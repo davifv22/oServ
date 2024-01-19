@@ -1,0 +1,13 @@
+form {
+    z-index: 999;
+    position: absolute;
+    background-color: #000000dc;
+    color: #fff;
+    padding: 1rem;
+    width: 20rem;
+    border-radius: .5rem;
+}
+
+form>img {
+    width: 10rem;
+}

@@ -1,0 +1,32 @@
+from flask import Flask
+from flask_restful import Api
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from flask_marshmallow import Marshmallow
+from flask_jwt_extended import JWTManager
+from flask_login import LoginManager
+from flask_cors import CORS
+
+app = Flask(__name__)
+CORS(app)
+app.config.from_object('config')
+
+db = SQLAlchemy(app)
+ma = Marshmallow(app)
+migrate = Migrate(app, db)
+api = Api(app)
+jwt = JWTManager(app)
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+from .views import user_views, token_views, refresh_token_views, header_views
+from .models import user_model
+
+@login_manager.user_loader
+def load_user(user):
+    return user_model.User.get(user)
+
+app.register_blueprint(user_views.bp)
+app.register_blueprint(header_views.bp)
+

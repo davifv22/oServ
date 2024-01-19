@@ -1,0 +1,17 @@
+DIR: davi_@Davi MINGW64  /d/GitHub/Gestcom-Updater/api_updater/api
+
+1 - CREATE .ENV
+$ pip install virtualenv
+$ virtualenv .env
+
+2 - ACTIVATE .ENV
+$ source .env/scripts/activate
+$ set FLASK_APP=api.py
+
+3 - INSTALL LIBS
+$ pip install -r requeriments.txt
+
+4 - START AND COMMIT DATABASE
+$ flask db init
+$ flask db migrate
+$ flask db upgrade
