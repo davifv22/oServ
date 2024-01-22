@@ -17,7 +17,7 @@ class UserList(Resource):
         response.mimetype = "text/html"
         return response
     
-    @login_required
+    # @login_required
     def post(self):
         us = user_schema.UserSchema()
         v = us.validate(request.json)
@@ -47,3 +47,12 @@ class UserDetail(Resource):
 
 api.add_resource(UserList, '/usuarios')
 api.add_resource(UserDetail, '/perfil/<user>')
+
+
+# {
+# 	"nome": "ADMINISTRADOR",
+# 	"user": "admin",
+# 	"email": "admin@mail.com",
+# 	"senha": "admin123",
+# 	"is_admin": 1
+# }

@@ -1,4 +1,4 @@
-<form #f="ngForm" (ngSubmit)="logar(f)" novalidate class="d-flex row justify-content-center position-absolute top-50 start-50 translate-middle">
+<form #f="ngForm" (ngSubmit)="logar(f)" noValidate class="d-flex row justify-content-center position-absolute top-50 start-50 translate-middle">
     <img src="../../../../../assets/img/logo.png" alt="">
     <small class="m-2 text-center">Preencha todos os campos abaixo para acessar o sistema</small>
     <hr>
@@ -13,5 +13,10 @@
     <div class="d-flex row text-center">
         <a href="#" class="mb-3">Esqueceu a senha?</a>
         <button type="submit" class="btn btn-success">Entrar</button>
+    </div>
+    <div class="position-relative text-secondary text-center mt-2">
+        <p>
+            <small><i>Versão: <span>&#64;</span>1.0.0.190124</i></small>
+        </p>
     </div>
 </form>

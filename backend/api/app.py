@@ -20,7 +20,7 @@ jwt = JWTManager(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-from .views import user_views, token_views, refresh_token_views, header_views
+from .views import user_views, token_views, refresh_token_views, header_views, login_views
 from .models import user_model
 
 @login_manager.user_loader
@@ -29,4 +29,5 @@ def load_user(user):
 
 app.register_blueprint(user_views.bp)
 app.register_blueprint(header_views.bp)
+app.register_blueprint(login_views.bp)
 

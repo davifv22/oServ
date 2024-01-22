@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Head, Observable } from 'rxjs';
+import { HttpClient, HttpHeaders  } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Login } from '../models/login'
 
@@ -9,19 +9,15 @@ import { Login } from '../models/login'
 })
 export class LoginService {
   private apiUrl = '';
-  private login:Login | any
 
   constructor(private http: HttpClient) {
     this.apiUrl  = environment.url
    }
 
-   getLogin(): Observable<Login> {
-    this.login = this
-    .http
-    .get<Login>
-    (`${this.apiUrl}`)
 
+   validarLogin(login: Login): Observable<Login> {
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.login
+    return this.http.post<any>(`${this.apiUrl}login`, login, { headers });
    }
 }
