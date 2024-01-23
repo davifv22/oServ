@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import {FormsModule, NgForm} from '@angular/forms';
 import { Login } from '../../../../models/login'
 import { LoginService } from '../../../../services/login.service';
+import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
 @Component({
   selector: 'app-form-login',
@@ -13,35 +14,41 @@ import { Router } from '@angular/router';
 })
 export class FormLoginComponent implements OnInit {
   @Input()
-  usuario:string =""
-  @Input() // mudar os input para o login principal
-  senha:string =""
+  usuario:string = ''
+  @Input()
+  senha:string = ''
+
+  error:string = ''
 
   login:Login
 
-  constructor(private loginService: LoginService, private router: Router) {
+  constructor(private loginService: LoginService, private authService: AuthService, private router: Router) {
     this.login = {
       usuario:'',
       senha:''
     }
   }
 
-  logar(f: NgForm) { // fazer essa logica de login buscando no backend
-    console.log('logando...')
+  logar(f: NgForm) {
     const json = { usuario: f.value['usuario'], senha: f.value['senha']}
-    console.log('recebendo dados...')
 
     this.loginService.validarLogin(json).subscribe(
-      (response: Login) => {
-        console.log('validando dados...')
-        console.log('Login bem-sucedido:', response);
-        this.router.navigate(['/']);
-      },
-      (error) => {
-        console.error('Erro ao fazer login:', error);
-      }
+        (response: Login) => {
+          console.log('Login bem-sucedido:', response);
+
+          try {
+            this.authService.login(f.value['usuario'], f.value['senha'])
+            sessionStorage.setItem('usuario', JSON.stringify(response));
+            this.router.navigate(['/'])
+          } catch (error) {
+            console.error('Erro na autenticação!');
+          }
+        },
+        (error) => {
+          this.error = `${error.error.message}`
+        }
     )
-  }
+}
 
   ngOnInit(): void { }
 

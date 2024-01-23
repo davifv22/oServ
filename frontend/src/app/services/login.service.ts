@@ -14,10 +14,9 @@ export class LoginService {
     this.apiUrl  = environment.url
    }
 
-
    validarLogin(login: Login): Observable<Login> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
 
-    return this.http.post<any>(`${this.apiUrl}login`, login, { headers });
+    return this.http.post<any>(`${this.apiUrl}/login`, login, { headers })
    }
 }

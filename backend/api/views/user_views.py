@@ -1,10 +1,10 @@
 from flask_restful import Resource
 from api.app import api
 from flask import request, make_response, jsonify, render_template, Blueprint
-from flask_login import login_required
 from ..schemas import user_schema
 from ..entidades import user
 from ..services import user_service
+from ..decorator import api_key_required
 import uuid
 
 bp = Blueprint('usuarios', __name__)
@@ -37,16 +37,20 @@ class UserList(Resource):
             return make_response(us.jsonify(x), 201)
 
 class UserDetail(Resource):
-    # @login_required
+    @api_key_required
     def get(self, user):
-        usuario = user_service.get_user(user)
-        response = make_response(render_template("cPanel/meu_perfil.html", usuario=usuario))
-        response.mimetype = "text/html"
-        return response
+        us = user_schema.UserSchema()
+        usuario = user_service.get_user_id(user)
+        if usuario:
+            return make_response(us.jsonify(usuario), 200)
+        else:
+            return make_response(jsonify({
+                'message': 'Usuário não encontrado!'}), 400)
+
 
 
 api.add_resource(UserList, '/usuarios')
-api.add_resource(UserDetail, '/perfil/<user>')
+api.add_resource(UserDetail, '/usuario/<user>')
 
 
 # {
