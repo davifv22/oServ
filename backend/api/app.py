@@ -16,10 +16,9 @@ migrate = Migrate(app, db)
 api = Api(app)
 jwt = JWTManager(app)
 
-from .views import user_views, token_views, refresh_token_views, header_views, login_views
+from .views import user_views, token_views, refresh_token_views, login_views
 from .models import user_model
 
 app.register_blueprint(user_views.bp)
-app.register_blueprint(header_views.bp)
 app.register_blueprint(login_views.bp)
 
