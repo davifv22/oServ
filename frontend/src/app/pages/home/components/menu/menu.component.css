@@ -1,0 +1,6 @@
+.navbar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: right;
+    font-size: .75rem;
+}

@@ -1,0 +1,18 @@
+.config-logout {
+    display: flex;
+    flex-direction: column;
+}
+
+.config-logout>button {
+    border-radius: 10px;
+    margin-right: .25rem;
+}
+
+.info>p {
+    text-align: center;
+    font-size: .75rem;
+}
+
+.logo>img {
+    width: 5rem;
+}

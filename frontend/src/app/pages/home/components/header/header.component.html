@@ -1,0 +1,12 @@
+<div class="logo">
+    <img src="../../../../../assets/img/logo.png" alt="">
+</div>
+<div class="info">
+    <p *ngIf="User">
+        Bem vindo, <br> {{ User.nome }}!
+    </p>
+</div>
+<div class="config-logout">
+    <button (click)="sair()"><i class="fa-solid fa-right-from-bracket m-1"></i></button>
+    <button><i class="fa-solid fa-gear m-1"></i></button>
+</div>
