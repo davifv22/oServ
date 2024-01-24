@@ -1,8 +1,8 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import {FormsModule, NgForm} from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { Login } from '../../../../models/login'
-import { LoginService } from '../../../../services/login.service';
+import { User } from '../../../../models/user'
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
 @Component({
@@ -13,36 +13,35 @@ import { Router } from '@angular/router';
   styleUrl: './form-login.component.css'
 })
 export class FormLoginComponent implements OnInit {
-  @Input()
-  usuario:string = ''
-  @Input()
-  senha:string = ''
-
   error:string = ''
+  result:User
 
-  login:Login
-
-  constructor(private loginService: LoginService, private authService: AuthService, private router: Router) {
-    this.login = {
-      usuario:'',
-      senha:''
+  constructor(private authService: AuthService, private router: Router) {
+    this.result = {
+      id:0,
+      nome:'',
+      user:'',
+      email:'',
+      situacao:'',
+      is_admin:false,
+      api_key:''
     }
   }
 
   logar(f: NgForm) {
-    const json = { usuario: f.value['usuario'], senha: f.value['senha']}
+    const json = { usuario: f.value['usuario'], senha: f.value['senha'], is_logged_in: true}
 
-    this.loginService.validarLogin(json).subscribe(
+    this.authService.login(json).subscribe(
         (response: Login) => {
-          console.log('Login bem-sucedido:', response);
-
-          try {
-            this.authService.login(f.value['usuario'], f.value['senha'])
-            sessionStorage.setItem('usuario', JSON.stringify(response));
-            this.router.navigate(['/'])
-          } catch (error) {
-            console.error('Erro na autenticação!');
-          }
+          this.result = JSON.parse(`${JSON.stringify(response)}`);
+          sessionStorage.setItem('id', `${this.result.id}`)
+          sessionStorage.setItem('nome', `${this.result.nome}`)
+          sessionStorage.setItem('user', `${this.result.user}`)
+          sessionStorage.setItem('email', `${this.result.email}`)
+          sessionStorage.setItem('is_admin', `${this.result.is_admin}`)
+          sessionStorage.setItem('api_key', `${this.result.api_key}`)
+          sessionStorage.setItem('is_logged_in', 'true')
+          this.router.navigate(['/'])
         },
         (error) => {
           this.error = `${error.error.message}`

@@ -25,10 +25,11 @@ export class UserService {
    }
 
    getUser(): Observable<User> {
-    const json = JSON.parse(`${sessionStorage.getItem('usuario')}`);
+    let api_key = sessionStorage.getItem('api_key');
+    let id = sessionStorage.getItem('id');
 
-    const params = { api_key: json.api_key };
-    return this.http.get<any>(`${this.apiUrl}/usuario/${json.id}`, { params });
+    const params = { api_key: `${api_key}` };
+    return this.http.get<any>(`${this.apiUrl}/usuario/${id}`, { params });
   }
 }
 

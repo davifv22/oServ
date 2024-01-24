@@ -44,8 +44,7 @@ class UserDetail(Resource):
         if usuario:
             return make_response(us.jsonify(usuario), 200)
         else:
-            return make_response(jsonify({
-                'message': 'Usuário não encontrado!'}), 400)
+            return make_response(jsonify({'message': 'Usuário não encontrado!'}), 404)
 
 
 

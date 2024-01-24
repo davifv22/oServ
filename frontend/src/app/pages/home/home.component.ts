@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
-import { LoginService } from '../../services/login.service';
+import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user'
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-home',
@@ -15,7 +16,7 @@ import { User } from '../../models/user'
 export class HomeComponent implements OnInit {
   User:User
 
-  constructor(private userService: UserService, private loginService: LoginService) {
+  constructor(private userService: UserService, private authService: AuthService, private router: Router) {
     this.User = {
       id:0,
       nome:'',
@@ -26,8 +27,15 @@ export class HomeComponent implements OnInit {
       api_key:''
     }
    }
+
    ngOnInit(): void {
     this.getUsuario();
+   }
+
+   sair() {
+    if (this.authService.logout()) {
+      this.router.navigate(['login'])
+    }
    }
 
    getUsuario(){

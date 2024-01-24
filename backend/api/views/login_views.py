@@ -16,16 +16,9 @@ class Login(Resource):
         user_bd = user_service.get_user(usuario)
 
         if user_bd and user_bd.ver_senha(senha):
-            return make_response(us.jsonify(user_bd), 200)
+            return make_response(us.jsonify(user_bd), 201)
         else:
             return make_response(jsonify({
                 'message': 'As credenciais estão inválidas!'}), 401)
 
-class Logout(Resource):
-    def get(self):
-        logout_user()
-        return redirect('/login')
-
-
 api.add_resource(Login, '/login')
-api.add_resource(Logout, '/logout')
