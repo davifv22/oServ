@@ -5,6 +5,7 @@ import { Login } from '../../../../models/login'
 import { User } from '../../../../models/user'
 import { AuthService } from '../../../../services/auth.service';
 import { Router } from '@angular/router';
+import { LoginComponent } from '../../login.component';
 @Component({
   selector: 'app-form-login',
   standalone: true,
@@ -41,7 +42,7 @@ export class FormLoginComponent implements OnInit {
           sessionStorage.setItem('is_admin', `${this.result.is_admin}`)
           sessionStorage.setItem('api_key', `${this.result.api_key}`)
           sessionStorage.setItem('is_logged_in', 'true')
-          this.router.navigate(['/'])
+          this.router.navigate([''])
         },
         (error) => {
           this.error = `${error.error.message}`

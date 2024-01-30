@@ -1,15 +1,26 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterOutlet } from '@angular/router';
-import { LoginComponent } from './pages/login/login.component';
-
+import { HeaderComponent } from './pages/home/components/header/header.component';
+import { MenuComponent } from './pages/home/components/menu/menu.component';
+import { AuthService } from './services/auth.service';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, LoginComponent],
+  imports: [CommonModule, RouterOutlet, HeaderComponent, MenuComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
-  title = 'frontend';
+export class AppComponent implements OnInit {
+  login: boolean
+
+  constructor(private authService: AuthService) {
+    this.login = false
+   }
+  ngOnInit(): void { }
+
+   isLoggedIn(): boolean {
+    return this.authService.isAuthenticated()
+  }
+
 }

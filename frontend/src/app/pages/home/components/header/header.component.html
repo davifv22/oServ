@@ -2,11 +2,50 @@
     <img src="../../../../../assets/img/logo.png" alt="">
 </div>
 <div class="info">
-    <p *ngIf="User">
-        Bem vindo, <br> {{ User.nome }}!
-    </p>
+    <p><b>REFERÊNCIA: </b> 01/2024</p>
+    <p><b>HORA: </b> 18:49:58</p>
 </div>
 <div class="config-logout">
-    <button (click)="sair()"><i class="fa-solid fa-right-from-bracket m-1"></i></button>
-    <button><i class="fa-solid fa-gear m-1"></i></button>
+    <div class="dropdown">
+        <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="fa-solid fa-envelope" style="color: #fff;"></i>
+            <span class="notification position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
+              4
+            </span>
+        </button>
+        <ul class="dropdown-menu text-center">
+            <li>
+                <small><a class="dropdown-item" href="">OS 51512.2024-5 baixada com sucesso</a></small>
+
+            </li>
+            <li>
+                <small><a class="dropdown-item" href="">Backup concluído às 19:27</a></small>
+
+            </li>
+            <li>
+                <small><a class="dropdown-item" href="">A equipe 37 está solicitando mais OS</a></small>
+            </li>
+            <a class="dropdown-item" href=""><small>Ver todas...</small></a>
+        </ul>
+    </div>
+
+    <div class="dropdown">
+        <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <i class="fa-solid fa-gear m-1" style="color: #fff;"></i>
+  </button>
+        <ul class="dropdown-menu text-center">
+            <li class="nav-item">
+                <a class="info-user nav-link" [routerLink]="['perfil']">
+                    <img src="../../../../../assets/img/profile.webp" alt="">
+                    <p *ngIf="User">
+                        Bem vindo, <br> {{ User.nome }}!
+                    </p>
+                </a>
+                <hr>
+            </li>
+            <li class="nav-item">
+                <small><a (click)="sair()" href="" class="nav-link"><i class="fa-solid fa-right-from-bracket m-1"></i> Sair</a></small>
+            </li>
+        </ul>
+    </div>
 </div>

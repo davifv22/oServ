@@ -1,0 +1,37 @@
+app-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.menu-btn>button {
+    margin-top: 3rem;
+    left: -.1rem;
+    position: fixed;
+    z-index: 999;
+}
+
+.card {
+    top: 5.8rem;
+    left: -.5rem;
+    width: 9rem;
+    position: fixed;
+    z-index: 999;
+    border-radius: 0;
+}
+
+app-header {
+    top: 0;
+    position: fixed;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border-bottom: 1px solid #000;
+    background-color: #232323;
+    color: white;
+    height: 3rem;
+    z-index: 999;
+}

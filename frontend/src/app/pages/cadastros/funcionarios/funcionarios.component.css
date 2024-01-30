@@ -1,0 +1,37 @@
+.container_funcionarios {
+    position: absolute;
+    width: 100%;
+}
+
+.menu_funcionarios {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    text-align: center;
+    margin-top: 3rem;
+}
+
+.menu_funcionarios>h3 {
+    margin-left: 5.5rem;
+}
+
+.menu_funcionarios>.actions {
+    position: absolute;
+    display: flex;
+    right: .2rem;
+    margin-top: .9rem;
+}
+
+.menu_funcionarios>.actions>small>a {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    margin: 0 .25rem;
+}
+
+.content_funcionarios {
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
