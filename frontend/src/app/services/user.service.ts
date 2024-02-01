@@ -31,5 +31,12 @@ export class UserService {
     const params = { api_key: `${api_key}` };
     return this.http.get<any>(`${this.apiUrl}/usuario/${id}`, { params });
   }
+
+  getUsers(): Observable<any> {
+    let api_key = sessionStorage.getItem('api_key');
+
+    const params = { api_key: `${api_key}` };
+    return this.http.get<any>(`${this.apiUrl}/usuarios`, { params });
+  }
 }
 

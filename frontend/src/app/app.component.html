@@ -1,20 +1,21 @@
-<router-outlet>
-    <div *ngIf="isLoggedIn()">
-        <app-header>
+<div *ngIf="isLoggedIn()">
+    <app-header>
 
-        </app-header>
-        <p class="menu-btn">
-            <button class="btn btn-danger btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMenu" aria-expanded="false" aria-controls="collapseWidthMenu">
-   MENU <i class="fa-solid fa-bars"></i>
+    </app-header>
+    <p class="menu-btn">
+        <button class="btn btn-danger btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMenu" aria-expanded="false" aria-controls="collapseWidthMenu">
+MENU <i class="fa-solid fa-bars"></i>
 </button>
-        </p>
-        <div style="min-height: 100%;">
-            <div class="collapse collapse-horizontal" id="collapseMenu">
-                <div class="card">
-                    <app-menu>
-                    </app-menu>
-                </div>
+    </p>
+    <div style="min-height: 100%;">
+        <div class="collapse collapse-horizontal" id="collapseMenu">
+            <div class="card">
+                <app-menu>
+                </app-menu>
             </div>
         </div>
     </div>
+</div>
+
+<router-outlet>
 </router-outlet>

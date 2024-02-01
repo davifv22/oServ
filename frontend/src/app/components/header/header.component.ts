@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { UserService } from '../../../../services/user.service';
-import { AuthService } from '../../../../services/auth.service';
-import { User } from '../../../../models/user'
+import { UserService } from '../../services/user.service';
+import { AuthService } from '../../services/auth.service';
+import { User } from '../../models/user'
 import { Router } from '@angular/router';
 
 @Component({

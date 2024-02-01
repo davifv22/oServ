@@ -10,12 +10,13 @@ import uuid
 bp = Blueprint('usuarios', __name__)
 
 class UserList(Resource):
-    # @login_required
+    @api_key_required
     def get(self):
         usuarios = user_service.get_users()
-        response = make_response(render_template("cPanel/usuarios.html", usuarios=usuarios))
-        response.mimetype = "text/html"
-        return response
+        if usuarios:
+            return make_response(usuarios, 200)
+        else:
+            return make_response(jsonify({'message': 'Nenhum usuário encontrado!'}), 404)
     
     # @login_required
     def post(self):

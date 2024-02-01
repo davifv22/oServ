@@ -1,33 +1,37 @@
-<app-home></app-home>
+<app-sub-menu></app-sub-menu>
+<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+
 <div class="container_funcionarios">
-    <div class="menu_funcionarios">
-        <h3><small><i class="fa-solid fa-share"> </i></small> FUNCIONÁRIOS</h3>
-        <div class="actions">
-            <small><a href="" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></a></small>
-            <small><a href="" class="nav-link"><i class="fa-solid fa-print"> </i> <span>Imprimir</span> </a></small>
-        </div>
+    <div class="search-user input-group input-group-sm">
+        <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user">
     </div>
-    <hr>
-    <div class="content_funcionarios">
-        <input type="text" class="form-control form-control-sm">
-        <br>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Usuário</th>
-                    <th scope="col">Administrador</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr>
-                    <th scope="row">1</th>
-                    <td>ADMINISTRADOR</td>
-                    <td>admin</td>
-                    <td>Sim</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <br>
+    <table class="table table-hover text-center">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Usuário</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Administrador</th>
+                <th scope="col">Situação</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let user of Users">
+                <th scope="row">{{ user.id }}</th>
+                <td>{{ user.nome }}</td>
+                <td>{{ user.user }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.is_admin ? 'Sim' : 'Não' }}</td>
+                <td>{{ user.situacao ? 'Ativo' : 'Suspenso' }}</td>
+                <td>
+                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
+                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>
