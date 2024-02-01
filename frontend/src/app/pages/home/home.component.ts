@@ -1,44 +1,21 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { HeaderService } from '../../services/header.service';
-import { Header } from '../../models/header'
+import { SubMenuComponent } from "../../components/sub-menu/sub-menu.component";
 
 @Component({
-  selector: 'app-home',
-  standalone: true,
-  imports: [CommonModule, RouterLink],
-  templateUrl: './home.component.html',
-  styleUrl: './home.component.css'
+    selector: 'app-home',
+    standalone: true,
+    templateUrl: './home.component.html',
+    styleUrl: './home.component.css',
+    imports: [CommonModule, RouterLink, SubMenuComponent]
 })
 export class HomeComponent implements OnInit {
-  header:Header
+  title:string = ''
+  constructor() { }
 
-  constructor(private headerService: HeaderService) {
-    this.header = {
-      nome:'',
-      mensagem:'',
-      status:''
-    }
-  }
 
   ngOnInit(): void {
-    this.getData()
+    this.title = 'HOME'
   }
-
-  getData(){
-    this.headerService.getHeader().subscribe(
-      {
-        next: (res) => {
-
-          this.header = {
-            nome: res.nome,
-            mensagem: res.mensagem,
-            status: res.status
-          }
-        },
-        error: (err) => console.log('not found')
-      }
-    )
   }
-}

@@ -1,0 +1,19 @@
+.navbar-nav {
+    display: flex;
+    flex-direction: column;
+    align-items: right;
+    font-size: .75rem;
+    margin-left: .8rem;
+}
+
+.sub-menu {
+    font-size: .75rem;
+    align-items: right;
+    border-radius: 0;
+}
+
+.sub-menu>li {
+    font-size: .75rem;
+    align-items: right;
+    margin-left: .5rem;
+}

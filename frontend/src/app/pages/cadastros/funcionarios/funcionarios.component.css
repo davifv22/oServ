@@ -1,0 +1,18 @@
+.container_funcionarios {
+    top: 8rem;
+    width: 80%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+app-sub-menu {
+    position: absolute;
+    width: 100%;
+}
+
+.container_funcionarios>.search-user {
+    width: 70%;
+    margin-right: auto;
+    margin-left: auto;
+}

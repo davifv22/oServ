@@ -1,0 +1,38 @@
+.config-logout {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.config-logout>.dropdown>button {
+    border-radius: 10px;
+    margin-right: .5rem;
+    background-color: transparent;
+}
+
+.info {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    text-align: center;
+    font-size: .75rem;
+}
+
+.info>p {
+    margin: .75rem;
+}
+
+.info-user>p {
+    text-align: center;
+    font-size: .75rem;
+}
+
+.info-user>img {
+    width: 7rem;
+    border-radius: 10rem;
+}
+
+.logo>img {
+    width: 5rem;
+    margin-left: .5rem;
+}

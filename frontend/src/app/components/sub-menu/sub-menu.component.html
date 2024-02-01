@@ -1,0 +1,18 @@
+<div class="container_sub-menu">
+    <div class="menu_sub-menu">
+        <h3><small><i class="fa-solid fa-share">
+        </i></small> {{titlePage}}
+        </h3>
+        <div class="actions_sub-menu">
+            <div *ngIf="input_insert">
+                <small><a href="" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></a></small>
+            </div>
+            <div *ngIf="input_listing">
+                <small><a href="" class="nav-link"><i class="fa-solid fa-print"> </i> <span>Listagem</span> </a></small>
+            </div>
+        </div>
+    </div>
+    <div class="content_sub-menu">
+        {{contentPage}}
+    </div>
+</div>

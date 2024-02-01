@@ -1,0 +1,37 @@
+<app-sub-menu></app-sub-menu>
+<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+
+<div class="container_funcionarios">
+    <div class="search-user input-group input-group-sm">
+        <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user">
+    </div>
+    <br>
+    <table class="table table-hover text-center">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Usuário</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Administrador</th>
+                <th scope="col">Situação</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr *ngFor="let user of Users">
+                <th scope="row">{{ user.id }}</th>
+                <td>{{ user.nome }}</td>
+                <td>{{ user.user }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.is_admin ? 'Sim' : 'Não' }}</td>
+                <td>{{ user.situacao ? 'Ativo' : 'Suspenso' }}</td>
+                <td>
+                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
+                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

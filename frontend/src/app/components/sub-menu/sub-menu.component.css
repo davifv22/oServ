@@ -1,0 +1,41 @@
+.container_sub-menu {
+    position: absolute;
+    width: 100%;
+}
+
+.menu_sub-menu {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    text-align: center;
+    margin-top: 2rem;
+    padding: .5rem 0;
+    border-bottom: 1px solid #00000070;
+}
+
+.menu_sub-menu>h3 {
+    margin-left: 5.5rem;
+    margin-top: .5rem;
+}
+
+.menu_sub-menu>.actions_sub-menu {
+    position: absolute;
+    display: flex;
+    right: .2rem;
+    margin-top: .9rem;
+}
+
+.menu_sub-menu>.actions_sub-menu>div>small>a {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    margin: 0 .25rem;
+}
+
+.content_sub-menu {
+    margin-top: 1rem;
+    width: 80%;
+    margin-left: auto;
+    margin-right: auto;
+}
