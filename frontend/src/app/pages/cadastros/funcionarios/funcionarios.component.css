@@ -6,12 +6,7 @@
     margin-right: auto;
 }
 
-app-sub-menu {
-    position: absolute;
-    width: 100%;
-}
-
-.container_funcionarios>.search-user {
+.container_funcionarios>.search-funcionarios {
     width: 70%;
     margin-right: auto;
     margin-left: auto;

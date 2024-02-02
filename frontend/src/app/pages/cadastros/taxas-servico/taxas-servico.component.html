@@ -1,1 +1,35 @@
-<p>taxas-servico works!</p>
+<app-sub-menu></app-sub-menu>
+<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+
+<div class="container_taxas-servico">
+    <div class="search-taxas-servicos input-group input-group-sm">
+        <span class="input-group-text" id="search-taxasservico"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar taxas de serviço" aria-label="Localizar taxas de serviço" aria-describedby="search-taxasservico">
+    </div>
+    <br>
+    <table class="table table-hover text-center">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Descrição</th>
+                <th scope="col">Tipo</th>
+                <th scope="col">Valor</th>
+                <th scope="col">Situação</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr>
+                <th scope="row">ID</th>
+                <td>Descrição</td>
+                <td>Tipo</td>
+                <td>Valor</td>
+                <td>Situação</td>
+                <td>
+                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
+                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
