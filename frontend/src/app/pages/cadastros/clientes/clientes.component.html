@@ -1,31 +1,41 @@
+<app-sub-menu></app-sub-menu>
+<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+
 <div class="container_clientes">
-    <div class="menu_clientes">
-        <h3><small><i class="fa-solid fa-share"> </i></small> CLIENTES</h3>
-        <div class="actions">
-            <small><a href="" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></a></small>
-            <small><a href="" class="nav-link"><i class="fa-solid fa-print"> </i> <span>Imprimir</span> </a></small>
-        </div>
+    <div class="search-clientes input-group input-group-sm">
+        <span class="input-group-text" id="search-cliente"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar cliente" aria-label="Localizar funcionário" aria-describedby="search-cliente">
     </div>
-    <div class="content_clientes">
-        <input type="text" class="form-control form-control-sm">
-        <br>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th scope="col">ID</th>
-                    <th scope="col">Nome</th>
-                    <th scope="col">Usuário</th>
-                    <th scope="col">Administrador</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr>
-                    <th scope="row">1</th>
-                    <td>ADMINISTRADOR</td>
-                    <td>admin</td>
-                    <td>Sim</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
+    <br>
+    <table class="table table-hover text-center">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nome</th>
+                <th scope="col">Telefone</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">CPF/CNPJ</th>
+                <th scope="col">Endereço</th>
+                <th scope="col">Bairro</th>
+                <th scope="col">Cidade</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr>
+                <th scope="row">ID</th>
+                <td>Nome</td>
+                <td>Telefone</td>
+                <td>E-mail</td>
+                <td>CPF/CNPJ</td>
+                <td>Endereço</td>
+                <td>Bairro</td>
+                <td>Cidade</td>
+                <td>
+                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
+                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </div>

@@ -1,0 +1,13 @@
+.container_ordem-de-servico {
+    top: 8rem;
+    width: 80%;
+    position: relative;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.container_ordem-de-servico>.search-ordem-de-servico {
+    width: 70%;
+    margin-right: auto;
+    margin-left: auto;
+}

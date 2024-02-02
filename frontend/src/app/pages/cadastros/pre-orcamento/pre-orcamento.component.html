@@ -1,1 +1,35 @@
-<p>pre-orcamento works!</p>
+<app-sub-menu></app-sub-menu>
+<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+
+<div class="container_pre-orcamento">
+    <div class="search-pre-orcamento input-group input-group-sm">
+        <span class="input-group-text" id="search-preorcamento"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar pré-orçamento" aria-label="Localizar pré-orçamento" aria-describedby="search-preorcamento">
+    </div>
+    <br>
+    <table class="table table-hover text-center">
+        <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Ordem de Serviço</th>
+                <th scope="col">Materiais</th>
+                <th scope="col">Taxas de Serviço</th>
+                <th scope="col">Valor Total</th>
+                <th scope="col">Ações</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+            <tr>
+                <th scope="row">ID</th>
+                <td>Ordem de Serviço</td>
+                <td>Materiais</td>
+                <td>Taxas de Serviço</td>
+                <td>Valor Total</td>
+                <td>
+                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
+                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

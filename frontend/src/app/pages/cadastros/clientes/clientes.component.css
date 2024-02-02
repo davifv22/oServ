@@ -1,41 +1,13 @@
 .container_clientes {
-    position: absolute;
-    width: 100%;
-}
-
-.menu_clientes {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    text-align: center;
-    margin-top: 2rem;
-    padding: .5rem 0;
-    border-bottom: 1px solid #00000070;
-}
-
-.menu_clientes>h3 {
-    margin-left: 5.5rem;
-    margin-top: .5rem;
-}
-
-.menu_clientes>.actions {
-    position: absolute;
-    display: flex;
-    right: .2rem;
-    margin-top: .9rem;
-}
-
-.menu_clientes>.actions>small>a {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-    margin: 0 .25rem;
-}
-
-.content_clientes {
-    margin-top: 1rem;
+    top: 8rem;
     width: 80%;
+    position: relative;
     margin-left: auto;
     margin-right: auto;
+}
+
+.container_clientes>.search-clientes {
+    width: 70%;
+    margin-right: auto;
+    margin-left: auto;
 }
