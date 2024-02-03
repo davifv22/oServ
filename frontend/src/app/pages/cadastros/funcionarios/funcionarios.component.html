@@ -1,7 +1,7 @@
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
-<div class="container_funcionarios">
-    <div class="search-funcionarios input-group input-group-sm" *ngIf="paginate">
+<div class="containerPage">
+    <div class="searchPage input-group input-group-sm" *ngIf="paginate">
         <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
         <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user" [(ngModel)]="search" (input)="searchUsuarios()">
     </div>
@@ -46,8 +46,8 @@
         </table>
     </div>
 
-    <div class="result_page" *ngIf="!search.length">
-        <small><p class="result_page">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+    <div class="resultPage" *ngIf="!search.length">
+        <small><p class="resultPage">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
         <nav>
             <ul class="pagination pagination-sm">
                 <li class="page-item">
@@ -61,10 +61,10 @@
             </ul>
         </nav>
     </div>
-    <div class="result_page" *ngIf="search.length && Users.length">
-        <small><p class="result_page">Total de registros: {{Users.length}}</p></small>
+    <div class="resultPage" *ngIf="search.length && Users.length">
+        <small><p class="resultPage">Total de registros: {{Users.length}}</p></small>
     </div>
-    <div class="result_page" *ngIf="Users.length === 0">
-        <small><p class="result_page">Nenhum registro encontrado!</p></small>
+    <div class="resultPage" *ngIf="Users.length === 0">
+        <small><p class="resultPage">Nenhum registro encontrado!</p></small>
     </div>
 </div>
