@@ -17,7 +17,10 @@ class UserList(Resource):
         usuarios = user_service.get_users()
         if usuarios:
             cs = user_schema.UserSchema(many=True)
-            return paginate(user_model.User, cs)
+            if request.args.get('isPaginate') == 'true':
+                return paginate(user_model.User, cs)
+            else:
+                return make_response(usuarios, 200)
         else:
             return make_response(jsonify({'message': 'Nenhum usuário encontrado!'}), 404)
 

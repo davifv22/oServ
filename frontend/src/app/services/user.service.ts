@@ -32,10 +32,10 @@ export class UserService {
     return this.http.get<any>(`${this.apiUrl}/usuario/${id}`, { params });
   }
 
-  getUsers(page: number, per_page: number): Observable<any> {
+  getUsers(page: number, per_page: number, isPaginate: boolean): Observable<any> {
     let api_key = sessionStorage.getItem('api_key');
 
-    const params = { api_key: `${api_key}`, page: page, per_page: per_page};
+    const params = { api_key: `${api_key}`, page: page, per_page: per_page, isPaginate: isPaginate};
     return this.http.get<any>(`${this.apiUrl}/usuarios`, { params });
   }
 }

@@ -1,9 +1,9 @@
-import { Component, OnInit } from '@angular/core';
-import { SubMenuComponent } from "../../../components/sub-menu/sub-menu.component";
-import { CommonModule } from '@angular/common';
-import { UserService } from '../../../services/user.service';
-import { RouterLink } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { Component, OnInit } from '@angular/core'
+import { SubMenuComponent } from "../../../components/sub-menu/sub-menu.component"
+import { CommonModule } from '@angular/common'
+import { UserService } from '../../../services/user.service'
+import { RouterLink } from '@angular/router'
+import { FormsModule } from '@angular/forms'
 
 @Component({
     selector: 'app-funcionarios',
@@ -13,11 +13,10 @@ import { FormsModule } from '@angular/forms';
     imports: [CommonModule, SubMenuComponent, RouterLink, FormsModule]
 })
 export class FuncionariosComponent implements OnInit {
-  Users: any[] = [];
   title:string = ''
-  paginate: any[] = [];
-  per_page:number = 20
-
+  Users: any[] = []
+  paginate: any[] = []
+  per_page:number = 0
   search:string = ''
 
 
@@ -25,27 +24,31 @@ export class FuncionariosComponent implements OnInit {
 
   ngOnInit(): void {
     this.title = 'FUNCIONÁRIOS'
-    this.getUsuarios();
+    this.per_page = 20
+    this.getUsuarios(1, this.per_page)
   }
 
-   getUsuarios(page = 1, per_page = this.per_page){
-    this.userService.getUsers(page, per_page).subscribe(data => {
+  getUsuarios(page:number, per_page:number) {
+    this.userService.getUsers(page, per_page, true).subscribe(data => {
+      console.log(data)
       this.paginate = Object.values(data)
-      this.Users = data.results;
+      this.Users = data.results
     })
-   }
-
-   search_user() {
-    if (this.search === '') {
-      this.getUsuarios(1, this.per_page)
-    } else {
-      this.Users = this.Users.filter(usuario =>
-        usuario.nome.toLowerCase().includes(this.search.toLowerCase())
-      );
-    }
   }
 
-   onSelecaoPer_page() {
+  searchUsuarios() {
+    this.userService.getUsers(0, 0, false).subscribe(data => {
+      this.Users = data
+      if (this.search !== '') {
+        this.Users = this.Users.filter(usuario =>
+          usuario.nome.toLowerCase().includes(this.search.toLowerCase()))
+        } else {
+          this.getUsuarios(1, this.per_page)
+        }
+      })
+  }
+
+  perPageSelected() {
     this.getUsuarios(1, this.per_page)
   }
 }

@@ -1,15 +1,15 @@
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
 <div class="container_funcionarios">
-    <div class="search-funcionarios input-group input-group-sm">
+    <div class="search-funcionarios input-group input-group-sm" *ngIf="paginate">
         <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user" [(ngModel)]="search" (input)="search_user()">
+        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user" [(ngModel)]="search" (input)="searchUsuarios()">
     </div>
     <br>
     <div class="table-responsive-md">
         <div class="form-select-sm">
             <small>Item por página: </small>
-            <select [(ngModel)]="per_page" (ngModelChange)="onSelecaoPer_page()">
+            <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
         <option value="20" selected>20</option>
         <option value="50">50</option>
         <option value="100">100</option>
@@ -46,7 +46,7 @@
         </table>
     </div>
 
-    <div class="result_page" *ngIf="paginate">
+    <div class="result_page" *ngIf="!search.length">
         <small><p class="result_page">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
         <nav>
             <ul class="pagination pagination-sm">
@@ -60,5 +60,11 @@
                 </li>
             </ul>
         </nav>
+    </div>
+    <div class="result_page" *ngIf="search.length && Users.length">
+        <small><p class="result_page">Total de registros: {{Users.length}}</p></small>
+    </div>
+    <div class="result_page" *ngIf="Users.length === 0">
+        <small><p class="result_page">Nenhum registro encontrado!</p></small>
     </div>
 </div>
