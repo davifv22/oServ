@@ -4,7 +4,9 @@ from flask import request, make_response, jsonify, render_template, Blueprint
 from ..schemas import user_schema
 from ..entidades import user
 from ..services import user_service
+from ..models import user_model
 from ..decorator import api_key_required
+from ..paginate import paginate
 import uuid
 
 bp = Blueprint('usuarios', __name__)
@@ -14,11 +16,13 @@ class UserList(Resource):
     def get(self):
         usuarios = user_service.get_users()
         if usuarios:
-            return make_response(usuarios, 200)
+            cs = user_schema.UserSchema(many=True)
+            return paginate(user_model.User, cs)
         else:
             return make_response(jsonify({'message': 'Nenhum usuário encontrado!'}), 404)
+
     
-    # @login_required
+    @api_key_required
     def post(self):
         us = user_schema.UserSchema()
         v = us.validate(request.json)

@@ -5,6 +5,7 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { User } from '../../models/user'
 import { Router } from '@angular/router';
+import { interval } from 'rxjs';
 
 @Component({
   selector: 'app-header',
@@ -14,6 +15,7 @@ import { Router } from '@angular/router';
   styleUrl: './header.component.css'
 })
 export class HeaderComponent implements OnInit {
+  public horarioAtual: Date;
   User:User
 
   constructor(private userService: UserService, private authService: AuthService, private router: Router) {
@@ -26,11 +28,20 @@ export class HeaderComponent implements OnInit {
       is_admin:false,
       api_key:''
     }
+    this.horarioAtual = new Date();
    }
 
    ngOnInit(): void {
     this.getUsuario();
+
+    interval(1000).subscribe(() => {
+      this.atualizarHorario();
+    });
    }
+
+   private atualizarHorario() {
+    this.horarioAtual = new Date();
+  }
 
    sair() {
     if (this.authService.logout()) {

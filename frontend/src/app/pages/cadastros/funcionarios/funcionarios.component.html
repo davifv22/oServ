@@ -1,37 +1,64 @@
-<app-sub-menu></app-sub-menu>
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
 <div class="container_funcionarios">
     <div class="search-funcionarios input-group input-group-sm">
         <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user">
+        <input type="text" class="form-control" placeholder="Localizar funcionário" aria-label="Localizar funcionário" aria-describedby="search-user" [(ngModel)]="search" (input)="search_user()">
     </div>
     <br>
-    <table class="table table-hover text-center">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Usuário</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">Administrador</th>
-                <th scope="col">Situação</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr *ngFor="let user of Users">
-                <th scope="row">{{ user.id }}</th>
-                <td>{{ user.nome }}</td>
-                <td>{{ user.user }}</td>
-                <td>{{ user.email }}</td>
-                <td>{{ user.is_admin ? 'Sim' : 'Não' }}</td>
-                <td>{{ user.situacao ? 'Ativo' : 'Suspenso' }}</td>
-                <td>
-                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
-                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <div class="form-select-sm">
+            <small>Item por página: </small>
+            <select [(ngModel)]="per_page" (ngModelChange)="onSelecaoPer_page()">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+        </div>
+        <table class="table table-hover table-sm table-light border text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Usuário</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">Cargo</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr *ngFor="let user of Users">
+                    <th scope="row">{{ user.id }}</th>
+                    <td>{{ user.nome }}</td>
+                    <td>{{ user.user }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.is_admin ? 'Administrador' : 'Operador' }}</td>
+                    <td>
+                        <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="user.situacao"></i>
+                        <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!user.situacao"></i>
+                    </td>
+                    <td>
+                        <a><i class="fa-solid fa-circle-info btn-sm" title="Detalhes"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="result_page" *ngIf="paginate">
+        <small><p class="result_page">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+        <nav>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['5']" (click)="getUsuarios(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
+                    <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['4']" (click)="getUsuarios(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
+                    <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
 </div>

@@ -3,11 +3,11 @@
 </div>
 <div class="info">
     <p><b>REFERÊNCIA: </b> 01/2024</p>
-    <p><b>HORA: </b> 18:49:58</p>
+    <p><b>HORA: </b> {{ horarioAtual | date:'HH:mm:ss' }}</p>
 </div>
 <div class="config-logout">
     <div class="dropdown">
-        <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+        <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificações">
             <i class="fa-solid fa-envelope" style="color: #fff;"></i>
             <span class="notification position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
               4
@@ -35,7 +35,7 @@
   </button>
         <ul class="dropdown-menu text-center">
             <li class="nav-item">
-                <a class="info-user nav-link" [routerLink]="['perfil']">
+                <a class="info-user nav-link" [routerLink]="['perfil']" title="Ver perfil">
                     <img src="../../../../../assets/img/profile.webp" alt="">
                     <p *ngIf="User">
                         Bem vindo, <br> {{ User.nome }}!

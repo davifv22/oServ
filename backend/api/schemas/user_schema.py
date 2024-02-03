@@ -12,6 +12,6 @@ class UserSchema(ma.SQLAlchemyAutoSchema):
     user = fields.String(required=True)
     email = fields.String(required=True)
     senha = fields.String(required=True)
-    situacao = fields.String(required=False)
+    situacao = fields.Boolean(required=False)
     is_admin = fields.Boolean(required=True)
     api_key = fields.String(required=False)

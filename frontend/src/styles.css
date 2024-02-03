@@ -5,3 +5,7 @@
     box-sizing: border-box;
     font-family: 'roboto', sans-serif;
 }
+
+body {
+    background-color: rgb(230, 230, 230);
+}
