@@ -1,1 +1,43 @@
 <app-sub-menu titlePage="{{title}}"></app-sub-menu>
+
+<div class="containerPage">
+    <a class="photoProfile">
+        <img *ngIf="!previewUrl" src="../../../assets/img/profile.webp" alt="">
+        <img [src]="previewUrl" *ngIf="previewUrl" alt="">
+        <input class="description" type="file" (change)="onFileSelected($event)">
+    </a>
+    <div class="profile">
+        <div class="profile-info">
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="Nome"><i class="fa-solid fa-address-card"></i></span>
+                <input type="text" class="form-control form-control-sm" placeholder="Nome" aria-label="Nome" aria-describedby="Nome">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="Usuário"><i class="fa-solid fa-user"></i></span>
+                <input type="text" class="form-control form-control-sm" placeholder="Usuário" aria-label="Usuário" aria-describedby="Usuário">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="E-mail"><i class="fa-solid fa-envelope"></i></span>
+                <input type="text" class="form-control form-control-sm" placeholder="E-mail" aria-label="E-mail" aria-describedby="E-mail">
+            </div>
+            <a type="button" class="btn btn-success btn-sm">Atualizar</a>
+        </div>
+
+        <div class="alterPassword">
+            <small><b>Mudar Senha:</b></small>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="SenhaAtual"><i class="fa-solid fa-key"></i></span>
+                <input type="password" class="form-control form-control-sm" placeholder="Senha atual" aria-label="SenhaAtual" aria-describedby="SenhaAtual">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="NovaSenha"><i class="fa-solid fa-key"></i></span>
+                <input type="password" class="form-control form-control-sm" placeholder="Nova senha" aria-label="NovaSenha" aria-describedby="NovaSenha">
+            </div>
+            <div class="input-group input-group-sm mb-3">
+                <span class="input-group-text" id="ConfirmarSenha"><i class="fa-solid fa-key"></i></span>
+                <input type="password" class="form-control form-control-sm" placeholder="Confirmar nova senha" aria-label="ConfirmarSenha" aria-describedby="ConfirmarSenha">
+            </div>
+            <a type="button" class="btn btn-success btn-sm">Atualizar</a>
+        </div>
+    </div>
+</div>
