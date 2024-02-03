@@ -24,15 +24,6 @@ def get_users():
     ]
     return users_list
 
-
-    nome = fields.String(required=True)
-    user = fields.String(required=True)
-    email = fields.String(required=True)
-    senha = fields.String(required=True)
-    situacao = fields.String(required=False)
-    is_admin = fields.Boolean(required=True)
-    api_key = fields.String(required=False)
-
 def get_user(user):
     return user_model.User.query.filter_by(user=user).first()
 

@@ -12,11 +12,9 @@ import { AuthService } from './services/auth.service';
   styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
-  login: boolean
 
-  constructor(private authService: AuthService) {
-    this.login = false
-   }
+  constructor(private authService: AuthService) { }
+
   ngOnInit(): void { }
 
    isLoggedIn(): boolean {
