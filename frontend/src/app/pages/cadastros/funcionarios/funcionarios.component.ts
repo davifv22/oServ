@@ -30,7 +30,6 @@ export class FuncionariosComponent implements OnInit {
 
   getUsuarios(page:number, per_page:number) {
     this.userService.getUsers(page, per_page, true).subscribe(data => {
-      console.log(data)
       this.paginate = Object.values(data)
       this.Users = data.results
     })
@@ -49,6 +48,11 @@ export class FuncionariosComponent implements OnInit {
   }
 
   perPageSelected() {
-    this.getUsuarios(1, this.per_page)
-  }
+    if (this.search !== '') {
+      this.Users = this.Users.filter(usuario =>
+        usuario.nome.toLowerCase().includes(this.search.toLowerCase())).slice(0, this.per_page)
+      } else {
+        this.getUsuarios(1, this.per_page)
+      }
+    }
 }
