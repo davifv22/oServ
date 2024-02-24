@@ -1,0 +1,59 @@
+.containerPage {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.containerPage>.photoProfile {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 15rem;
+    height: 15rem;
+}
+
+.containerPage>.photoProfile>img {
+    max-width: 100%;
+    min-width: 100%;
+    max-height: 100%;
+    min-height: 100%;
+    border-radius: 10rem;
+    box-shadow: 1px 1px 5px rgb(202, 202, 202);
+    border: 1px solid rgb(202, 202, 202);
+}
+
+.containerPage>.photoProfile>.description {
+    max-width: 15rem;
+    min-width: 15rem;
+    min-height: 15rem;
+    max-height: 15rem;
+    border-radius: 10rem;
+    position: absolute;
+}
+
+.description::-webkit-file-upload-button {
+    visibility: hidden;
+}
+
+.containerPage>.photoProfile>.description::before {
+    content: '';
+    margin-left: 5rem;
+    cursor: pointer;
+}
+
+.profile {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    justify-content: space-around;
+}
+
+.profile-info,
+.alterPassword {
+    margin-top: 1rem;
+    text-align: center;
+    width: 30rem;
+}

@@ -1,9 +1,10 @@
 .container_sub-menu {
-    position: absolute;
+    position: fixed;
     width: 100%;
     background-color: white;
     box-shadow: 1px 1px 5px rgb(200, 200, 200);
     border-bottom: 1px rgb(200, 200, 200);
+    z-index: 998;
 }
 
 .menu_sub-menu {
