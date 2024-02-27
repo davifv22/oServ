@@ -14,28 +14,28 @@ export class UserService {
   constructor(private http: HttpClient) {
     this.apiUrl  = environment.url
     this.User = {
-      id:0,
+      idUser:0,
       nome:'',
       user:'',
       email:'',
       situacao:'',
-      is_admin:false,
-      api_key:''
+      isAdmin:false,
+      apiKey:''
     }
    }
 
    getUser(): Observable<User> {
-    let api_key = sessionStorage.getItem('api_key');
-    let id = sessionStorage.getItem('id');
+    let apiKey = sessionStorage.getItem('apiKey');
+    let idUser = sessionStorage.getItem('idUser');
 
-    const params = { api_key: `${api_key}` };
-    return this.http.get<any>(`${this.apiUrl}/usuario/${id}`, { params });
+    const params = { apiKey: `${apiKey}` };
+    return this.http.get<any>(`${this.apiUrl}/usuario/${idUser}`, { params });
   }
 
   getUsers(page: number, per_page: number, isPaginate: boolean): Observable<any> {
-    let api_key = sessionStorage.getItem('api_key');
+    let apiKey = sessionStorage.getItem('apiKey');
 
-    const params = { api_key: `${api_key}`, page: page, per_page: per_page, isPaginate: isPaginate};
+    const params = { apiKey: `${apiKey}`, page: page, per_page: per_page, isPaginate: isPaginate};
     return this.http.get<any>(`${this.apiUrl}/usuarios`, { params });
   }
 }

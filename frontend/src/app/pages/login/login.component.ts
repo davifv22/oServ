@@ -18,13 +18,13 @@ export class LoginComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) {
     this.result = {
-      id:0,
+      idUser:0,
       nome:'',
       user:'',
       email:'',
       situacao:'',
-      is_admin:false,
-      api_key:''
+      isAdmin:false,
+      apiKey:''
     }
   }
 
@@ -38,12 +38,12 @@ export class LoginComponent implements OnInit {
     this.authService.login(json).subscribe(
         (response: Login) => {
           this.result = JSON.parse(`${JSON.stringify(response)}`);
-          sessionStorage.setItem('id', `${this.result.id}`)
+          sessionStorage.setItem('idUser', `${this.result.idUser}`)
           sessionStorage.setItem('nome', `${this.result.nome}`)
           sessionStorage.setItem('user', `${this.result.user}`)
           sessionStorage.setItem('email', `${this.result.email}`)
-          sessionStorage.setItem('is_admin', `${this.result.is_admin}`)
-          sessionStorage.setItem('api_key', `${this.result.api_key}`)
+          sessionStorage.setItem('isAdmin', `${this.result.isAdmin}`)
+          sessionStorage.setItem('apiKey', `${this.result.apiKey}`)
           sessionStorage.setItem('is_logged_in', 'true')
           this.router.navigate([''])
         },

@@ -1,9 +1,9 @@
 export type User = {
-  id:number,
+  idUser:number,
   nome:string,
   user: string,
   email:string,
   situacao:string,
-  is_admin:boolean,
-  api_key:string
+  isAdmin:boolean,
+  apiKey:string
 }

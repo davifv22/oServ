@@ -20,13 +20,13 @@ export class HeaderComponent implements OnInit {
 
   constructor(private userService: UserService, private authService: AuthService, private router: Router) {
     this.User = {
-      id:0,
+      idUser:0,
       nome:'',
       user:'',
       email:'',
       situacao:'',
-      is_admin:false,
-      api_key:''
+      isAdmin:false,
+      apiKey:''
     }
     this.horarioAtual = new Date();
    }
@@ -54,13 +54,13 @@ export class HeaderComponent implements OnInit {
       {
         next: (res) => {
           this.User = {
-            id: res.id,
+            idUser: res.idUser,
             nome: res.nome,
             user: res.user,
             email: res.email,
             situacao: res.situacao,
-            is_admin: res.is_admin,
-            api_key: res.api_key
+            isAdmin: res.isAdmin,
+            apiKey: res.apiKey
           }
         },
         error: (err) => console.log('not found')

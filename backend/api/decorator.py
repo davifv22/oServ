@@ -1,7 +1,7 @@
 from functools import wraps
 from flask_jwt_extended import get_jwt, verify_jwt_in_request
 from flask import make_response, jsonify, request
-from .services import user_service
+from .services import usuario_service
 from datetime import datetime
 
 def admin_required(fn):
@@ -18,8 +18,8 @@ def admin_required(fn):
 def api_key_required(fn):
     @wraps(fn)
     def wrapper(*args, **kwargs):
-        api_key = request.args.get('api_key')
-        if api_key and user_service.get_user_api_key(api_key):
+        apiKey = request.args.get('apiKey')
+        if apiKey and usuario_service.get_usuario_apiKey(apiKey):
             return fn(*args, **kwargs)
         else:
             return make_response(jsonify(messages='Não é permitido esse tipo de recurso, apenas usuários com api_key cadastrada!',
