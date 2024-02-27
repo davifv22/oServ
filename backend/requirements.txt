@@ -7,10 +7,10 @@ Flask-SQLAlchemy==3.1.1
 passlib==1.7.4
 marshmallow-sqlalchemy==0.29.0
 flask-mysql==1.5.2
-mysql-connector-python==8.0.5
+mysql-connector-python==8.0.19
 gevent==23.9.1
 eventlet==0.33.3
 rarfile==4.1
 flask_login==0.6.2
-Werkzeug==2.3.7
+werkzeug==2.3.8
 numpy==1.24.4
