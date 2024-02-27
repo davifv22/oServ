@@ -1,14 +1,12 @@
-
-
-class User():
-    def __init__(self, user, nome, email, senha, situacao, is_admin, api_key):
+class Usuario():
+    def __init__(self, user, nome, email, senha, situacao, isAdmin, apiKey):
         self.__user = user
         self.__nome = nome
         self.__email = email
         self.__senha = senha
         self.__situacao = situacao
-        self.__is_admin = is_admin
-        self.__api_key = api_key
+        self.__isAdmin = isAdmin
+        self.__apiKey = apiKey
 
     @property
     def user(self):
@@ -51,17 +49,17 @@ class User():
         self.__situacao = situacao
 
     @property
-    def is_admin(self):
-        return self.__is_admin
+    def isAdmin(self):
+        return self.__isAdmin
 
-    @is_admin.setter
-    def is_admin(self, is_admin):
-        self.__is_admin = is_admin
+    @isAdmin.setter
+    def isAdmin(self, isAdmin):
+        self.__isAdmin = isAdmin
 
     @property
-    def api_key(self):
-        return self.__api_key
+    def apiKey(self):
+        return self.__apiKey
 
-    @api_key.setter
-    def api_key(self, api_key):
-        self.__api_key = api_key
+    @apiKey.setter
+    def apiKey(self, apiKey):
+        self.__apiKey = apiKey

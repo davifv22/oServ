@@ -1,10 +1,10 @@
 from api.app import ma
-from ..models import user_model
+from ..models import usuario_model
 from marshmallow import fields
 
 class LoginSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = user_model.User
+        model = usuario_model.UsuarioModel
         load_instance = True
         fields = ('id', 'user', 'nome', 'email', 'senha')
 

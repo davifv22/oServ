@@ -2,16 +2,15 @@ from flask_restful import Resource
 from api.app import api, jwt
 from flask import request, make_response, jsonify
 from ..schemas import token_schema
-from ..services import user_service
+from ..services import usuario_service
 from flask_jwt_extended import create_access_token, create_refresh_token
 from datetime import timedelta, datetime
 
 
 class TokenList(Resource):
-
     @jwt.additional_claims_loader
     def add_claims_to_access_token(identity):
-        user_token = user_service.get_user_id(identity)
+        user_token = usuario_service.get_user_id(identity)
         if user_token.is_admin:
             roles = 'admin'
         else:
@@ -26,13 +25,13 @@ class TokenList(Resource):
         else:
             user = request.json['user']
             senha = request.json['senha']
-            user_bd = user_service.get_user(user)
-            if user_bd and user_bd.ver_senha(senha):
+            usuario_bd = usuario_service.get_usuario(user)
+            if usuario_bd and usuario_bd.ver_senha(senha):
                 access_token = create_access_token(
-                    identity=user_bd.id,
+                    identity=usuario_bd.id,
                     expires_delta=timedelta(seconds=100))
                 refresh_token = create_refresh_token(
-                    identity=user_bd.id)
+                    identity=usuario_bd.id)
 
                 return make_response(jsonify({
                     'access_token': access_token,

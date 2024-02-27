@@ -1,69 +1,64 @@
 from flask_restful import Resource
 from api.app import api
-from flask import request, make_response, jsonify, render_template, Blueprint
-from ..schemas import user_schema
-from ..entidades import user
-from ..services import user_service
-from ..models import user_model
+from flask import request, make_response, jsonify, Blueprint
+from ..schemas import usuario_schema
+from ..entidades import usuario
+from ..services import usuario_service
+from ..models import usuario_model
 from ..decorator import api_key_required
 from ..paginate import paginate
 import uuid
 
 bp = Blueprint('usuarios', __name__)
 
-class UserList(Resource):
+class UsuariosList(Resource):
     @api_key_required
     def get(self):
-        usuarios = user_service.get_users()
+        usuarios = usuario_service.get_usuarios()
         if usuarios:
-            cs = user_schema.UserSchema(many=True)
+            cs = usuario_schema.UsuarioSchema(many=True)
             if request.args.get('isPaginate') == 'true':
-                return paginate(user_model.User, cs)
+                return paginate(usuario_model.UsuarioModel, cs)
             else:
                 return make_response(usuarios, 200)
         else:
             return make_response(jsonify({'message': 'Nenhum usuário encontrado!'}), 404)
 
-    
-    @api_key_required
+    # @api_key_required
     def post(self):
-        us = user_schema.UserSchema()
+        us = usuario_schema.UsuarioSchema()
         v = us.validate(request.json)
         if v:
             return make_response(jsonify(v), 400)
         else:
-            user_ = request.json['user']
+            user = request.json['user']
             nome = request.json['nome']
             email = request.json['email']
             senha = request.json['senha']
             situacao = True
-            is_admin = request.json['is_admin']
-            api_key = str(uuid.uuid4())
-            novo_user = user.User(user=user_, nome=nome, email=email, senha=senha, situacao=situacao, is_admin=is_admin, api_key=api_key)
-            x = user_service.set_user(novo_user)
+            isAdmin = request.json['isAdmin']
+            apiKey = str(uuid.uuid4())
+            novo_usuario = usuario.Usuario(user=user, nome=nome, email=email, senha=senha, situacao=situacao, isAdmin=isAdmin, apiKey=apiKey)
+            x = usuario_service.set_usuario(novo_usuario)
             
             return make_response(us.jsonify(x), 201)
 
-class UserDetail(Resource):
+class UsuarioDetail(Resource):
     @api_key_required
-    def get(self, user):
-        us = user_schema.UserSchema()
-        usuario = user_service.get_user_id(user)
+    def get(self, idUser):
+        us = usuario_schema.UsuarioSchema()
+        usuario = usuario_service.get_usuario_id(idUser)
         if usuario:
             return make_response(us.jsonify(usuario), 200)
         else:
             return make_response(jsonify({'message': 'Usuário não encontrado!'}), 404)
 
 
+api.add_resource(UsuariosList, '/usuarios')
+api.add_resource(UsuarioDetail, '/usuario/<idUser>')
 
-api.add_resource(UserList, '/usuarios')
-api.add_resource(UserDetail, '/usuario/<user>')
-
-
-# {
 # 	"nome": "ADMINISTRADOR",
 # 	"user": "admin",
 # 	"email": "admin@mail.com",
-# 	"senha": "admin123",
-# 	"is_admin": 1
-# }
+# 	"senha": "admin",
+# 	"isAdmin": 1

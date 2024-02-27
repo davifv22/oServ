@@ -16,10 +16,10 @@ migrate = Migrate(app, db)
 api = Api(app)
 jwt = JWTManager(app)
 
-from .views import user_views, token_views, refresh_token_views, login_views
-from .views import user_views, token_views, refresh_token_views
-from .models import user_model
+from .views import token_views, refresh_token_views, login_views, usuarios_views
+from .views import token_views, refresh_token_views
+from .models import boleto_model, boleto_servico_model, cliente_model, controle_model, equipe_model, funcionario_model, ordem_servico_model, pre_orcamento_model, requerimento_model, servico_model, setor_model, tipo_requerimento_model, usuario_model, veiculo_model
 
-app.register_blueprint(user_views.bp)
+app.register_blueprint(usuarios_views.bp)
 app.register_blueprint(login_views.bp)
 

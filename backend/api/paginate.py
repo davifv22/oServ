@@ -1,4 +1,4 @@
-from flask import request, url_for
+from flask import request
 
 
 def paginate(model, schema):

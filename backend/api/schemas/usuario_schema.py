@@ -1,17 +1,17 @@
 from api.app import ma
-from ..models import user_model
+from ..models import usuario_model
 from marshmallow import fields
 
-class UserSchema(ma.SQLAlchemyAutoSchema):
+class UsuarioSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
-        model = user_model.User
+        model = usuario_model.UsuarioModel
         load_instance = True
-        fields = ('id', 'user', 'nome', 'email', 'senha', 'situacao', 'is_admin', 'api_key')
+        fields = ('idUser', 'user', 'nome', 'email', 'senha', 'situacao', 'isAdmin', 'apiKey')
 
     nome = fields.String(required=True)
     user = fields.String(required=True)
     email = fields.String(required=True)
     senha = fields.String(required=True)
     situacao = fields.Boolean(required=False)
-    is_admin = fields.Boolean(required=True)
-    api_key = fields.String(required=False)
+    isAdmin = fields.Boolean(required=True)
+    apiKey = fields.String(required=False)

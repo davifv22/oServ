@@ -33,7 +33,7 @@
                     <td>{{ user.nome }}</td>
                     <td>{{ user.user }}</td>
                     <td>{{ user.email }}</td>
-                    <td>{{ user.is_admin ? 'Administrador' : 'Operador' }}</td>
+                    <td>{{ user.isAdmin ? 'Administrador' : 'Operador' }}</td>
                     <td>
                         <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="user.situacao"></i>
                         <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!user.situacao"></i>
