@@ -26,13 +26,11 @@ export const routes: Routes = [
 
   {path: 'cadastro/cliente', component: ClientesComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/ordem-de-servico', component: OrdemDeServicoComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/tipo-requerimento', component: OrdemDeServicoComponent, canActivate: [AuthGuard]},
 
   {path: 'cadastro/veiculo', component: VeiculosComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/material', component: MateriaisComponent, canActivate: [AuthGuard]},
-
-  {path: 'cadastro/taxas-servico', component: TaxasServicoComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/taxas-diversas', component: TaxasServicoComponent, canActivate: [AuthGuard]},
 
   {path: 'cadastro/pre-orcamento', component: PreOrcamentoComponent, canActivate: [AuthGuard]},
 
