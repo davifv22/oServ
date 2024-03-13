@@ -1,4 +1,4 @@
-.container_taxas-servico {
+.container_servico {
     top: 8rem;
     width: 80%;
     position: relative;
@@ -6,7 +6,7 @@
     margin-right: auto;
 }
 
-.container_taxas-servico>.search-taxas-servico {
+.container_servico>.search-servico {
     width: 70%;
     margin-right: auto;
     margin-left: auto;

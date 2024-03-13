@@ -7,8 +7,7 @@ import { FuncionariosComponent } from './pages/cadastros/funcionarios/funcionari
 import { ClientesComponent } from './pages/cadastros/clientes/clientes.component'
 import { OrdemDeServicoComponent } from './pages/cadastros/ordem-de-servico/ordem-de-servico.component'
 import { VeiculosComponent } from './pages/cadastros/veiculos/veiculos.component'
-import { MateriaisComponent } from './pages/cadastros/materiais/materiais.component'
-import { TaxasServicoComponent } from './pages/cadastros/taxas-servico/taxas-servico.component'
+import { ServicosComponent } from './pages/cadastros/servicos/servicos.component'
 import { PreOrcamentoComponent } from './pages/cadastros/pre-orcamento/pre-orcamento.component'
 
 import { GestaoComponent } from './pages/gestao/gestao.component'
@@ -22,15 +21,15 @@ import { PerfilComponent } from './pages/perfil/perfil.component'
 export const routes: Routes = [
   {path: '', component: HomeComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/funcionario', component: FuncionariosComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/funcionarios', component: FuncionariosComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/cliente', component: ClientesComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/clientes', component: ClientesComponent, canActivate: [AuthGuard]},
 
   {path: 'cadastro/tipo-requerimento', component: OrdemDeServicoComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/veiculo', component: VeiculosComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/veiculos', component: VeiculosComponent, canActivate: [AuthGuard]},
 
-  {path: 'cadastro/taxas-diversas', component: TaxasServicoComponent, canActivate: [AuthGuard]},
+  {path: 'cadastro/servicos', component: ServicosComponent, canActivate: [AuthGuard]},
 
   {path: 'cadastro/pre-orcamento', component: PreOrcamentoComponent, canActivate: [AuthGuard]},
 

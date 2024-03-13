@@ -3,18 +3,18 @@ import { SubMenuComponent } from "../../../components/sub-menu/sub-menu.componen
 import { CommonModule } from '@angular/common';
 
 @Component({
-  selector: 'app-taxas-servico',
+  selector: 'app-servicos',
   standalone: true,
   imports: [CommonModule, SubMenuComponent],
-  templateUrl: './taxas-servico.component.html',
-  styleUrl: './taxas-servico.component.css'
+  templateUrl: './servicos.component.html',
+  styleUrl: './servicos.component.css'
 })
-export class TaxasServicoComponent implements OnInit {
+export class ServicosComponent implements OnInit {
   title:string = ''
 
   constructor() { }
 
   ngOnInit(): void {
-    this.title = 'TAXAS DE SERVIÇOS'
+    this.title = 'SERVIÇOS'
   }
 }
