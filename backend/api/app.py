@@ -5,7 +5,9 @@ from flask_migrate import Migrate
 from flask_marshmallow import Marshmallow
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
+import datetime
 
+print(f'[{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} +0000] [SISTEMA] [INICIALIZANDO] 🟢  Sistema iniciando...')
 app = Flask(__name__)
 CORS(app)
 app.config.from_object('config')
@@ -23,3 +25,4 @@ from .models import boleto_model, boleto_servico_model, cliente_model, controle_
 app.register_blueprint(usuarios_views.bp)
 app.register_blueprint(login_views.bp)
 
+print(f'[{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} +0000] [SISTEMA] [INICIALIZANDO] 🟢  Sistema iniciado com sucesso!')

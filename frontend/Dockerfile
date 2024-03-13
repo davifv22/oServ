@@ -1,5 +1,5 @@
 # Use the official Node.js 18 image as base
-FROM node:18 as builder
+FROM node:20 as builder
 
 # Set the working directory
 WORKDIR /usr/src/app
@@ -11,7 +11,7 @@ RUN npm install -g @angular/cli
 COPY package*.json ./
 
 # Install dependencies
-RUN npm install
+RUN npm install node 20
 
 # Copy the rest of the application files
 COPY . .
