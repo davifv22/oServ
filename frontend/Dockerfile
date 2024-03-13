@@ -26,7 +26,7 @@ FROM nginx:alpine
 COPY nginx.conf /etc/nginx/nginx.conf
 
 # Copy the built app from the previous stage into the nginx web server
-COPY --from=builder /usr/src/app/dist/frontend /usr/share/nginx/html/dist/frontend
+COPY --from=builder /usr/src/app/dist/oServ /usr/share/nginx/html/dist/oServ
 
 # Expose port 80
 EXPOSE 80
