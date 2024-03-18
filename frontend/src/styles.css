@@ -19,11 +19,32 @@ body {
     box-shadow: 1px 1px 5px rgb(200, 200, 200);
     border-bottom: 1px rgb(200, 200, 200);
     background-color: white;
-    padding: 1rem;
+    padding: 3rem;
 }
 
-@media screen and (max-width: 770px) {
+.containerPage>.searchPage {
+    width: 70%;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.resultPage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: .5rem;
+}
+
+@media screen and (max-width: 768px) {
     .containerPage {
         width: 100%;
+    }
+}
+
+@media screen and (max-width: 900px) {
+    .containerPage {
+        width: 95%;
     }
 }

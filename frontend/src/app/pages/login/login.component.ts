@@ -33,7 +33,12 @@ export class LoginComponent implements OnInit {
   }
 
   logar(f: NgForm) {
-    const json = { usuario: f.value['usuario'], senha: f.value['senha'], is_logged_in: true}
+
+    const json = {
+      usuario: f.value['usuario'],
+      senha: f.value['senha'],
+      is_logged_in: true
+    }
 
     this.authService.login(json).subscribe(
         (response: Login) => {
@@ -51,5 +56,5 @@ export class LoginComponent implements OnInit {
           this.error = `${error.error.message}`
         }
     )
-}
+  }
 }

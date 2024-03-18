@@ -1,11 +1,11 @@
-from flask_restful import Resource
-from api.app import api
+from flask_restful import Api, Resource
 from flask import request, Blueprint, make_response, jsonify
 from ..services import usuario_service
 from ..schemas import usuario_schema
 import datetime
 
 bp = Blueprint('login', __name__)
+api = Api(bp)
 
 class Login(Resource):
     def post(self):

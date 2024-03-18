@@ -1,17 +1,20 @@
-from flask_restful import Resource
-from api.app import api, jwt
-from flask import request, make_response, jsonify
+from flask_restful import Api, Resource
+from api.app import app
+from flask import request, make_response, jsonify, Blueprint
 from ..schemas import token_schema
 from ..services import usuario_service
-from flask_jwt_extended import create_access_token, create_refresh_token
+from flask_jwt_extended import JWTManager, create_access_token, create_refresh_token
 from datetime import timedelta, datetime
 
+bp = Blueprint('token', __name__)
+api = Api(bp)
+jwt = JWTManager(app)
 
 class TokenList(Resource):
     @jwt.additional_claims_loader
     def add_claims_to_access_token(identity):
-        user_token = usuario_service.get_user_id(identity)
-        if user_token.is_admin:
+        user_token = usuario_service.get_usuario_id(identity)
+        if user_token.isAdmin:
             roles = 'admin'
         else:
             roles = 'user'
@@ -28,10 +31,10 @@ class TokenList(Resource):
             usuario_bd = usuario_service.get_usuario(user)
             if usuario_bd and usuario_bd.ver_senha(senha):
                 access_token = create_access_token(
-                    identity=usuario_bd.id,
+                    identity=usuario_bd.idUser,
                     expires_delta=timedelta(seconds=100))
                 refresh_token = create_refresh_token(
-                    identity=usuario_bd.id)
+                    identity=usuario_bd.idUser)
 
                 return make_response(jsonify({
                     'access_token': access_token,
