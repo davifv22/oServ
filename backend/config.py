@@ -3,7 +3,7 @@ SECRET_KEY = 'aplicacao_flask'
 
 USERNAME = 'oServ'
 PASSWORD = '12345'
-SERVER = '192.168.0.102'
+SERVER = 'localhost'
 PORT_MYSQL = '3306'
 DB = 'db'
 SQLALCHEMY_DATABASE_URI = f'mysql+pymysql://{USERNAME}:{PASSWORD}@{SERVER}:{PORT_MYSQL}/{DB}'

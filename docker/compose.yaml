@@ -11,8 +11,6 @@ services:
       NODE_ENV: production
     ports:
       - "4200:80"
-    volumes:
-      - ./nginx/logs:/var/log/nginx
 
   backend:
     container_name: Flask

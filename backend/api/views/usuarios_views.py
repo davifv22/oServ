@@ -1,5 +1,4 @@
-from flask_restful import Resource
-from api.app import api
+from flask_restful import Api, Resource
 from flask import request, make_response, jsonify, Blueprint
 from ..schemas import usuario_schema
 from ..entidades import usuario
@@ -11,6 +10,7 @@ import uuid
 import datetime
 
 bp = Blueprint('usuarios', __name__)
+api = Api(bp)
 
 class UsuariosList(Resource):
     @api_key_required
