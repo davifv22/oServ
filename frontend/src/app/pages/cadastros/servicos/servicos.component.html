@@ -1,34 +1,72 @@
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
-<div class="container_servico">
-    <div class="search-servicos input-group input-group-sm">
-        <span class="input-group-text" id="search-taxasservico"><i class="fa-solid fa-user"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar taxas de serviço" aria-label="Localizar taxas de serviço" aria-describedby="search-taxasservico">
+<div class="containerPage">
+    <div class="searchPage input-group input-group-sm" *ngIf="paginate">
+        <span class="input-group-text" id="search-servico"><i class="fa-solid fa-servico"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar serviços/materiais/taxas" aria-label="Localizar serviços/materiais/taxas" aria-describedby="search-servico" [(ngModel)]="search" (input)="searchServicos()">
     </div>
     <br>
-    <table class="table table-hover text-center">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Descrição</th>
-                <th scope="col">Tipo</th>
-                <th scope="col">Valor</th>
-                <th scope="col">Situação</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr>
-                <th scope="row">ID</th>
-                <td>Descrição</td>
-                <td>Tipo</td>
-                <td>Valor</td>
-                <td>Situação</td>
-                <td>
-                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
-                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <div class="form-select-sm">
+            <small>Item por página: </small>
+            <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+        </div>
+        <table class="table table-hover table-sm table-light border text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Descrição</th>
+                    <th scope="col">Tipo</th>
+                    <th scope="col">Valor</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr *ngFor="let servico of Servicos">
+                    <th scope="row">{{ servico.idServico }}</th>
+                    <td>{{ servico.descricao }}</td>
+                    <td>
+                        <a *ngIf="servico.tipo === 0">Serviço</a>
+                        <a *ngIf="servico.tipo === 1">Material</a>
+                        <a *ngIf="servico.tipo === 2">Taxa</a>
+                    </td>
+                    <td>{{ servico.valor | currency:'R$' }}</td>
+                    <td>
+                        <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="servico.situacao"></i>
+                        <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!servico.situacao"></i>
+                    </td>
+                    <td>
+                        <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="resultPage" *ngIf="!search.length">
+        <small><p class="resultPage">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+        <nav>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['5']" (click)="getServicos(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
+                    <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['4']" (click)="getServicos(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
+                    <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="resultPage" *ngIf="search.length && Servicos.length">
+        <small><p class="resultPage">Total de registros: {{Servicos.length}}</p></small>
+    </div>
+    <div class="resultPage" *ngIf="Servicos.length === 0">
+        <small><p class="resultPage">Nenhum registro encontrado!</p></small>
+    </div>
 </div>

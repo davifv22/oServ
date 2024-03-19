@@ -1,40 +1,80 @@
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
-<div class="container_clientes">
-    <div class="search-clientes input-group input-group-sm">
-        <span class="input-group-text" id="search-cliente"><i class="fa-solid fa-user"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar cliente" aria-label="Localizar funcionário" aria-describedby="search-cliente">
+<div class="containerPage">
+    <div class="searchPage input-group input-group-sm" *ngIf="paginate">
+        <span class="input-group-text" id="search-user"><i class="fa-solid fa-user"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar clientes" aria-label="Localizar clientes" aria-describedby="search-user" [(ngModel)]="search" (input)="searchClientes()">
     </div>
     <br>
-    <table class="table table-hover text-center">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Nome</th>
-                <th scope="col">Telefone</th>
-                <th scope="col">E-mail</th>
-                <th scope="col">CPF/CNPJ</th>
-                <th scope="col">Endereço</th>
-                <th scope="col">Bairro</th>
-                <th scope="col">Cidade</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr>
-                <th scope="row">ID</th>
-                <td>Nome</td>
-                <td>Telefone</td>
-                <td>E-mail</td>
-                <td>CPF/CNPJ</td>
-                <td>Endereço</td>
-                <td>Bairro</td>
-                <td>Cidade</td>
-                <td>
-                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
-                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <div class="form-select-sm">
+            <small>Item por página: </small>
+            <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+        </div>
+        <table class="table table-hover table-sm table-light border text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Nome</th>
+                    <th scope="col">Telefone</th>
+                    <th scope="col">E-mail</th>
+                    <th scope="col">DOC</th>
+                    <th scope="col">Endereço</th>
+                    <th scope="col">Bairro</th>
+                    <th scope="col">Cidade</th>
+                    <th scope="col">CEP</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Data Cadastro</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr *ngFor="let cliente of Clientes">
+                    <th scope="row">{{ cliente.idCliente }}</th>
+                    <td>{{ cliente.nome }}</td>
+                    <td>{{ cliente.telefone }}</td>
+                    <td>{{ cliente.email }}</td>
+                    <td>{{ cliente.doc }}</td>
+                    <td>{{ cliente.endereco }}</td>
+                    <td>{{ cliente.bairro }}</td>
+                    <td>{{ cliente.cidade }}</td>
+                    <td>{{ cliente.cep }}</td>
+                    <td>
+                        <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="cliente.situacao"></i>
+                        <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!cliente.situacao"></i>
+                    </td>
+                    <td>{{ cliente.dtCadastro| date:'dd/MM/yyyy' }}</td>
+                    <td>
+                        <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="resultPage" *ngIf="!search.length">
+        <small><p class="resultPage">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+        <nav>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['5']" (click)="getClientes(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
+                    <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['4']" (click)="getClientes(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
+                    <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="resultPage" *ngIf="search.length && Clientes.length">
+        <small><p class="resultPage">Total de registros: {{Clientes.length}}</p></small>
+    </div>
+    <div class="resultPage" *ngIf="Clientes.length === 0">
+        <small><p class="resultPage">Nenhum registro encontrado!</p></small>
+    </div>
 </div>

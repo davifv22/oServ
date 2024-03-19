@@ -1,7 +1,6 @@
 from api.app import ma
 from ..models import empresa_model
 from marshmallow import fields
-
 class EmpresaSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = empresa_model.EmpresaModel

@@ -5,7 +5,7 @@
     </div>
     <div class="col-md-4">
         <label for="cnpj" class="form-label">CNPJ</label>
-        <input ngModel="{{Empresa.cnpj}}" type="text" class="form-control form-control-sm" placeholder="12.345.678/0001-00" id="cnpj" name="cnpj">
+        <input ngModel="{{Empresa.cnpj}}" type="text" class="form-control form-control-sm" placeholder="00.000.000/0000-00" id="cnpj" name="cnpj">
     </div>
     <div class="col-md-8">
         <label for="logradouro" class="form-label">Endereço</label>
@@ -24,11 +24,11 @@
     </div>
     <div class="col-md-3">
         <label for="dtImplantacao" class="form-label">Data Implantação</label>
-        <input ngModel="{{Empresa.dtImplantacao | date:'dd/MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtImplantacao" name="dtImplantacao" disabled>
+        <input ngModel="{{Empresa.dtImplantacao}}" type="date" class="form-control form-control-sm" id="dtImplantacao" name="dtImplantacao">
     </div>
     <div class="col-md-3">
         <label for="dtRefSistema" class="form-label">Referência</label>
-        <input ngModel="{{Empresa.dtRefSistema| date:'MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtRefSistema" name="dtRefSistema">
+        <input ngModel="{{Empresa.dtRefSistema}}" type="month" class="form-control form-control-sm" id="dtRefSistema" name="dtRefSistema">
     </div>
     <div class="col-12 text-end">
         <button type="submit" class="btn btn-sm btn-success">Confirmar</button>

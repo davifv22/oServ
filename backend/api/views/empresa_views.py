@@ -1,16 +1,11 @@
 from flask_restful import Api, Resource
 from flask import request, make_response, jsonify, Blueprint
 from ..schemas import empresa_schema
-from ..entidades import empresa
 from ..services import empresa_service
-from ..models import empresa_model
 from ..decorator import api_key_required
-from ..paginate import paginate
-import datetime
 
 bp = Blueprint('empresa', __name__)
 api = Api(bp)
-
 class EmpresaDetail(Resource):
     @api_key_required
     def get(self):
