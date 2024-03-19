@@ -1,20 +1,14 @@
-.containerPage {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap;
-}
-
-.containerPage>.photoProfile {
+.photoProfile {
     display: flex;
     align-items: center;
     justify-content: center;
     width: 15rem;
     height: 15rem;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-.containerPage>.photoProfile>img {
+.photoProfile>img {
     max-width: 100%;
     min-width: 100%;
     max-height: 100%;
@@ -24,7 +18,7 @@
     border: 1px solid rgb(202, 202, 202);
 }
 
-.containerPage>.photoProfile>.description {
+.photoProfile>.description {
     max-width: 15rem;
     min-width: 15rem;
     min-height: 15rem;
@@ -37,23 +31,16 @@
     visibility: hidden;
 }
 
-.containerPage>.photoProfile>.description::before {
+.photoProfile>.description::before {
     content: '';
     margin-left: 5rem;
     cursor: pointer;
 }
 
-.profile {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 100%;
-    justify-content: space-around;
-}
-
-.profile-info,
+.profile,
 .alterPassword {
-    margin-top: 1rem;
     text-align: center;
-    width: 30rem;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 30rem;
 }
