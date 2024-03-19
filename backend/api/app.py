@@ -14,10 +14,11 @@ db = SQLAlchemy(app)
 ma = Marshmallow(app)
 migrate = Migrate(app, db)
 
-from .views import token_views, refresh_token_views, login_views, usuarios_views, tipo_requerimento_views
-from .models import boleto_model, boleto_servico_model, cliente_model, controle_model, equipe_model, funcionario_model, ordem_servico_model, pre_orcamento_model, requerimento_model, servico_model, setor_model, tipo_requerimento_model, usuario_model, veiculo_model
+from .views import token_views, refresh_token_views, login_views, usuarios_views, tipo_requerimento_views, empresa_views
+from .models import boleto_model, boleto_servico_model, cliente_model, empresa_model, equipe_model, funcionario_model, ordem_servico_model, pre_orcamento_model, requerimento_model, servico_model, setor_model, tipo_requerimento_model, usuario_model, veiculo_model
 
 app.register_blueprint(tipo_requerimento_views.bp, url_prefix='/api')
+app.register_blueprint(empresa_views.bp, url_prefix='/api')
 app.register_blueprint(usuarios_views.bp, url_prefix='/api')
 app.register_blueprint(login_views.bp, url_prefix='/api')
 app.register_blueprint(token_views.bp, url_prefix='/api')

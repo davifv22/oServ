@@ -1,34 +1,34 @@
 <form #f="ngForm" (ngSubmit)="insertEmpresa(f)" noValidate class="row g-3">
     <div class="col-md-8">
         <label for="nomeEmpresa" class="form-label">Nome Empresa</label>
-        <input ngModel="{{nomeEmpresa}}" type="text" class="form-control form-control-sm" id="nomeEmpresa" name="nomeEmpresa">
+        <input ngModel="{{Empresa.nomeEmpresa}}" type="text" class="form-control form-control-sm" id="nomeEmpresa" name="nomeEmpresa">
     </div>
     <div class="col-md-4">
         <label for="cnpj" class="form-label">CNPJ</label>
-        <input type="text" class="form-control form-control-sm" placeholder="12.345.678/0001-00" id="cnpj" name="cnpj">
+        <input ngModel="{{Empresa.cnpj}}" type="text" class="form-control form-control-sm" placeholder="12.345.678/0001-00" id="cnpj" name="cnpj">
     </div>
     <div class="col-md-8">
         <label for="logradouro" class="form-label">Endereço</label>
         <div class="input-group">
-            <input type="text" class="form-control form-control-sm w-50" placeholder="Logradouro" aria-label="Logradouro" id="logradouro" name="logradouro">
-            <input type="number" class="form-control form-control-sm" placeholder="N°" aria-label="N°" id="numero" name="numero">
-            <input type="text" class="form-control form-control-sm w-25" placeholder="Bairro" aria-label="Bairro" id="bairro" name="bairro">
+            <input ngModel="{{Empresa.endereco[0]}}" type="text" class="form-control form-control-sm w-50" placeholder="Logradouro" aria-label="Logradouro" id="logradouro" name="logradouro">
+            <input ngModel="{{Empresa.endereco[1]}}" type="text" class="form-control form-control-sm" placeholder="N°" aria-label="N°" id="numero" name="numero">
+            <input ngModel="{{Empresa.endereco[2]}}" type="text" class="form-control form-control-sm w-25" placeholder="Bairro" aria-label="Bairro" id="bairro" name="bairro">
         </div>
     </div>
     <div class="col-md-4">
         <label for="cidade" class="form-label">Cidade</label>
         <div class="input-group">
-            <input type="text" class="form-control form-control-sm w-75" placeholder="Cidade" id="cidade" name="cidade">
-            <input type="text" class="form-control form-control-sm" placeholder="UF" id="uf" name="uf">
+            <input ngModel="{{Empresa.cidade[0]}}" type="text" class="form-control form-control-sm w-75" placeholder="Cidade" id="cidade" name="cidade">
+            <input ngModel="{{Empresa.cidade[1]}}" type="text" class="form-control form-control-sm" placeholder="UF" id="uf" name="uf">
         </div>
     </div>
     <div class="col-md-3">
         <label for="dtImplantacao" class="form-label">Data Implantação</label>
-        <input ngModel="{{dtImplantacao | date:'dd/MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtImplantacao" name="dtImplantacao" disabled>
+        <input ngModel="{{Empresa.dtImplantacao | date:'dd/MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtImplantacao" name="dtImplantacao" disabled>
     </div>
     <div class="col-md-3">
         <label for="dtRefSistema" class="form-label">Referência</label>
-        <input ngModel="{{dtRefSistema | date:'MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtRefSistema" name="dtRefSistema">
+        <input ngModel="{{Empresa.dtRefSistema| date:'MM/yyyy'}}" type="text" class="form-control form-control-sm" id="dtRefSistema" name="dtRefSistema">
     </div>
     <div class="col-12 text-end">
         <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
