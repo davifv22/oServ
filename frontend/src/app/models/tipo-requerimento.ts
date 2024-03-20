@@ -3,5 +3,5 @@ export type TipoRequerimento = {
   descricao:string,
   emiteOrcamento: boolean,
   emiteOS:boolean,
-  situacao:boolean,
+  situacao:boolean
 }

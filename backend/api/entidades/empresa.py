@@ -1,9 +1,10 @@
-class Controle():
-    def __init__(self, nomeEmpresa, dtRefSistema, dtImplantacao, endereco, cnpj):
+class Empresa():
+    def __init__(self, nomeEmpresa, dtRefSistema, dtImplantacao, endereco, cidade, cnpj):
         self.__nomeEmpresa = nomeEmpresa
         self.__dtRefSistema = dtRefSistema
         self.__dtImplantacao = dtImplantacao
         self.__endereco = endereco
+        self.__cidade = cidade
         self.__cnpj = cnpj
 
     @property
@@ -37,6 +38,14 @@ class Controle():
     @endereco.setter
     def endereco(self, endereco):
         self.__endereco = endereco
+
+    @property
+    def cidade(self):
+        return self.__cidade
+
+    @cidade.setter
+    def cidade(self, cidade):
+        self.__cidade = cidade
 
     @property
     def cnpj(self):

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { TipoRequerimentoService } from '../../../services/tipo-requerimento.service';
+import { TipoRequerimentoService } from '../../../services/cadastros/tipo-requerimento.service';
 import { SubMenuComponent } from "../../../components/sub-menu/sub-menu.component";
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
@@ -18,7 +18,6 @@ export class TipoRequerimentoComponent implements OnInit {
   paginate: any[] = []
   per_page:number = 0
   search:string = ''
-
 
   constructor(private tipoRequerimentoService: TipoRequerimentoService) { }
 

@@ -1,34 +1,72 @@
 <app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
 
-<div class="container_veiculos">
-    <div class="search-veiculos input-group input-group-sm">
-        <span class="input-group-text" id="search-veiculos"><i class="fa-solid fa-user"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar veiculos" aria-label="Localizar veiculos" aria-describedby="search-veiculos">
+<div class="containerPage">
+    <div class="searchPage input-group input-group-sm" *ngIf="paginate">
+        <span class="input-group-text" id="search-veiculo"><i class="fa-solid fa-magnifying-glass"></i></span>
+        <input type="text" class="form-control" placeholder="Localizar veiculos" aria-label="Localizar veiculos" aria-describedby="search-veiculo" [(ngModel)]="search" (input)="searchVeiculos()">
     </div>
     <br>
-    <table class="table table-hover text-center">
-        <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Modelo</th>
-                <th scope="col">Marca</th>
-                <th scope="col">Placa</th>
-                <th scope="col">Situação</th>
-                <th scope="col">Ações</th>
-            </tr>
-        </thead>
-        <tbody class="table-group-divider">
-            <tr>
-                <th scope="row">ID</th>
-                <td>Modelo</td>
-                <td>Marca</td>
-                <td>Placa</td>
-                <td>Situação</td>
-                <td>
-                    <a href="" class="btn btn-primary btn-sm">EDITAR</a>
-                    <a href="" class="btn btn-danger btn-sm">EXCLUIR</a>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="table-responsive-md">
+        <div class="form-select-sm">
+            <small>Item por página: </small>
+            <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
+        <option value="20" selected>20</option>
+        <option value="50">50</option>
+        <option value="100">100</option>
+      </select>
+        </div>
+        <table class="table table-hover table-sm table-light border text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">Modelo</th>
+                    <th scope="col">Marca</th>
+                    <th scope="col">Placa</th>
+                    <th scope="col">km Rodados</th>
+                    <th scope="col">ID Equipe</th>
+                    <th scope="col">Situação</th>
+                    <th scope="col">Ações</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                <tr *ngFor="let veiculo of Veiculos">
+                    <th scope="row">{{ veiculo.idVeiculo }}</th>
+                    <td>{{ veiculo.modelo }}</td>
+                    <td>{{ veiculo.marca }}</td>
+                    <td>{{ veiculo.placa }}</td>
+                    <td>{{ veiculo.kmRodados }}</td>
+                    <td>{{ veiculo.idEquipe }}</td>
+                    <td>
+                        <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="veiculo.situacao"></i>
+                        <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!veiculo.situacao"></i>
+                    </td>
+                    <td>
+                        <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="resultPage" *ngIf="!search.length">
+        <small><p class="resultPage">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+        <nav>
+            <ul class="pagination pagination-sm">
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['5']" (click)="getVeiculos(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
+                    <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" *ngIf="paginate['4']" (click)="getVeiculos(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
+                    <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="resultPage" *ngIf="search.length && Veiculos.length">
+        <small><p class="resultPage">Total de registros: {{Veiculos.length}}</p></small>
+    </div>
+    <div class="resultPage" *ngIf="Veiculos.length === 0">
+        <small><p class="resultPage">Nenhum registro encontrado!</p></small>
+    </div>
 </div>

@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
+import { Empresa } from '../../models/empresa'
+import { EmpresaService } from '../../services/parametrizacao/empresa.service';
 import { User } from '../../models/user'
 import { Router } from '@angular/router';
 import { interval } from 'rxjs';
@@ -17,8 +19,9 @@ import { interval } from 'rxjs';
 export class HeaderComponent implements OnInit {
   public horarioAtual: Date;
   User:User
+  Empresa:Empresa
 
-  constructor(private userService: UserService, private authService: AuthService, private router: Router) {
+  constructor(private userService: UserService, private empresaService: EmpresaService, private authService: AuthService, private router: Router) {
     this.User = {
       idUser:0,
       nome:'',
@@ -28,11 +31,21 @@ export class HeaderComponent implements OnInit {
       isAdmin:false,
       apiKey:''
     }
+    this.Empresa = {
+      idEmpresa:0,
+      nomeEmpresa:'',
+      dtRefSistema:'',
+      dtImplantacao:'',
+      endereco:[],
+      cidade:'',
+      cnpj:''
+    }
     this.horarioAtual = new Date();
    }
 
    ngOnInit(): void {
     this.getUsuario();
+    this.getEmpresa();
 
     interval(1000).subscribe(() => {
       this.atualizarHorario();
@@ -61,6 +74,25 @@ export class HeaderComponent implements OnInit {
             situacao: res.situacao,
             isAdmin: res.isAdmin,
             apiKey: res.apiKey
+          }
+        },
+        error: (err) => console.log('not found')
+      }
+    )
+   }
+
+   getEmpresa(){
+    this.empresaService.getEmpresa().subscribe(
+      {
+        next: (res) => {
+          this.Empresa = {
+            idEmpresa: res.idEmpresa,
+            nomeEmpresa: res.nomeEmpresa,
+            dtRefSistema: res.dtRefSistema,
+            dtImplantacao: res.dtImplantacao,
+            endereco: res.endereco.split(','),
+            cidade: res.cidade.split(','),
+            cnpj: res.cnpj
           }
         },
         error: (err) => console.log('not found')

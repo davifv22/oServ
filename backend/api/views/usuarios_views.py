@@ -7,7 +7,6 @@ from ..models import usuario_model
 from ..decorator import api_key_required
 from ..paginate import paginate
 import uuid
-import datetime
 
 bp = Blueprint('usuarios', __name__)
 api = Api(bp)
@@ -17,14 +16,12 @@ class UsuariosList(Resource):
     def get(self):
         usuarios = usuario_service.get_usuarios()
         if usuarios:
-            print(f'[{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} +0000] [USUÁRIOS] [STATUS CODE: 200] 🟢  Dados de usuários retornados com sucesso: {len(usuarios)}')
             cs = usuario_schema.UsuarioSchema(many=True)
             if request.args.get('isPaginate') == 'true':
                 return paginate(usuario_model.UsuarioModel, cs)
             else:
                 return make_response(usuarios, 200)
         else:
-            print(f'[{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} +0000] [USUÁRIOS] [STATUS CODE: 404] 🔴  Nenhum usuário encontrado: 0')
             return make_response(jsonify({'message': 'Nenhum usuário encontrado!'}), 404)
 
     # @api_key_required
