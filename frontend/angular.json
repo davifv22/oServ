@@ -8,7 +8,7 @@
             "schematics": {},
             "root": "",
             "i18n": {
-                "sourceLocale": "pt-BR"
+                "sourceLocale": "pt"
             },
             "sourceRoot": "src",
             "prefix": "app",
@@ -28,6 +28,7 @@
                             "src/assets"
                         ],
                         "styles": [
+                            "src/custom-theme.scss",
                             "node_modules/bootstrap/dist/css/bootstrap.min.css",
                             "src/styles.css"
                         ],

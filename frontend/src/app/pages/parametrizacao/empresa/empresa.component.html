@@ -1,36 +1,77 @@
-<form #f="ngForm" (ngSubmit)="insertEmpresa(f)" noValidate class="row g-3">
-    <div class="col-md-8">
-        <label for="nomeEmpresa" class="form-label">Nome Empresa</label>
-        <input ngModel="{{Empresa.nomeEmpresa}}" type="text" class="form-control form-control-sm" id="nomeEmpresa" name="nomeEmpresa">
-    </div>
-    <div class="col-md-4">
-        <label for="cnpj" class="form-label">CNPJ</label>
-        <input ngModel="{{Empresa.cnpj}}" type="text" class="form-control form-control-sm" placeholder="00.000.000/0000-00" id="cnpj" name="cnpj">
-    </div>
-    <div class="col-md-8">
-        <label for="logradouro" class="form-label">Endereço</label>
-        <div class="input-group">
-            <input ngModel="{{Empresa.endereco[0]}}" type="text" class="form-control form-control-sm w-50" placeholder="Logradouro" aria-label="Logradouro" id="logradouro" name="logradouro">
-            <input ngModel="{{Empresa.endereco[1]}}" type="text" class="form-control form-control-sm" placeholder="N°" aria-label="N°" id="numero" name="numero">
-            <input ngModel="{{Empresa.endereco[2]}}" type="text" class="form-control form-control-sm w-25" placeholder="Bairro" aria-label="Bairro" id="bairro" name="bairro">
-        </div>
-    </div>
-    <div class="col-md-4">
-        <label for="cidade" class="form-label">Cidade</label>
-        <div class="input-group">
-            <input ngModel="{{Empresa.cidade[0]}}" type="text" class="form-control form-control-sm w-75" placeholder="Cidade" id="cidade" name="cidade">
-            <input ngModel="{{Empresa.cidade[1]}}" type="text" class="form-control form-control-sm" placeholder="UF" id="uf" name="uf">
-        </div>
-    </div>
-    <div class="col-md-3">
-        <label for="dtImplantacao" class="form-label">Data Implantação</label>
-        <input ngModel="{{Empresa.dtImplantacao}}" type="date" class="form-control form-control-sm" id="dtImplantacao" name="dtImplantacao">
-    </div>
-    <div class="col-md-3">
-        <label for="dtRefSistema" class="form-label">Referência</label>
-        <input ngModel="{{Empresa.dtRefSistema}}" type="month" class="form-control form-control-sm" id="dtRefSistema" name="dtRefSistema">
-    </div>
-    <div class="col-12 text-end">
-        <button type="submit" class="btn btn-sm btn-success">Confirmar</button>
-    </div>
+<form #f="ngForm" (ngSubmit)="insertEmpresa(f)" noValidate>
+    <table class="w-100" cellspacing="0">
+        <tr>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Nome Empresa</mat-label>
+                    <input matInput ngModel="{{Empresa.nomeEmpresa}}" id="nomeEmpresa" name="nomeEmpresa">
+                </mat-form-field>
+            </td>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>CNPJ</mat-label>
+                    <input matInput ngModel="{{Empresa.cnpj}}" id="cnpj" name="cnpj">
+                </mat-form-field>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Data Implantação</mat-label>
+                    <input matInput ngModel="{{Empresa.dtImplantacao | date:'dd/MM/YYYY'}}" id="dtImplantacao" name="dtImplantacao">
+                    <!-- [matDatepicker]="picker"  -->
+                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </td>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Referência</mat-label>
+                    <input matInput ngModel="{{Empresa.dtRefSistema | date:'MM/YYYY'}}" id="dtRefSistema" name="dtRefSistema">
+                    <!-- [matDatepicker]="picker"  -->
+                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-datepicker #picker></mat-datepicker>
+                </mat-form-field>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Logradouro</mat-label>
+                    <input matInput ngModel="{{Empresa.endereco[0]}}" placeholder="Logradouro" aria-label="Logradouro" id="logradouro" name="logradouro">
+                </mat-form-field>
+            </td>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Número</mat-label>
+                    <input matInput ngModel="{{Empresa.endereco[1]}}" placeholder="N°" aria-label="N°" id="numero" name="numero">
+                </mat-form-field>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Bairro</mat-label>
+                    <input matInput ngModel="{{Empresa.endereco[2]}}" placeholder="Bairro" aria-label="Bairro" id="bairro" name="bairro">
+                </mat-form-field>
+            </td>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>Cidade</mat-label>
+                    <input matInput ngModel="{{Empresa.cidade[0]}}" placeholder="Cidade" id="cidade" name="cidade">
+                </mat-form-field>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <mat-form-field class="w-100">
+                    <mat-label>UF</mat-label>
+                    <input matInput ngModel="{{Empresa.cidade[1]}}" placeholder="UF" id="uf" name="uf">
+                </mat-form-field>
+            </td>
+        </tr>
+    </table>
+    <button mat-raised-button color="primary">Confirmar</button>
 </form>

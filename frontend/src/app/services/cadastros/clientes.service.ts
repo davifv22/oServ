@@ -23,7 +23,7 @@ export class ClientesService {
       bairro:'',
       cidade:'',
       cep:'',
-      situacao:'',
+      situacao:false,
       observacao:'',
       dtCadastro:''
     }

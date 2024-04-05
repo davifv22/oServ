@@ -1,37 +1,13 @@
-.container_sub-menu {
+.menu_sub-menu {
     position: fixed;
     width: 100%;
-    background-color: white;
-    box-shadow: 1px 1px 5px rgb(200, 200, 200);
-    border-bottom: 1px rgb(200, 200, 200);
     z-index: 998;
-}
-
-.menu_sub-menu {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    text-align: center;
-    margin-top: 2rem;
-    padding: .5rem 0;
+    background-color: #fff;
+    padding: .25rem;
+    box-shadow: 0px 0px 1px rgba(0, 0, 0, 0.63);
 }
 
 .menu_sub-menu>h3 {
-    margin-left: 5.5rem;
+    margin-left: 3rem;
     margin-top: .5rem;
-}
-
-.menu_sub-menu>.actions_sub-menu {
-    position: absolute;
-    display: flex;
-    right: .2rem;
-    margin-top: .9rem;
-}
-
-.menu_sub-menu>.actions_sub-menu>div>small>a {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
-    align-items: center;
-    margin: 0 .25rem;
 }

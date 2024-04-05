@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: d3da68d80073
+Revision ID: 8aeccd6f2bfd
 Revises: 
-Create Date: 2024-02-26 23:08:23.704888
+Create Date: 2024-04-05 09:27:33.352139
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'd3da68d80073'
+revision = '8aeccd6f2bfd'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -33,14 +33,15 @@ def upgrade():
     sa.Column('dtCadastro', sa.String(length=50), nullable=False),
     sa.PrimaryKeyConstraint('idCliente')
     )
-    op.create_table('controle',
-    sa.Column('idControle', sa.Integer(), autoincrement=True, nullable=False),
+    op.create_table('empresa',
+    sa.Column('idEmpresa', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('nomeEmpresa', sa.String(length=50), nullable=False),
-    sa.Column('dtRefSistema', sa.String(length=6), nullable=False),
+    sa.Column('dtRefSistema', sa.String(length=7), nullable=False),
     sa.Column('dtImplantacao', sa.String(length=50), nullable=False),
     sa.Column('endereco', sa.String(length=255), nullable=False),
+    sa.Column('cidade', sa.String(length=50), nullable=False),
     sa.Column('cnpj', sa.String(length=50), nullable=False),
-    sa.PrimaryKeyConstraint('idControle')
+    sa.PrimaryKeyConstraint('idEmpresa')
     )
     op.create_table('servico',
     sa.Column('idServico', sa.Integer(), autoincrement=True, nullable=False),
@@ -185,6 +186,6 @@ def downgrade():
     op.drop_table('tipo_requerimento')
     op.drop_table('setor')
     op.drop_table('servico')
-    op.drop_table('controle')
+    op.drop_table('empresa')
     op.drop_table('cliente')
     # ### end Alembic commands ###

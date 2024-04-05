@@ -8,34 +8,29 @@
 <div class="config-logout">
     <div class="dropdown">
         <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Notificações">
-            <i class="fa-solid fa-envelope" style="color: #fff;"></i>
-            <span class="notification position-absolute top-0 start-0 translate-middle badge rounded-pill bg-danger">
-              4
-            </span>
+              <i class="fa-solid fa-envelope" style="color: #fff;"></i>
+              <span class="position-absolute top-0 start-0 translate-middle" matBadge="15" matBadgeColor="warn"></span>
         </button>
         <ul class="dropdown-menu text-center">
-            <li>
-                <small><a class="dropdown-item" href="">OS 51512.2024-5 baixada com sucesso</a></small>
-            </li>
-            <li>
-                <small><a class="dropdown-item" href="">Backup concluído às 19:27</a></small>
-            </li>
-            <li>
-                <small><a class="dropdown-item" href="">A equipe 37 está solicitando mais OS</a></small>
-            </li>
-            <a class="dropdown-item" href=""><small>Ver todas...</small></a>
+            <mat-list>
+                <mat-list-item [routerLink]=""><small class="text-uppercase">OS 51512.2024-5 baixada com sucesso</small></mat-list-item>
+                <mat-divider></mat-divider>
+                <mat-list-item [routerLink]=""><small class="text-uppercase">Backup concluído às 19:27</small></mat-list-item>
+                <mat-divider></mat-divider>
+                <mat-list-item [routerLink]=""><small class="text-uppercase">A equipe 37 está solicitando mais OS</small></mat-list-item>
+            </mat-list>
         </ul>
     </div>
 
     <div class="dropdown">
         <button class="dropdown-toggle me-3" style="color: #fff;" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-    <i class="fa-solid fa-gear m-1" style="color: #fff;"></i>
-  </button>
-        <ul class="dropdown-menu text-center">
+            <i class="fa-solid fa-gear m-1" style="color: #fff;"></i>
+        </button>
+        <ul class="dropdown-menu text-center w-50">
             <li class="nav-item">
                 <a class="info-user nav-link" [routerLink]="['perfil']" title="Ver perfil">
                     <img src="../../../../../assets/img/profile.webp" alt="">
-                    <p>
+                    <p class="p-2">
                         Bem vindo, <br> {{ User.nome }}!
                     </p>
                 </a>

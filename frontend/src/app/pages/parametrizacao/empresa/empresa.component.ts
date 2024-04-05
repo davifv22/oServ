@@ -1,14 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { Empresa } from '../../../models/empresa'
 import { EmpresaService } from '../../../services/parametrizacao/empresa.service';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatDatepickerModule} from '@angular/material/datepicker';
+import {provideNativeDateAdapter} from '@angular/material/core';
+import {MatButtonModule} from '@angular/material/button';
 @Component({
     selector: 'app-empresa',
     standalone: true,
     templateUrl: './empresa.component.html',
     styleUrl: './empresa.component.css',
-    imports: [CommonModule, FormsModule]
+    imports: [CommonModule, FormsModule, MatInputModule, MatFormFieldModule, MatDatepickerModule, MatButtonModule],
+    providers: [provideNativeDateAdapter()]
 })
 export class EmpresaComponent implements OnInit {
   Empresa:Empresa
@@ -18,7 +24,7 @@ export class EmpresaComponent implements OnInit {
       idEmpresa:0,
       nomeEmpresa:'',
       dtRefSistema:'',
-      dtImplantacao:'',
+      dtImplantacao: '',
       endereco:[],
       cidade:'',
       cnpj:''
@@ -33,7 +39,6 @@ export class EmpresaComponent implements OnInit {
     this.empresaService.getEmpresa().subscribe(
       {
         next: (res) => {
-          console.log(res);
           this.Empresa = {
             idEmpresa: res.idEmpresa,
             nomeEmpresa: res.nomeEmpresa,

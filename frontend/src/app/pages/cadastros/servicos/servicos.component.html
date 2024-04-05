@@ -1,72 +1,76 @@
-<app-sub-menu titlePage="{{title}}" [input_insert]="true" [input_listing]="true"></app-sub-menu>
+<app-sub-menu titlePage="{{title}}"></app-sub-menu>
 
-<div class="containerPage">
-    <div class="searchPage input-group input-group-sm" *ngIf="paginate">
-        <span class="input-group-text" id="search-servico"><i class="fa-solid fa-magnifying-glass"></i></span>
-        <input type="text" class="form-control" placeholder="Localizar serviços/materiais/taxas" aria-label="Localizar serviços/materiais/taxas" aria-describedby="search-servico" [(ngModel)]="search" (input)="searchServicos()">
-    </div>
-    <br>
-    <div class="table-responsive-md">
-        <div class="form-select-sm">
+<mat-card class="containerPage">
+    <mat-card-content>
+        <div class="buttons">
+            <small><button (click)="openDialog()" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></button></small>
+            <small><button class="nav-link"><i class="fa-solid fa-print"> </i> <span>Listagem</span> </button></small>
+        </div>
+        <mat-form-field>
+            <mat-label><i class="fa-solid fa-magnifying-glass"></i> Localizar</mat-label>
+            <input matInput (keyup)="applyFilter($event)" #input>
+        </mat-form-field>
+        <div class="form-select-sm text-end">
             <small>Item por página: </small>
             <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
-        <option value="20" selected>20</option>
-        <option value="50">50</option>
-        <option value="100">100</option>
-      </select>
+          <option value="20" selected>20</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
         </div>
-        <table class="table table-hover table-sm table-light border text-center">
-            <thead class="table-dark">
-                <tr>
-                    <th scope="col">#</th>
-                    <th scope="col">Descrição</th>
-                    <th scope="col">Tipo</th>
-                    <th scope="col">Valor</th>
-                    <th scope="col">Situação</th>
-                    <th scope="col">Ações</th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                <tr *ngFor="let servico of Servicos">
-                    <th scope="row">{{ servico.idServico }}</th>
-                    <td>{{ servico.descricao }}</td>
-                    <td>
-                        <a *ngIf="servico.tipo === 0">Serviço</a>
-                        <a *ngIf="servico.tipo === 1">Material</a>
-                        <a *ngIf="servico.tipo === 2">Taxa</a>
-                    </td>
-                    <td>{{ servico.valor | currency:'R$' }}</td>
-                    <td>
+        <div class="table-responsive">
+            <table mat-table matSort [dataSource]="Servicos">
+                <ng-container matColumnDef="idServico">
+                    <th mat-header-cell mat-sort-header="idServico" *matHeaderCellDef> # </th>
+                    <td mat-cell *matCellDef="let servico"> {{servico.idServico}} </td>
+                </ng-container>
+                <ng-container matColumnDef="descricao">
+                    <th mat-header-cell mat-sort-header="descricao" *matHeaderCellDef> Descrição </th>
+                    <td mat-cell *matCellDef="let servico"> {{servico.descricao}} </td>
+                </ng-container>
+                <ng-container matColumnDef="tipo">
+                    <th mat-header-cell *matHeaderCellDef> Tipo </th>
+                    <td mat-cell *matCellDef="let servico"> {{servico.tipo}} </td>
+                </ng-container>
+                <ng-container matColumnDef="valor">
+                    <th mat-header-cell *matHeaderCellDef> Valor </th>
+                    <td mat-cell *matCellDef="let servico"> {{servico.valor}} </td>
+                </ng-container>
+                <ng-container matColumnDef="situacao">
+                    <th mat-header-cell *matHeaderCellDef> Situação </th>
+                    <td mat-cell *matCellDef="let servico">
                         <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo" *ngIf="servico.situacao"></i>
                         <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso" *ngIf="!servico.situacao"></i>
                     </td>
-                    <td>
-                        <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a>
+                </ng-container>
+                <ng-container matColumnDef="detalhes">
+                    <th mat-header-cell *matHeaderCellDef> Detalhes </th>
+                    <td mat-cell *matCellDef="let servico"> <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
+                </ng-container>
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell text-center" colspan="100">
+                        <p class="m-2 fs-6"> Nenhum registro encontrado: " {{input.value}} "</p>
                     </td>
                 </tr>
-            </tbody>
-        </table>
-    </div>
+            </table>
+        </div>
 
-    <div class="resultPage" *ngIf="!search.length">
-        <small><p class="resultPage">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
-        <nav>
-            <ul class="pagination pagination-sm">
-                <li class="page-item">
-                    <a class="page-link" *ngIf="paginate['5']" (click)="getServicos(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
-                    <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
-                </li>
-                <li class="page-item">
-                    <a class="page-link" *ngIf="paginate['4']" (click)="getServicos(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
-                    <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
-                </li>
-            </ul>
-        </nav>
-    </div>
-    <div class="resultPage" *ngIf="search.length && Servicos.length">
-        <small><p class="resultPage">Total de registros: {{Servicos.length}}</p></small>
-    </div>
-    <div class="resultPage" *ngIf="Servicos.length === 0">
-        <small><p class="resultPage">Nenhum registro encontrado!</p></small>
-    </div>
-</div>
+        <div class="paginationPage" *ngIf="!input.value">
+            <small><p class="mt-2 fs-6">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de {{paginate['1']}}</p></small>
+            <nav>
+                <ul class="pagination pagination-sm">
+                    <li class="page-item user-select-none">
+                        <a class="page-link" *ngIf="paginate['5']" (click)="getServicos(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i> Anterior</a>
+                        <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i> Anterior</a>
+                    </li>
+                    <li class="page-item user-select-none">
+                        <a class="page-link" *ngIf="paginate['4']" (click)="getServicos(paginate['4'], paginate['3'])">Próximo <i class="fa-solid fa-forward"></i></a>
+                        <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i class="fa-solid fa-forward"></i></a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </mat-card-content>
+</mat-card>
