@@ -3,6 +3,8 @@ import { Component, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CanvasJSAngularChartsModule } from '@canvasjs/angular-charts';
 import { SubMenuComponent } from "../../components/sub-menu/sub-menu.component";
+import {MatExpansionModule} from '@angular/material/expansion';
+import {MatCardModule} from '@angular/material/card';
 
 export interface data {
 	[key: string]: any;
@@ -13,7 +15,7 @@ export interface data {
     standalone: true,
     templateUrl: './home.component.html',
     styleUrl: './home.component.css',
-    imports: [CommonModule, CanvasJSAngularChartsModule, RouterLink, SubMenuComponent]
+    imports: [CommonModule, CanvasJSAngularChartsModule, RouterLink, SubMenuComponent, MatExpansionModule, MatCardModule]
 })
 export class HomeComponent implements OnInit  {
   title:string = '';

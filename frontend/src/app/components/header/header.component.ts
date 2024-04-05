@@ -5,20 +5,23 @@ import { UserService } from '../../services/user.service';
 import { AuthService } from '../../services/auth.service';
 import { Empresa } from '../../models/empresa'
 import { EmpresaService } from '../../services/parametrizacao/empresa.service';
-import { User } from '../../models/user'
+import { Usuarios } from '../../models/usuarios'
 import { Router } from '@angular/router';
 import { interval } from 'rxjs';
+import {MatBadgeModule} from '@angular/material/badge';
+import {MatDividerModule} from '@angular/material/divider';
+import {MatListModule} from '@angular/material/list';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [RouterLink, CommonModule],
+  imports: [RouterLink, CommonModule, MatBadgeModule, MatDividerModule, MatListModule],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css'
 })
 export class HeaderComponent implements OnInit {
   public horarioAtual: Date;
-  User:User
+  User:Usuarios
   Empresa:Empresa
 
   constructor(private userService: UserService, private empresaService: EmpresaService, private authService: AuthService, private router: Router) {

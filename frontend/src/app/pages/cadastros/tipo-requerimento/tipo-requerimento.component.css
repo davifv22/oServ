@@ -1,0 +1,28 @@
+table {
+    width: 100%;
+}
+
+.mat-mdc-form-field {
+    font-size: 14px;
+    width: 100%;
+}
+
+th.mat-sort-header-sorted {
+    color: black;
+}
+
+.buttons {
+    position: relative;
+    display: flex;
+    right: .2rem;
+    justify-content: end;
+    margin-bottom: 1rem;
+}
+
+.buttons>small>button {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+    margin: 0 .25rem;
+}

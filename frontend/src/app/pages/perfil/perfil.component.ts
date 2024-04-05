@@ -3,19 +3,24 @@ import { SubMenuComponent } from "../../components/sub-menu/sub-menu.component";
 import { CommonModule } from '@angular/common';
 import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import { User } from '../../models/user'
+import { Usuarios } from '../../models/usuarios'
 import { UserService } from '../../services/user.service';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+import {MatInputModule} from '@angular/material/input';
+import {MatFormFieldModule} from '@angular/material/form-field';
+import {MatCardModule} from '@angular/material/card';
 
 @Component({
   selector: 'app-perfil',
   standalone: true,
-  imports: [SubMenuComponent, CommonModule, FormsModule],
+  imports: [SubMenuComponent, CommonModule, FormsModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatCardModule],
   templateUrl: './perfil.component.html',
   styleUrl: './perfil.component.css'
 })
 export class PerfilComponent implements OnInit {
   title:string = ''
-  User:User
+  User:Usuarios
 
   constructor(private userService: UserService, private http: HttpClient) {
     this.User = {

@@ -1,16 +1,13 @@
 <app-sub-menu titlePage="{{title}}"></app-sub-menu>
 
-<div class="containerPage">
-    <div class="d-flex align-items-start">
-        <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist" aria-orientation="vertical">
-            <button class="nav-link active" id="v-pills-empresa-tab" data-bs-toggle="pill" data-bs-target="#v-pills-empresa" type="button" role="tab" aria-controls="v-pills-empresa" aria-selected="true">Empresa</button>
-            <button class="nav-link" id="v-pills-disabled-tab" data-bs-toggle="pill" data-bs-target="#v-pills-disabled" type="button" role="tab" aria-controls="v-pills-disabled" aria-selected="false" disabled>Disabled</button>
-        </div>
-        <div class="tab-content" id="v-pills-tabContent">
-            <div class="tab-pane fade show active" id="v-pills-empresa" role="tabpanel" aria-labelledby="v-pills-empresa-tab" tabindex="0">
+<mat-card class="containerPage">
+    <mat-card-content>
+        <mat-tab-group>
+            <mat-tab label="Empresa">
                 <app-empresa></app-empresa>
-            </div>
-            <div class="tab-pane fade" id="v-pills-disabled" role="tabpanel" aria-labelledby="v-pills-disabled-tab" tabindex="0">Desabilitado...</div>
-        </div>
-    </div>
-</div>
+            </mat-tab>
+            <mat-tab label="Opção 2"> ... </mat-tab>
+            <mat-tab label="Opção 3"> ... </mat-tab>
+        </mat-tab-group>
+    </mat-card-content>
+</mat-card>

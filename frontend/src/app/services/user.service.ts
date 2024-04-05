@@ -2,14 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { User } from '../models/user'
+import { Usuarios } from '../models/usuarios'
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserService {
   private apiUrl = '';
-  private User:User
+  private User:Usuarios
 
   constructor(private http: HttpClient) {
     this.apiUrl  = environment.url
@@ -24,7 +24,7 @@ export class UserService {
     }
    }
 
-   getUser(): Observable<User> {
+   getUser(): Observable<Usuarios> {
     let apiKey = sessionStorage.getItem('apiKey');
     let idUser = sessionStorage.getItem('idUser');
 

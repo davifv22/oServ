@@ -8,7 +8,7 @@ export type Clientes = {
   bairro:string,
   cidade:string,
   cep:string,
-  situacao:string,
+  situacao:boolean,
   observacao:string,
   dtCadastro:string
 }

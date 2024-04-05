@@ -1,25 +1,27 @@
-<form #f="ngForm" (ngSubmit)="logar(f)" noValidate class="d-flex row justify-content-center position-absolute top-50 start-50 translate-middle">
-    <img src="../../../../../assets/img/logo.png" alt="">
-    <small class="m-2 text-center">Preencha todos os campos abaixo para acessar o sistema</small>
-    <hr>
-    <div class="mb-2">
-        <label for="usuario" class="form-label">Usuário</label>
-        <input ngModel type="usuario" class="form-control" id="usuario" name="usuario">
-    </div>
-    <div class="mb-3">
-        <label for="senha" class="form-label">Senha</label>
-        <input ngModel type="password" class="form-control" id="senha" name="senha">
-    </div>
-    <div class="d-flex row text-center">
-        <a href="#" class="mb-2">Esqueceu a senha?</a>
-        <p *ngIf="error" class="text-danger">
-            {{ error }}
-        </p>
-        <button type="submit" class="btn btn-success">Entrar</button>
-    </div>
-    <div class="position-relative text-secondary text-center mt-2">
-        <p>
-            <small><i>Versão: <span>&#64;</span>1.0.0.190124</i></small>
-        </p>
-    </div>
-</form>
+<mat-card class="position-absolute top-50 start-50 translate-middle text-bg-dark">
+    <mat-card-content>
+        <form #f="ngForm" (ngSubmit)="logar(f)" noValidate class="d-flex row justify-content-center">
+            <img src="../../../../../assets/img/logo.png" alt=""> <br>
+            <small class="m-2 text-center">Preencha todos os campos abaixo para acessar o sistema</small>
+            <mat-divider></mat-divider>
+            <mat-form-field>
+                <mat-label><i class="fa-solid fa-user"> </i> Usuário</mat-label>
+                <input ngModel matInput id="usuario" name="usuario">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label><i class="fa-solid fa-key"> </i> Senha</mat-label>
+                <input ngModel matInput type="password" id="senha" name="senha">
+            </mat-form-field>
+            <div class="d-flex row text-center">
+                <a href="#" class="mb-2">Esqueceu a senha?</a>
+                <p *ngIf="error" class="text-danger">
+                    {{ error }}
+                </p>
+                <button mat-raised-button color="primary">Entrar</button>
+            </div>
+            <div class="position-relative text-secondary text-center mt-2">
+                <pre><i>Versão: <span>&#64;</span>1.0.0.190124</i></pre>
+            </div>
+        </form>
+    </mat-card-content>
+</mat-card>

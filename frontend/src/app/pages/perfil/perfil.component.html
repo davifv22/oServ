@@ -1,50 +1,54 @@
 <app-sub-menu titlePage="{{title}}"></app-sub-menu>
 
 
-<div class="containerPage">
-    <form #f="ngForm">
-        <a class="photoProfile">
-            <img *ngIf="!previewUrl" src="../../../assets/img/profile.webp" alt="">
-            <img [src]="previewUrl" *ngIf="previewUrl" alt="">
-            <input class="description" type="file" (change)="onFileSelected($event)">
-        </a>
-        <div class="profile">
-            <div class="profile-info">
-                <hr>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" id="Nome"><i class="fa-solid fa-address-card"></i></span>
-                    <input ngModel="{{User.nome}}" type="text" class="form-control form-control-sm" placeholder="Nome" aria-label="Nome" aria-describedby="Nome" id="nome" name="nome">
+<mat-card class="containerPage">
+    <mat-card-content>
+        <form #f="ngForm">
+            <a class="photoProfile">
+                <img *ngIf="!previewUrl" src="../../../assets/img/profile.webp" alt="">
+                <img [src]="previewUrl" *ngIf="previewUrl" alt="">
+                <input class="description" type="file" (change)="onFileSelected($event)">
+            </a>
+            <div class="profile">
+                <div class="profile-info">
+                    <hr>
+                    <mat-form-field class="w-100">
+                        <mat-label><i class="fa-solid fa-address-card"> </i> Nome</mat-label>
+                        <input matInput type="text" ngModel="{{User.nome}}" id="nome" name="nome">
+                    </mat-form-field>
+                    <mat-form-field class="w-100">
+                        <mat-label><i class="fa-solid fa-user"> </i> Nome</mat-label>
+                        <input matInput type="text" ngModel="{{User.user}}" id="user" name="user">
+                    </mat-form-field>
+                    <mat-form-field class="w-100">
+                        <mat-label><i class="fa-solid fa-envelope"> </i> Nome</mat-label>
+                        <input matInput type="text" ngModel="{{User.email}}" id="email" name="email">
+                    </mat-form-field>
+                    <button mat-raised-button color="primary">Confirmar</button>
                 </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" id="Usuário"><i class="fa-solid fa-user"></i></span>
-                    <input ngModel="{{User.user}}" type="text" class="form-control form-control-sm" placeholder="Usuário" aria-label="Usuário" aria-describedby="Usuário" id="user" name="user">
-                </div>
-                <div class="input-group input-group-sm mb-3">
-                    <span class="input-group-text" id="E-mail"><i class="fa-solid fa-envelope"></i></span>
-                    <input ngModel="{{User.email}}" type="text" class="form-control form-control-sm" placeholder="E-mail" aria-label="E-mail" aria-describedby="E-mail" id="email" name="email">
-                </div>
-                <a type="button" class="btn btn-success btn-sm">Atualizar</a>
             </div>
-        </div>
-    </form>
-</div>
+        </form>
+    </mat-card-content>
+</mat-card>
 <br>
-<div class="containerPage">
-    <form #f="ngForm" class="alterPassword">
-        <h5><b>Alterar Senha:</b></h5>
-        <hr>
-        <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text" id="SenhaAtual"><i class="fa-solid fa-key"></i></span>
-            <input type="password" class="form-control form-control-sm" placeholder="Senha atual" aria-label="SenhaAtual" aria-describedby="SenhaAtual">
-        </div>
-        <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text" id="NovaSenha"><i class="fa-solid fa-key"></i></span>
-            <input type="password" class="form-control form-control-sm" placeholder="Nova senha" aria-label="NovaSenha" aria-describedby="NovaSenha">
-        </div>
-        <div class="input-group input-group-sm mb-3">
-            <span class="input-group-text" id="ConfirmarSenha"><i class="fa-solid fa-key"></i></span>
-            <input type="password" class="form-control form-control-sm" placeholder="Confirmar nova senha" aria-label="ConfirmarSenha" aria-describedby="ConfirmarSenha">
-        </div>
-        <a type="button" class="btn btn-success btn-sm">Atualizar</a>
-    </form>
-</div>
+<mat-card class="containerPage">
+    <mat-card-content>
+        <form #f="ngForm" class="alterPassword">
+            <h5><b>Alterar Senha:</b></h5>
+            <hr>
+            <mat-form-field class="w-100">
+                <mat-label><i class="fa-solid fa-key"> </i> Senha Atual</mat-label>
+                <input matInput [type]="'password'">
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <mat-label><i class="fa-solid fa-key"> </i> Nova Senha</mat-label>
+                <input matInput [type]="'password'">
+            </mat-form-field>
+            <mat-form-field class="w-100">
+                <mat-label><i class="fa-solid fa-key"> </i> Confirmar Senha Nova</mat-label>
+                <input matInput [type]="'password'">
+            </mat-form-field>
+            <button mat-raised-button color="primary">Confirmar</button>
+        </form>
+    </mat-card-content>
+</mat-card>
