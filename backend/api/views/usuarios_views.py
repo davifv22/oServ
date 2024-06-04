@@ -67,8 +67,3 @@ class UsuarioDetail(Resource):
 api.add_resource(UsuariosList, '/usuarios')
 api.add_resource(UsuarioDetail, '/usuario/<idUser>')
 
-# 	"nome": "ADMINISTRADOR",
-# 	"user": "admin",
-# 	"email": "admin@mail.com",
-# 	"senha": "admin",
-# 	"isAdmin": 1
