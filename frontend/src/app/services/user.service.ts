@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { Usuarios } from '../models/usuarios'
+import { HttpClient, HttpHeaders  } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -30,6 +30,16 @@ export class UserService {
 
     const params = { apiKey: `${apiKey}` };
     return this.http.get<any>(`${this.apiUrl}/usuario/${idUser}`, { params });
+  }
+
+  postUser(json: any): Observable<Usuarios> {
+    let apiKey = sessionStorage.getItem('apiKey');
+    let idUser = sessionStorage.getItem('idUser');
+
+    const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+    const params = { apiKey: `${apiKey}` };
+
+    return this.http.post<any>(`${this.apiUrl}/usuario/${idUser}`, json, { headers, params })
   }
 
   getUsers(page: number, per_page: number, isPaginate: boolean): Observable<any> {

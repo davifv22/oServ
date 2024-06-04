@@ -20,7 +20,7 @@
                     <mat-label>Data Implantação</mat-label>
                     <input matInput ngModel="{{Empresa.dtImplantacao | date:'dd/MM/YYYY'}}" id="dtImplantacao" name="dtImplantacao">
                     <!-- [matDatepicker]="picker"  -->
-                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-hint>DD/MM/YYYY</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>
@@ -30,7 +30,7 @@
                     <mat-label>Referência</mat-label>
                     <input matInput ngModel="{{Empresa.dtRefSistema | date:'MM/YYYY'}}" id="dtRefSistema" name="dtRefSistema">
                     <!-- [matDatepicker]="picker"  -->
-                    <mat-hint>MM/DD/YYYY</mat-hint>
+                    <mat-hint>MM/YYYY</mat-hint>
                     <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
                     <mat-datepicker #picker></mat-datepicker>
                 </mat-form-field>

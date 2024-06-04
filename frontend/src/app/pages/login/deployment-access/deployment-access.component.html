@@ -1,0 +1,13 @@
+<mat-card>
+  <mat-card-content>
+    <form #f="ngForm" ngIf="first_access" (ngSubmit)="set_pass(f)" noValidate class="d-flex row justify-content-center">
+      <h1>Senha implantação:</h1>
+      <hr>
+      <mat-form-field>
+        <mat-label><i class="fa-solid fa-key"> </i> Senha</mat-label>
+        <input ngModel matInput type="password" id="senha" name="senha">
+    </mat-form-field>
+    <button mat-raised-button color="primary">Validar</button>
+  </form>
+  </mat-card-content>
+</mat-card>

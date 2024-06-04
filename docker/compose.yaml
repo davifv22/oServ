@@ -20,18 +20,17 @@ services:
       dockerfile: ../backend/Dockerfile
     ports:
       - "5000:90"
+    environment:
+      FLASK_ENV: production
+      DATABASE_HOST: mysql
+      DATABASE_PORT: 3306
+      DATABASE_USER: root
+      DATABASE_PASSWORD: oServ
+      DATABASE_NAME: db
     depends_on:
       - mysql
     extra_hosts:
       - "host.docker.internal:host-gateway"
-
-  ssh:
-    container_name: SSH
-    build:
-      context: .
-      dockerfile: Dockerfile.ssh
-    ports:
-      - "2222:22"
 
   mysql:
     image: mysql:8.0

@@ -8,6 +8,16 @@ def set_usuario(usuario):
     db.session.commit()
     return usuario_bd
 
+def update_usuario(idUser, usuario):
+    usuario_model.UsuarioModel.query.filter_by(idUser=idUser).update(
+            {"nome": usuario['nome'], "user": usuario['user'], "email": usuario['email']})
+
+    # usuario_bd.encriptar_senha()
+    db.session.commit()
+    
+    usuario_bd = get_usuario_id(idUser)
+    return usuario_bd
+
 def get_usuarios():
     usuarios_bd = usuario_model.UsuarioModel.query.all()
     usuarios_list = [{

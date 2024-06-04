@@ -4,12 +4,15 @@ import { FormsModule, NgForm } from '@angular/forms';
 import { Login } from '../../models/login'
 import { Usuarios } from '../../models/usuarios'
 import { AuthService } from '../../services/auth.service';
+import { ValidationsService } from '../../services/validations.service';
 import { Router } from '@angular/router';
 import {MatCardModule} from '@angular/material/card';
 import {MatInputModule} from '@angular/material/input';
 import {MatFormFieldModule} from '@angular/material/form-field';
 import {MatDividerModule} from '@angular/material/divider';
 import {MatButtonModule} from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { DeploymentAccessComponent } from './deployment-access/deployment-access.component';
 @Component({
   selector: 'app-login',
   standalone: true,
@@ -21,7 +24,7 @@ export class LoginComponent implements OnInit {
   error:string = ''
   result:Usuarios
 
-  constructor(private authService: AuthService, private router: Router) {
+  constructor(private authService: AuthService, private validationsService: ValidationsService, private router: Router, public modal: MatDialog) {
     this.result = {
       idUser:0,
       nome:'',
@@ -35,16 +38,32 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     sessionStorage.clear()
+    this.initial_validations()
+  }
+
+  initial_validations() {
+    this.validationsService.validations_db().subscribe(
+      (response) => {
+        if (response === false) {
+          this.openDialog()
+        }
+      },
+      (error) => {
+        console.log(error)
+      }
+    )
+  }
+
+  openDialog(): void {
+    this.modal.open(DeploymentAccessComponent, { });
   }
 
   logar(f: NgForm) {
-
     const json = {
       usuario: f.value['usuario'],
       senha: f.value['senha'],
       is_logged_in: true
     }
-
     this.authService.login(json).subscribe(
         (response: Login) => {
           this.result = JSON.parse(`${JSON.stringify(response)}`);
