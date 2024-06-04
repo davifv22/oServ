@@ -1,4 +1,4 @@
-import { DEBUG } from './debug'
+import { DEBUG, URL } from './debug'
 
 export const environment = {
   production: false,
@@ -10,5 +10,5 @@ if (DEBUG) {
   environment.url = 'http://localhost:5000/api'
 } else {
   environment.production = true;
-  environment.url = 'https://api.itsdevcode.com.br/api'
+  environment.url = URL
 }
