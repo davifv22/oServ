@@ -3,7 +3,7 @@
 
 <mat-card class="containerPage">
     <mat-card-content>
-        <form #f="ngForm">
+        <form #f="ngForm" (ngSubmit)="postUsuario(f)" noValidate class="profile d-flex row justify-content-center">
             <a class="photoProfile">
                 <img *ngIf="!previewUrl" src="../../../assets/img/profile.webp" alt="">
                 <img [src]="previewUrl" *ngIf="previewUrl" alt="">
@@ -14,15 +14,15 @@
                     <hr>
                     <mat-form-field class="w-100">
                         <mat-label><i class="fa-solid fa-address-card"> </i> Nome</mat-label>
-                        <input matInput type="text" ngModel="{{User.nome}}" id="nome" name="nome">
+                        <input matInput ngModel="{{User.nome}}" id="nome" name="nome">
                     </mat-form-field>
                     <mat-form-field class="w-100">
-                        <mat-label><i class="fa-solid fa-user"> </i> Nome</mat-label>
-                        <input matInput type="text" ngModel="{{User.user}}" id="user" name="user">
+                        <mat-label><i class="fa-solid fa-user"> </i> Usuário</mat-label>
+                        <input matInput ngModel="{{User.user}}" id="user" name="user">
                     </mat-form-field>
                     <mat-form-field class="w-100">
-                        <mat-label><i class="fa-solid fa-envelope"> </i> Nome</mat-label>
-                        <input matInput type="text" ngModel="{{User.email}}" id="email" name="email">
+                        <mat-label><i class="fa-solid fa-envelope"> </i> E-mail</mat-label>
+                        <input matInput ngModel="{{User.email}}" id="email" name="email">
                     </mat-form-field>
                     <button mat-raised-button color="primary">Confirmar</button>
                 </div>
@@ -38,15 +38,15 @@
             <hr>
             <mat-form-field class="w-100">
                 <mat-label><i class="fa-solid fa-key"> </i> Senha Atual</mat-label>
-                <input matInput [type]="'password'">
+                <input matInput [type]="'password'" id="senha_atual" name="senha_atual">
             </mat-form-field>
             <mat-form-field class="w-100">
                 <mat-label><i class="fa-solid fa-key"> </i> Nova Senha</mat-label>
-                <input matInput [type]="'password'">
+                <input matInput [type]="'password'" id="nova_senha" name="nova_senha">
             </mat-form-field>
             <mat-form-field class="w-100">
                 <mat-label><i class="fa-solid fa-key"> </i> Confirmar Senha Nova</mat-label>
-                <input matInput [type]="'password'">
+                <input matInput [type]="'password'" id="confirmar_senha" name="confirmar_senha">
             </mat-form-field>
             <button mat-raised-button color="primary">Confirmar</button>
         </form>

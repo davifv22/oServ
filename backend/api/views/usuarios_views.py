@@ -52,6 +52,16 @@ class UsuarioDetail(Resource):
             return make_response(us.jsonify(usuario), 200)
         else:
             return make_response(jsonify({'message': 'Usuário não encontrado!'}), 404)
+    
+    @api_key_required
+    def post(self, idUser):
+        us = usuario_schema.UsuarioSchema()
+        v = us.validate(request.json)
+        if v:
+            return make_response(jsonify(v), 400)
+        else:
+            x = usuario_service.update_usuario(idUser, request.json)
+            return make_response(us.jsonify(x), 201)
 
 
 api.add_resource(UsuariosList, '/usuarios')
