@@ -54,7 +54,7 @@ export class EmpresaComponent implements OnInit {
     )
    }
 
-   insertEmpresa(f: NgForm) {
+   postEmpresa(f: NgForm) {
     const json = {
       nomeEmpresa: f.value['nomeEmpresa'],
       dtRefSistema: f.value['dtRefSistema'],
@@ -63,6 +63,13 @@ export class EmpresaComponent implements OnInit {
       cnpj: f.value['cnpj'],
       dtImplantacao: f.value['dtImplantacao'],
     }
-    console.log(json)
+    this.empresaService.postEmpresa(json).subscribe(
+      (response) => {
+        return window.location.reload()
+      },
+      (error) => {
+        return error.message
+      }
+    )
   }
 }
