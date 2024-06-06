@@ -37,9 +37,6 @@ class LoginDB(Resource):
     def post(self):
         senha = request.json['json']['senha']
         if senha == '1234':
-            from api.app import db
-            db.create_all()
-            
             nome = 'ADMINISTRADOR'
             user = 'admin'
             email = 'admin@mail.com'

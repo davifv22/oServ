@@ -1,2 +1,2 @@
-export const DEBUG = true
+export const DEBUG = false
 export const URL = 'https://api.itsdevcode.com.br/api'
