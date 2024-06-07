@@ -5,6 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialogTitle, MatDialogContent, MatDialogActions, MatDialogClose, MatDialogRef } from '@angular/material/dialog'
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-gerenciar-veiculos',
@@ -19,6 +20,7 @@ import { MatInputModule } from '@angular/material/input';
     MatDialogActions,
     MatDialogClose,
     MatCardModule,
+    MatSelectModule,
   ],
   templateUrl: './gerenciar-veiculos.component.html',
   styleUrl: './gerenciar-veiculos.component.css'
