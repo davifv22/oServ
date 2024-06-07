@@ -38,10 +38,6 @@ export class DeploymentAccessComponent {
     this.first_access = false;
   }
 
-  onNoClick(): void {
-    this.modal.close();
-  }
-
   set_pass(f: NgForm) {
     const json = {
       senha: f.value['senha']

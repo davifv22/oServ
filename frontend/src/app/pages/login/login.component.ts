@@ -55,7 +55,7 @@ export class LoginComponent implements OnInit {
   }
 
   openDialog(): void {
-    this.modal.open(DeploymentAccessComponent, { });
+    this.modal.open(DeploymentAccessComponent, { disableClose: true });
   }
 
   logar(f: NgForm) {
