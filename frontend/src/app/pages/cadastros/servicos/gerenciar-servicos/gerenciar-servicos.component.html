@@ -1,6 +1,53 @@
 <mat-card>
     <mat-card-content>
-        <h1>MODAL SERVIÇOS</h1>
+        <h1>Cadastrar Serviço:</h1>
         <hr>
+        <form #f="ngForm" noValidate>
+          <table class="row g-2 w-100" cellspacing="0">
+            <div class="col-md-6">
+              <mat-form-field class="w-100">
+                <mat-label>Descrição</mat-label>
+                <input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="w-100">
+                <mat-label>Tipo</mat-label>
+                <mat-select>
+                  <mat-option value="option1">Option 1</mat-option>
+                  <mat-option value="option2">Option 2</mat-option>
+                  <mat-option value="option3">Option 3</mat-option>
+              <!-- @for (food of foods; track food) {
+                <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
+              } -->
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="w-100">
+                <mat-label>Valor</mat-label>
+                <input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
+              </mat-form-field>
+            </div>
+            <div class="col-md-6">
+              <mat-form-field class="w-100">
+                <mat-label>Situação</mat-label>
+                <mat-select>
+                  <mat-option value="option1">Option 1</mat-option>
+                  <mat-option value="option2">Option 2</mat-option>
+                  <mat-option value="option3">Option 3</mat-option>
+              <!-- @for (food of foods; track food) {
+                <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
+              } -->
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="w-100 text-end">
+              <button mat-raised-button color="primary" class="m-1">Atualizar</button>
+              <button mat-raised-button color="warn" class="m-1">Excluir</button>
+              <button mat-raised-button color="accent" class="m-1">Voltar</button>
+            </div>
+            </table>
+            </form>
     </mat-card-content>
 </mat-card>

@@ -31,4 +31,11 @@ export class EmpresaService {
     const params = { apiKey: `${apiKey}` };
     return this.http.get<any>(`${this.apiUrl}/empresa`, { params });
   }
+
+  postEmpresa(json: any): Observable<Empresa> {
+    let apiKey = sessionStorage.getItem('apiKey');
+
+    const params = { apiKey: `${apiKey}` };
+    return this.http.post<any>(`${this.apiUrl}/empresa`, { json }, { params });
+  }
 }

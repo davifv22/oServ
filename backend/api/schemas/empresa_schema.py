@@ -12,4 +12,4 @@ class EmpresaSchema(ma.SQLAlchemyAutoSchema):
     dtImplantacao = fields.String(required=True)
     endereco = fields.String(required=True)
     cidade = fields.String(required=True)
-    cnpj = fields.String(required=False)
+    cnpj = fields.String(required=True)

@@ -44,8 +44,8 @@ export class EmpresaComponent implements OnInit {
             nomeEmpresa: res.nomeEmpresa,
             dtRefSistema: res.dtRefSistema,
             dtImplantacao: res.dtImplantacao,
-            endereco: res.endereco.split(','),
-            cidade: res.cidade.split(','),
+            endereco: res.endereco.split(', '),
+            cidade: res.cidade.split(', '),
             cnpj: res.cnpj
           }
         },
@@ -54,7 +54,7 @@ export class EmpresaComponent implements OnInit {
     )
    }
 
-   insertEmpresa(f: NgForm) {
+   postEmpresa(f: NgForm) {
     const json = {
       nomeEmpresa: f.value['nomeEmpresa'],
       dtRefSistema: f.value['dtRefSistema'],
@@ -63,6 +63,13 @@ export class EmpresaComponent implements OnInit {
       cnpj: f.value['cnpj'],
       dtImplantacao: f.value['dtImplantacao'],
     }
-    console.log(json)
+    this.empresaService.postEmpresa(json).subscribe(
+      (response) => {
+        return window.location.reload()
+      },
+      (error) => {
+        return error.message
+      }
+    )
   }
 }

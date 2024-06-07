@@ -1,8 +1,9 @@
+import datetime
 from flask_restful import Api, Resource
 from flask import request, Blueprint, make_response, jsonify
 
-from ..entidades import usuario
-from ..services import usuario_service
+from ..entidades import usuario, empresa
+from ..services import usuario_service, empresa_service
 from ..schemas import usuario_schema
 import uuid
 
@@ -36,9 +37,6 @@ class LoginDB(Resource):
     def post(self):
         senha = request.json['json']['senha']
         if senha == '1234':
-            from api.app import db
-            db.create_all()
-            
             nome = 'ADMINISTRADOR'
             user = 'admin'
             email = 'admin@mail.com'
@@ -48,6 +46,15 @@ class LoginDB(Resource):
             apiKey = str(uuid.uuid4())
             novo_usuario = usuario.Usuario(user=user, nome=nome, email=email, senha=senha, situacao=situacao, isAdmin=isAdmin, apiKey=apiKey)
             x = usuario_service.set_usuario(novo_usuario)
+            
+            nomeEmpresa = ''
+            dtRefSistema = ''
+            dtImplantacao = datetime.datetime.now()
+            endereco = ''
+            cnpj = ''
+            cidade = ''
+            nova_empresa = empresa.Empresa(nomeEmpresa=nomeEmpresa, dtRefSistema=dtRefSistema, dtImplantacao=dtImplantacao, endereco=endereco, cnpj=cnpj, cidade=cidade)
+            x = empresa_service.set_empresa(nova_empresa)
 
             return True
         else:

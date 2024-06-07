@@ -2,96 +2,96 @@
 
 
 <mat-card class="containerPage">
-    <mat-card-content>
-        <h2><i class="fa-solid fa-chart-pie"></i> DASHBOARD</h2>
-        <hr>
-        <mat-accordion class="example-headers-align" multi>
-            <mat-expansion-panel [expanded]="true">
-                <mat-expansion-panel-header>
-                    <mat-panel-title>
-                        <i class="fa-solid fa-calendar-days"></i> &nbsp; Geral
-                    </mat-panel-title>
-                    <mat-panel-description>
-                        Informações em geral diariamente
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-                <div class="container">
-                    <div class="box m-2 p-2">
-                        <h3 class="text-center"><small>ORDEM DE SERVIÇO</small></h3>
-                        <div class="content">
-                            <pre class="text-success p-1 m-1"><i class="fa-solid fa-box-tissue"></i> Emitidas <span>50</span> <br> &nbsp;&nbsp;<small><i class="fa-solid fa-truck-ramp-box"></i> Em Execução <span>25</span></small></pre>
-                            <pre class="text-primary p-1 m-1"><i class="fa-solid fa-clipboard-check"></i> Executadas <span>24</span> <br> &nbsp;&nbsp;<small class="text-danger"><i class="fa-solid fa-ban"></i> Canceladas <span>1</span></small></pre>
-                        </div>
-                    </div>
-                    <div class="box m-2 p-2">
-                        <h3 class="text-center"><small>REQUERIMENTOS</small></h3>
-                        <div class="content">
-                            <pre class="text-success p-1 m-1"><i class="fa-solid fa-file-circle-question"></i> Requerido <span>70</span> <br> &nbsp;&nbsp;<small><i class="fa-solid fa-box-tissue"></i> OS Emitidas <span>50</span></small></pre>
-                            <pre class="text-primary p-1 m-1"><i class="fa-solid fa-clipboard-check"></i> Finalizados <span>12</span> <br> &nbsp;&nbsp;<small class="text-danger"><i class="fa-solid fa-ban"></i> Cancelados <span>2</span></small></pre>
-                        </div>
-                    </div>
-                    <div class="box m-2 p-2">
-                        <h3 class="text-center"><small>FINANÇAS</small></h3>
-                        <div class="content">
-                            <pre class="text-success p-1 m-1"><i class="fa-solid fa-arrow-trend-up"></i> Ganhos R$ <span>150,00</span><br> &nbsp;&nbsp;<small><i class="fa-solid fa-angles-up"></i> À Faturar R$ <span>15,00</span></small></pre>
-                            <pre class="text-danger p-1 m-1"><i class="fa-solid fa-arrow-trend-down"></i> Perdas R$ <span>10,00</span><br> &nbsp;&nbsp;<small><i class="fa-solid fa-clock"></i> À Vencer R$ <span>35,00</span></small></pre>
-                        </div>
-                    </div>
-                </div>
-            </mat-expansion-panel>
-            <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                    <mat-panel-title>
-                        <i class="fa-solid fa-screwdriver-wrench"> </i> &nbsp; Ordem de Serviço
-                    </mat-panel-title>
-                    <mat-panel-description>
-                        Informações de ordens de serviços mensalmente
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-                <div class="container">
-                    <div class="w-100">
-                        <canvasjs-chart [options]="dashboardOS"></canvasjs-chart>
-                    </div>
-                    <!-- <div class="w-25">
-                        <hr>
-                        <pre class="text-dark"><b><i class="fa-solid fa-box-tissue"></i> Ordens de Serviços Emitidas:</b> 180</pre>
-                        <hr>
-                        <pre class="text-primary"><b><i class="fa-solid fa-truck-ramp-box"></i> Ordens de Serviços em Execução:</b> 64</pre>
-                        <hr>
-                        <pre class="text-success"><b><i class="fa-solid fa-clipboard-check"></i> Ordens de Serviços Executadas:</b> 103</pre>
-                        <hr>
-                        <pre class="text-danger"><b><i class="fa-solid fa-ban"></i> Ordens de Serviços Canceladas:</b> 13</pre>
-                        <hr>
-                    </div> -->
-                </div>
-            </mat-expansion-panel>
-            <mat-expansion-panel>
-                <mat-expansion-panel-header>
-                    <mat-panel-title>
-                        <i class="fa-solid fa-money-bill"></i> &nbsp; Finanças
-                    </mat-panel-title>
-                    <mat-panel-description>
-                        Finanças operadas mensalmente
-                    </mat-panel-description>
-                </mat-expansion-panel-header>
-                <div class="container">
-                    <div class="w-100">
-                        <canvasjs-chart [options]="dashboardFinancas"></canvasjs-chart>
-                    </div>
-                    <!-- <div class="w-25">
-                        <hr>
-                        <pre class="text-success"><b><i class="fa-solid fa-arrow-trend-up"></i> Receitas:</b> R$ 15.241,20</pre>
-                        <small><pre class="text-success"> &nbsp; &nbsp;<i class="fa-solid fa-angles-up"></i> À FATURAR: R$ 154,54</pre></small>
-                        <hr>
-                        <pre class="text-danger"><b><i class="fa-solid fa-arrow-trend-down"></i> Despesas:</b> R$ 2.456,45</pre>
-                        <small><pre class="text-danger"> &nbsp; &nbsp;<i class="fa-solid fa-clock"></i> À VENCER: R$ 905,00</pre></small>
-                        <hr>
-                        <pre class="text-primary"><b><i class="fa-solid fa-scale-balanced"></i> Balanço:</b> R$ 12.784,75</pre>
-                        <small><pre class="text-primary"> &nbsp; &nbsp;<i class="fa-solid fa-check-double"></i> ATUALIZADO: R$ 14.415,45</pre></small>
-                        <hr>
-                    </div> -->
-                </div>
-            </mat-expansion-panel>
-        </mat-accordion>
-    </mat-card-content>
+	<mat-card-content>
+		<h2><i class="fa-solid fa-chart-pie"></i> DASHBOARD</h2>
+		<hr>
+		<mat-accordion class="example-headers-align" multi>
+			<mat-expansion-panel [expanded]="true">
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						<i class="fa-solid fa-calendar-days"></i> &nbsp; Geral
+					</mat-panel-title>
+					<mat-panel-description>
+						Informações em geral diariamente
+					</mat-panel-description>
+				</mat-expansion-panel-header>
+				<div class="container">
+					<div class="box m-2 p-2">
+						<h3 class="text-center"><small>ORDEM DE SERVIÇO</small></h3>
+						<div class="content">
+							<pre class="text-success p-1 m-1"><i class="fa-solid fa-box-tissue"></i> Emitidas <span>50</span> <br> &nbsp;&nbsp;<small><i class="fa-solid fa-truck-ramp-box"></i> Em Execução <span>25</span></small></pre>
+							<pre class="text-primary p-1 m-1"><i class="fa-solid fa-clipboard-check"></i> Executadas <span>24</span> <br> &nbsp;&nbsp;<small class="text-danger"><i class="fa-solid fa-ban"></i> Canceladas <span>1</span></small></pre>
+						</div>
+					</div>
+					<div class="box m-2 p-2">
+						<h3 class="text-center"><small>REQUERIMENTOS</small></h3>
+						<div class="content">
+							<pre class="text-success p-1 m-1"><i class="fa-solid fa-file-circle-question"></i> Requerido <span>70</span> <br> &nbsp;&nbsp;<small><i class="fa-solid fa-box-tissue"></i> OS Emitidas <span>50</span></small></pre>
+							<pre class="text-primary p-1 m-1"><i class="fa-solid fa-clipboard-check"></i> Finalizados <span>12</span> <br> &nbsp;&nbsp;<small class="text-danger"><i class="fa-solid fa-ban"></i> Cancelados <span>2</span></small></pre>
+						</div>
+					</div>
+					<div class="box m-2 p-2">
+						<h3 class="text-center"><small>FINANÇAS</small></h3>
+						<div class="content">
+							<pre class="text-success p-1 m-1"><i class="fa-solid fa-arrow-trend-up"></i> Ganhos R$ <span>150,00</span><br> &nbsp;&nbsp;<small><i class="fa-solid fa-angles-up"></i> À Faturar R$ <span>15,00</span></small></pre>
+							<pre class="text-danger p-1 m-1"><i class="fa-solid fa-arrow-trend-down"></i> Perdas R$ <span>10,00</span><br> &nbsp;&nbsp;<small><i class="fa-solid fa-clock"></i> À Vencer R$ <span>35,00</span></small></pre>
+						</div>
+					</div>
+				</div>
+			</mat-expansion-panel>
+			<mat-expansion-panel>
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						<i class="fa-solid fa-screwdriver-wrench"> </i> &nbsp; Ordem de Serviço
+					</mat-panel-title>
+					<mat-panel-description>
+						Informações de ordens de serviços mensalmente
+					</mat-panel-description>
+				</mat-expansion-panel-header>
+				<div class="container">
+					<div class="w-100">
+						<canvasjs-chart [options]="dashboardOS"></canvasjs-chart>
+					</div>
+					<!-- <div class="w-25">
+						<hr>
+						<pre class="text-dark"><b><i class="fa-solid fa-box-tissue"></i> Ordens de Serviços Emitidas:</b> 180</pre>
+						<hr>
+						<pre class="text-primary"><b><i class="fa-solid fa-truck-ramp-box"></i> Ordens de Serviços em Execução:</b> 64</pre>
+						<hr>
+						<pre class="text-success"><b><i class="fa-solid fa-clipboard-check"></i> Ordens de Serviços Executadas:</b> 103</pre>
+						<hr>
+						<pre class="text-danger"><b><i class="fa-solid fa-ban"></i> Ordens de Serviços Canceladas:</b> 13</pre>
+						<hr>
+					</div> -->
+				</div>
+			</mat-expansion-panel>
+			<mat-expansion-panel>
+				<mat-expansion-panel-header>
+					<mat-panel-title>
+						<i class="fa-solid fa-money-bill"></i> &nbsp; Finanças
+					</mat-panel-title>
+					<mat-panel-description>
+						Finanças operadas mensalmente
+					</mat-panel-description>
+				</mat-expansion-panel-header>
+				<div class="container">
+					<div class="w-100">
+						<canvasjs-chart [options]="dashboardFinancas"></canvasjs-chart>
+					</div>
+					<!-- <div class="w-25">
+						<hr>
+						<pre class="text-success"><b><i class="fa-solid fa-arrow-trend-up"></i> Receitas:</b> R$ 15.241,20</pre>
+						<small><pre class="text-success"> &nbsp; &nbsp;<i class="fa-solid fa-angles-up"></i> À FATURAR: R$ 154,54</pre></small>
+						<hr>
+						<pre class="text-danger"><b><i class="fa-solid fa-arrow-trend-down"></i> Despesas:</b> R$ 2.456,45</pre>
+						<small><pre class="text-danger"> &nbsp; &nbsp;<i class="fa-solid fa-clock"></i> À VENCER: R$ 905,00</pre></small>
+						<hr>
+						<pre class="text-primary"><b><i class="fa-solid fa-scale-balanced"></i> Balanço:</b> R$ 12.784,75</pre>
+						<small><pre class="text-primary"> &nbsp; &nbsp;<i class="fa-solid fa-check-double"></i> ATUALIZADO: R$ 14.415,45</pre></small>
+						<hr>
+					</div> -->
+				</div>
+			</mat-expansion-panel>
+		</mat-accordion>
+	</mat-card-content>
 </mat-card>
