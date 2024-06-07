@@ -44,8 +44,8 @@ export class EmpresaComponent implements OnInit {
             nomeEmpresa: res.nomeEmpresa,
             dtRefSistema: res.dtRefSistema,
             dtImplantacao: res.dtImplantacao,
-            endereco: res.endereco.split(','),
-            cidade: res.cidade.split(','),
+            endereco: res.endereco.split(', '),
+            cidade: res.cidade.split(', '),
             cnpj: res.cnpj
           }
         },

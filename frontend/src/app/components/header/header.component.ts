@@ -88,6 +88,7 @@ export class HeaderComponent implements OnInit {
     this.empresaService.getEmpresa().subscribe(
       {
         next: (res) => {
+          console.log(res.dtRefSistema)
           this.Empresa = {
             idEmpresa: res.idEmpresa,
             nomeEmpresa: res.nomeEmpresa,

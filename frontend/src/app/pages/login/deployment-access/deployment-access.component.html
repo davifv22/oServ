@@ -2,8 +2,9 @@
   <mat-card-content class="text-center">
     <h1>Senha implantação:</h1>
     <hr>
-    <code class="text-danger">Algumas informações necessárias não foram identificadas no banco de dados, <br>
-      informe a senha de implantação para criar automaticamente!</code>
+    <code class="text-dark">Algumas informações necessárias não foram identificadas no banco de dados, <br>
+      informe a senha de implantação para prosseguir!</code>
+      <br>
       <br>
 	<form #f="ngForm" ngIf="first_access" (ngSubmit)="set_pass(f)" noValidate class="d-flex row justify-content-center">
 	  <mat-form-field>
