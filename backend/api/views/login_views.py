@@ -49,7 +49,7 @@ class LoginDB(Resource):
             
             nomeEmpresa = ''
             dtRefSistema = ''
-            dtImplantacao = datetime.datetime.now()
+            dtImplantacao = datetime.datetime.now().strftime("%d/%m/%Y")
             endereco = ''
             cnpj = ''
             cidade = ''
