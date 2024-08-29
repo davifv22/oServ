@@ -54,7 +54,7 @@ export class EmpresaComponent implements OnInit {
     )
    }
 
-   postEmpresa(f: NgForm) {
+  postEmpresa(f: NgForm) {
     const json = {
       nomeEmpresa: f.value['nomeEmpresa'],
       dtRefSistema: f.value['dtRefSistema'],
