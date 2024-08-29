@@ -35,12 +35,13 @@ class VeiculosList(Resource):
             placa = request.json['placa']
             kmRodados = request.json['kmRodados']
             idEquipe = request.json['idEquipe']
+            situacao = request.json['situacao']
             novo_veiculo = veiculo.Veiculo(modelo=modelo,
                                            marca=marca,
                                            placa=placa,
                                            kmRodados=kmRodados,
                                            idEquipe=idEquipe,
-                                           situacao=True)
+                                           situacao=situacao)
             x = veiculo_service.insert_veiculo(novo_veiculo)
 
             return make_response(vs.jsonify(x), 201)
@@ -55,7 +56,6 @@ class VeiculoDetail(Resource):
         else:
             x = veiculo_service.update_veiculo(idVeiculo, request.json)
             return make_response(vs.jsonify(x), 201)
-
         
 api.add_resource(VeiculosList, '/veiculos')
 api.add_resource(VeiculoDetail, '/veiculo/<idVeiculo>')

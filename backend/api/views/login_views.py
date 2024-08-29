@@ -35,7 +35,7 @@ class LoginDB(Resource):
             return False
     
     def post(self):
-        senha = request.json['json']['senha']
+        senha = request.json['senha']
         if senha == '1234':
             nome = 'ADMINISTRADOR'
             user = 'admin'

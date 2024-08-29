@@ -1,11 +1,10 @@
 class Cliente():
-    def __init__(self, nome, telefone, email, doc, endereco, bairro, cidade, cep, situacao, observacao, dtCadastro):
+    def __init__(self, nome, telefone, email, doc, endereco, cidade, cep, situacao, observacao, dtCadastro):
         self.__nome = nome
         self.__telefone = telefone
         self.__email = email
         self.__doc = doc
         self.__endereco = endereco
-        self.__bairro = bairro
         self.__cidade = cidade
         self.__cep = cep
         self.__situacao = situacao
@@ -51,14 +50,6 @@ class Cliente():
     @endereco.setter
     def endereco(self, endereco):
         self.__endereco = endereco
-
-    @property
-    def bairro(self):
-        return self.__bairro
-
-    @bairro.setter
-    def bairro(self, bairro):
-        self.__bairro = bairro
 
     @property
     def cidade(self):

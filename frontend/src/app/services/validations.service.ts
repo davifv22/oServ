@@ -20,7 +20,7 @@ export class ValidationsService {
 
   init_db(json: any): Observable<Boolean> {
     const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-    return this.http.post<any>(`${this.apiUrl}/usuario/db`, { json }, { headers });
+    return this.http.post<any>(`${this.apiUrl}/usuario/db`, json, { headers });
   }
 
 }

@@ -16,14 +16,15 @@ class EmpresaDetail(Resource):
             return make_response(us.jsonify(empresa), 200)
         else:
             return make_response(jsonify({'message': 'Empresa não cadastrada!'}), 404)
-        
+    
+    @api_key_required
     def post(self):
         es = empresa_schema.EmpresaSchema()
-        v = es.validate(request.json['json'])
+        v = es.validate(request.json)
         if v:
             return make_response(jsonify(v), 400)
         else:
-            x = empresa_service.update_empresa(request.json['json'])
+            x = empresa_service.update_empresa(request.json)
             return make_response(es.jsonify(x), 201)
         
 api.add_resource(EmpresaDetail, '/empresa')

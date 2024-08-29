@@ -8,5 +8,6 @@ class PreOrcamentoSchema(ma.SQLAlchemyAutoSchema):
         load_instance = True
         fields = ('idTipoRequerimento', 'idServico', 'valor')
 
+    idTipoRequerimento = fields.Integer(required=True)
     idServico = fields.Integer(required=True)
     valor = fields.String(required=True)
