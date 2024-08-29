@@ -13,4 +13,4 @@ class VeiculoSchema(ma.SQLAlchemyAutoSchema):
     placa = fields.String(required=True)
     kmRodados = fields.String(required=True)
     idEquipe = fields.Integer(required=True)
-    situacao = fields.Boolean(required=True)
+    situacao = fields.Boolean(required=False)

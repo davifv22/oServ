@@ -45,7 +45,7 @@ class LoginDB(Resource):
             isAdmin = True
             apiKey = str(uuid.uuid4())
             novo_usuario = usuario.Usuario(user=user, nome=nome, email=email, senha=senha, situacao=situacao, isAdmin=isAdmin, apiKey=apiKey)
-            x = usuario_service.set_usuario(novo_usuario)
+            x = usuario_service.insert_usuario(novo_usuario)
             
             nomeEmpresa = ''
             dtRefSistema = ''
@@ -54,7 +54,7 @@ class LoginDB(Resource):
             cnpj = ''
             cidade = ''
             nova_empresa = empresa.Empresa(nomeEmpresa=nomeEmpresa, dtRefSistema=dtRefSistema, dtImplantacao=dtImplantacao, endereco=endereco, cnpj=cnpj, cidade=cidade)
-            x = empresa_service.set_empresa(nova_empresa)
+            x = empresa_service.insert_empresa(nova_empresa)
 
             return True
         else:

@@ -1,4 +1,17 @@
 button {
     font-size: .75rem;
-    border-bottom: 1px solid #97979788;
+    border-bottom: 1px solid #97979790;
+}
+
+.sub-menu>button {
+  padding-left: 3rem;
+  background-color: #97979770;
+}
+
+.sub-menu>button:hover {
+  background-color: #97979760;
+}
+
+.sub-menu {
+  box-shadow: #97979760 3px 3px 6px 0px inset, #97979760 -3px -3px 6px 1px inset;
 }
