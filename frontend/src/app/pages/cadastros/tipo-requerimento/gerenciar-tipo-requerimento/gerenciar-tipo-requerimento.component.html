@@ -1,6 +1,7 @@
 <mat-card>
     <mat-card-content>
-        <h1>Cadastrar Tipo Requerimento:</h1>
+        <h2 *ngIf="this.data == null">CADASTRAR TIPO DE REQUERIMENTO</h2>
+        <h2 *ngIf="this.data !== null">ALTERAR TIPO DE REQUERIMENTO #{{ this.data.idTipoRequerimento }}</h2>
         <hr>
         <form #f="ngForm" (ngSubmit)="TipoRequerimento(f)" noValidate>
           <table class="row g-2 w-100" cellspacing="0">

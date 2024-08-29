@@ -1,6 +1,7 @@
 <mat-card>
 	<mat-card-content>
-		<h1>Cadastrar Cliente:</h1>
+		<h2 *ngIf="this.data == null">CADASTRAR CLIENTE</h2>
+    <h2 *ngIf="this.data !== null">ALTERAR CLIENTE #{{ this.data.idCliente }}</h2>
 		<hr>
 		<form #f="ngForm" (ngSubmit)="Cliente(f)" noValidate>
 			<table class="row g-2 w-100" cellspacing="0">
