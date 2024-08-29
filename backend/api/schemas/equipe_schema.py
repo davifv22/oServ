@@ -10,4 +10,4 @@ class EquipeSchema(ma.SQLAlchemyAutoSchema):
 
     descricao = fields.String(required=True)
     idSetor = fields.String(required=True)
-    situacao = fields.String(required=True)
+    situacao = fields.String(required=False)

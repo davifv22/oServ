@@ -5,7 +5,6 @@ export type Clientes = {
   email:string,
   doc:string,
   endereco:string,
-  bairro:string,
   cidade:string,
   cep:string,
   situacao:boolean,

@@ -2,21 +2,21 @@
     <mat-card-content>
         <h1>Cadastrar Serviço:</h1>
         <hr>
-        <form #f="ngForm" noValidate>
+        <form #f="ngForm" (ngSubmit)="Servico(f)" noValidate>
           <table class="row g-2 w-100" cellspacing="0">
             <div class="col-md-6">
               <mat-form-field class="w-100">
                 <mat-label>Descrição</mat-label>
-                <input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
+                <input matInput ngModel="{{ this.data ? this.data.descricao: '' }}" id="descricao" name="descricao">
               </mat-form-field>
             </div>
             <div class="col-md-6">
               <mat-form-field class="w-100">
                 <mat-label>Tipo</mat-label>
-                <mat-select>
-                  <mat-option value="option1">Option 1</mat-option>
-                  <mat-option value="option2">Option 2</mat-option>
-                  <mat-option value="option3">Option 3</mat-option>
+                <mat-select id="tipo" name="tipo" ngModel="{{ this.data ? this.data.tipo: 0 }}">
+                  <mat-option value="1">tipo 1</mat-option>
+                  <mat-option value="2">tipo 2</mat-option>
+                  <mat-option value="3">tipo 3</mat-option>
               <!-- @for (food of foods; track food) {
                 <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
               } -->
@@ -26,26 +26,22 @@
             <div class="col-md-6">
               <mat-form-field class="w-100">
                 <mat-label>Valor</mat-label>
-                <input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
+                <input matInput ngModel="{{ this.data ? this.data.valor: '' }}" id="valor" name="valor">
               </mat-form-field>
             </div>
             <div class="col-md-6">
               <mat-form-field class="w-100">
                 <mat-label>Situação</mat-label>
-                <mat-select>
-                  <mat-option value="option1">Option 1</mat-option>
-                  <mat-option value="option2">Option 2</mat-option>
-                  <mat-option value="option3">Option 3</mat-option>
-              <!-- @for (food of foods; track food) {
-                <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
-              } -->
+                <mat-select id="situacao" name="situacao" ngModel="{{ this.data ? this.data.situacao: true }}">
+                  <mat-option value="true">ATIVO</mat-option>
+                  <mat-option value="false">INATIVO</mat-option>
                 </mat-select>
               </mat-form-field>
             </div>
             <div class="w-100 text-end">
-              <button mat-raised-button color="primary" class="m-1">Atualizar</button>
-              <button mat-raised-button color="warn" class="m-1">Excluir</button>
-              <button mat-raised-button color="accent" class="m-1">Voltar</button>
+              <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+              <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+              <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
             </div>
             </table>
             </form>

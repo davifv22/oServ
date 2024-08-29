@@ -49,8 +49,12 @@ export class PreOrcamentoComponent implements OnInit {
     this.PreOrcamentos.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarPreOrcamentoComponent, { });
+  openDialog(preOrcamento: PreOrcamento): void {
+    if (preOrcamento.idTipoRequerimento > 0) {
+      this.modal.open(GerenciarPreOrcamentoComponent, { data:preOrcamento });
+    } else {
+      this.modal.open(GerenciarPreOrcamentoComponent, { });
+    }
   }
 
   perPageSelected() {

@@ -49,8 +49,12 @@ export class TipoRequerimentoComponent implements OnInit {
     this.TipoRequerimentos.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarTipoRequerimentoComponent, { });
+  openDialog(tipoRequerimento: TipoRequerimento): void {
+    if (tipoRequerimento.idTipoRequerimento > 0) {
+      this.modal.open(GerenciarTipoRequerimentoComponent, { data:tipoRequerimento });
+    } else {
+      this.modal.open(GerenciarTipoRequerimentoComponent, { });
+    }
   }
 
   perPageSelected() {

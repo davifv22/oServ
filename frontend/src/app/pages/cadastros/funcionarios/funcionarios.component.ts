@@ -49,8 +49,12 @@ export class FuncionariosComponent implements OnInit {
     this.Funcionarios.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarFuncionariosComponent, { });
+  openDialog(funcionario: Funcionarios): void {
+    if (funcionario.idFuncionario > 0) {
+      this.modal.open(GerenciarFuncionariosComponent, { data:funcionario });
+    } else {
+      this.modal.open(GerenciarFuncionariosComponent, { });
+    }
   }
 
   perPageSelected() {

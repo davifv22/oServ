@@ -12,4 +12,4 @@ class FuncionarioSchema(ma.SQLAlchemyAutoSchema):
     idUser = fields.Integer(required=True)
     nome = fields.String(required=True)
     idEquipe = fields.Integer(required=True)
-    situacao = fields.Boolean(required=True)
+    situacao = fields.Boolean(required=False)
