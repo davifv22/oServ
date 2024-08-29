@@ -49,8 +49,12 @@ export class VeiculosComponent implements OnInit {
     this.Veiculos.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarVeiculosComponent, { });
+  openDialog(veiculo: Veiculos): void {
+    if (veiculo.idVeiculo > 0) {
+      this.modal.open(GerenciarVeiculosComponent, { data:veiculo });
+    } else {
+      this.modal.open(GerenciarVeiculosComponent, { });
+    }
   }
 
   perPageSelected() {

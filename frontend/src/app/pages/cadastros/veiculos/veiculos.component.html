@@ -3,7 +3,7 @@
 <mat-card class="containerPage">
     <mat-card-content>
         <div class="buttons">
-            <small><button (click)="openDialog()" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></button></small>
+            <small><button (click)="openDialog(Veiculos)" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></button></small>
             <small><button class="nav-link"><i class="fa-solid fa-print"> </i> <span>Listagem</span> </button></small>
         </div>
         <mat-form-field>
@@ -53,7 +53,7 @@
                 </ng-container>
                 <ng-container matColumnDef="detalhes">
                     <th mat-header-cell *matHeaderCellDef> Detalhes </th>
-                    <td mat-cell *matCellDef="let veiculo"> <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
+                    <td mat-cell *matCellDef="let veiculo"> <a (click)="openDialog(veiculo)" class="nav-link"><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
                 </ng-container>
                 <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
                 <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
