@@ -1,5 +1,5 @@
 <mat-card>
-    <mat-card-content>
+    <mat-dialog-content class="mat-typography">
         <h2 *ngIf="this.data == null">CADASTRAR SETOR</h2>
         <h2 *ngIf="this.data !== null">ALTERAR SETOR #{{ this.data.idSetor }}</h2>
         <hr>
@@ -106,5 +106,5 @@
                 </nav>
             </div>
         </div>
-    </mat-card-content>
+    </mat-dialog-content>
 </mat-card>

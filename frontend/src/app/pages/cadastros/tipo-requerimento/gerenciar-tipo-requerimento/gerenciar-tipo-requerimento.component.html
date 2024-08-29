@@ -1,49 +1,52 @@
 <mat-card>
-    <mat-card-content>
+    <mat-dialog-content class="mat-typography">
         <h2 *ngIf="this.data == null">CADASTRAR TIPO DE REQUERIMENTO</h2>
         <h2 *ngIf="this.data !== null">ALTERAR TIPO DE REQUERIMENTO #{{ this.data.idTipoRequerimento }}</h2>
         <hr>
         <form #f="ngForm" (ngSubmit)="TipoRequerimento(f)" noValidate>
-          <table class="row g-2 w-100" cellspacing="0">
-              <div class="col-md-6">
-                  <mat-form-field class="w-100">
-                      <mat-label>Descrição</mat-label>
-                      <input matInput ngModel="{{ this.data ? this.data.descricao: '' }}" id="descricao" name="descricao">
-                  </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="w-100">
-                  <mat-label>Orçamento</mat-label>
-                  <mat-select id="emiteOrcamento" name="emiteOrcamento" ngModel="{{  this.data ? this.data.emiteOrcamento: true  }}">
-                    <mat-option value="false">NÃO</mat-option>
-                    <mat-option value="true">SIM</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="w-100">
-                  <mat-label>Ordem de Serviço</mat-label>
-                  <mat-select id="emiteOS" name="emiteOS" ngModel="{{  this.data ? this.data.emiteOS: true  }}">
-                    <mat-option value="false">NÃO</mat-option>
-                    <mat-option value="true">SIM</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="col-md-6">
-                <mat-form-field class="w-100">
-                  <mat-label>Situação</mat-label>
-                  <mat-select id="situacao" name="situacao" ngModel="{{  this.data ? this.data.situacao: true  }}">
-                    <mat-option value="false">INATIVO</mat-option>
-                    <mat-option value="true">ATIVO</mat-option>
-                  </mat-select>
-                </mat-form-field>
-              </div>
-              <div class="w-100 text-end">
-                <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
-                <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
-                <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
-              </div>
-              </table>
-              </form>
-    </mat-card-content>
+            <table class="row g-2 w-100" cellspacing="0">
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Descrição</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.descricao: '' }}" id="descricao"
+                            name="descricao">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Orçamento</mat-label>
+                        <mat-select id="emiteOrcamento" name="emiteOrcamento"
+                            ngModel="{{  this.data ? this.data.emiteOrcamento: true  }}">
+                            <mat-option value="false">NÃO</mat-option>
+                            <mat-option value="true">SIM</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Ordem de Serviço</mat-label>
+                        <mat-select id="emiteOS" name="emiteOS" ngModel="{{  this.data ? this.data.emiteOS: true  }}">
+                            <mat-option value="false">NÃO</mat-option>
+                            <mat-option value="true">SIM</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Situação</mat-label>
+                        <mat-select id="situacao" name="situacao"
+                            ngModel="{{  this.data ? this.data.situacao: true  }}">
+                            <mat-option value="false">INATIVO</mat-option>
+                            <mat-option value="true">ATIVO</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="w-100 text-end">
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+                    <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
+                </div>
+            </table>
+        </form>
+    </mat-dialog-content>
 </mat-card>

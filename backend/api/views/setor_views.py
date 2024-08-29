@@ -14,7 +14,6 @@ class SetorList(Resource):
     @api_key_required
     def get(self):
         setores = setor_service.get_setores()
-        print(setores)
         if setores:
             ss = setor_schema.SetorSchema(many=True)
             if request.args.get('isPaginate') == 'true':

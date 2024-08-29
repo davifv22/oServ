@@ -1,62 +1,64 @@
 <mat-card>
-    <mat-card-content>
+    <mat-dialog-content class="mat-typography">
         <h2 *ngIf="this.data == null">CADASTRAR VEÍCULO</h2>
         <h2 *ngIf="this.data !== null">ALTERAR VEÍCULO #{{ this.data.idVeiculo }}</h2>
         <hr>
         <form #f="ngForm" (ngSubmit)="Veiculo(f)" noValidate>
-          <table class="row g-2 w-100" cellspacing="0">
-              <div class="col-md-6">
-                  <mat-form-field class="w-100">
-                      <mat-label>Modelo</mat-label>
-                      <input matInput ngModel="{{ this.data ? this.data.modelo: '' }}" id="modelo" name="modelo">
-                  </mat-form-field>
+            <table class="row g-2 w-100" cellspacing="0">
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Modelo</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.modelo: '' }}" id="modelo" name="modelo">
+                    </mat-form-field>
                 </div>
-              <div class="col-md-6">
-                <mat-form-field class="w-100">
-                    <mat-label>Marca</mat-label>
-                    <input matInput ngModel="{{ this.data ? this.data.marca: '' }}" id="marca" name="marca">
-                </mat-form-field>
-            </div>
-            <div class="col-md-6">
-              <mat-form-field class="w-100">
-                  <mat-label>Placa</mat-label>
-                  <input matInput ngModel="{{ this.data ? this.data.placa: '' }}" id="placa" name="placa">
-              </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field class="w-100">
-                <mat-label>KM Rodados</mat-label>
-                <input matInput ngModel="{{ this.data ? this.data.kmRodados: '' }}" id="kmRodados" name="kmRodados">
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field class="w-100">
-              <mat-label>Equipe</mat-label>
-              <mat-select id="idEquipe" name="idEquipe" ngModel="{{ this.data ? this.data.idEquipe: 0 }}">
-                <mat-option value="1">1 - MANUTENÇÃO</mat-option>
-                <mat-option value="2">2</mat-option>
-                <mat-option value="3">3</mat-option>
-            <!-- @for (food of foods; track food) {
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Marca</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.marca: '' }}" id="marca" name="marca">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Placa</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.placa: '' }}" id="placa" name="placa">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>KM Rodados</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.kmRodados: '' }}" id="kmRodados"
+                            name="kmRodados">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Equipe</mat-label>
+                        <mat-select id="idEquipe" name="idEquipe" ngModel="{{ this.data ? this.data.idEquipe: 0 }}">
+                            <mat-option value="1">1 - MANUTENÇÃO</mat-option>
+                            <mat-option value="2">2</mat-option>
+                            <mat-option value="3">3</mat-option>
+                            <!-- @for (food of foods; track food) {
               <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
             } -->
-              </mat-select>
-            </mat-form-field>
-          </div>
-          <div class="col-md-6">
-            <mat-form-field class="w-100">
-              <mat-label>Situação</mat-label>
-              <mat-select id="situacao" name="situacao" ngModel="{{  this.data ? this.data.situacao: true  }}">
-                <mat-option value="true">ATIVO</mat-option>
-                <mat-option value="false">INATIVO</mat-option>
-              </mat-select>
-            </mat-form-field>
-          </div>
-              <div class="w-100 text-end">
-                <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
-                <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
-                <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
-              </div>
-          </table>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Situação</mat-label>
+                        <mat-select id="situacao" name="situacao"
+                            ngModel="{{  this.data ? this.data.situacao: true  }}">
+                            <mat-option value="true">ATIVO</mat-option>
+                            <mat-option value="false">INATIVO</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="w-100 text-end">
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+                    <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
+                </div>
+            </table>
         </form>
-    </mat-card-content>
+    </mat-dialog-content>
 </mat-card>
