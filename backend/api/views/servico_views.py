@@ -46,7 +46,6 @@ class ServicoDetail(Resource):
     @api_key_required
     def post(self, idServico):
         ss = servico_schema.ServicoSchema()
-        print(request.json)
         v = ss.validate(request.json)
         if v:
             return make_response(jsonify(v), 400)

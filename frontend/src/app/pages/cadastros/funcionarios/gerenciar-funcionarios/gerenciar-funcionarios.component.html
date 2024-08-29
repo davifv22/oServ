@@ -2,21 +2,21 @@
     <mat-card-content>
         <h1>Cadastrar Funcionário:</h1>
         <hr>
-        <form #f="ngForm" noValidate>
+        <form #f="ngForm" (ngSubmit)="Funcionario(f)" noValidate>
             <table class="row g-2 w-100" cellspacing="0">
                 <div class="col-md-6">
                     <mat-form-field class="w-100">
                         <mat-label>Nome</mat-label>
-                        <input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
+                        <input matInput ngModel="{{ this.data ? this.data.nome: '' }}" id="nome" name="nome">
                     </mat-form-field>
                 </div>
                 <div class="col-md-6">
                     <mat-form-field class="w-100">
                       <mat-label>Usuário</mat-label>
-                      <mat-select>
-                        <mat-option value="option1">Option 1</mat-option>
-                        <mat-option value="option2">Option 2</mat-option>
-                        <mat-option value="option3">Option 3</mat-option>
+                      <mat-select id="idUser" name="idUser" ngModel="{{ this.data ? this.data.idUser: 0 }}">
+                        <mat-option value="1">usuario 1</mat-option>
+                        <mat-option value="2">usuario 2</mat-option>
+                        <mat-option value="3">usuario 3</mat-option>
                     <!-- @for (food of foods; track food) {
                       <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
                     } -->
@@ -26,10 +26,10 @@
                 <div class="col-md-6">
                     <mat-form-field class="w-100">
                       <mat-label>Equipe</mat-label>
-                      <mat-select>
-                        <mat-option value="option1">Option 1</mat-option>
-                        <mat-option value="option2">Option 2</mat-option>
-                        <mat-option value="option3">Option 3</mat-option>
+                      <mat-select id="idEquipe" name="idEquipe" ngModel="{{ this.data ? this.data.idEquipe: 0 }}">
+                        <mat-option value="1">equipe 1</mat-option>
+                        <mat-option value="2">equipe 2</mat-option>
+                        <mat-option value="3">equipe 3</mat-option>
                     <!-- @for (food of foods; track food) {
                       <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
                     } -->
@@ -39,20 +39,16 @@
                 <div class="col-md-6">
                     <mat-form-field class="w-100">
                       <mat-label>Situação</mat-label>
-                      <mat-select>
-                        <mat-option value="option1">Option 1</mat-option>
-                        <mat-option value="option2">Option 2</mat-option>
-                        <mat-option value="option3">Option 3</mat-option>
-                    <!-- @for (food of foods; track food) {
-                      <mat-option [value]="food.value">{{food.viewValue}}</mat-option>
-                    } -->
+                      <mat-select id="situacao" name="situacao" ngModel="{{ this.data ? this.data.situacao: true }}">
+                        <mat-option value="true">ATIVO</mat-option>
+                        <mat-option value="false">INATIVO</mat-option>
                       </mat-select>
                     </mat-form-field>
                   </div>
                   <div class="w-100 text-end">
-                    <button mat-raised-button color="primary" class="m-1">Atualizar</button>
-                    <button mat-raised-button color="warn" class="m-1">Excluir</button>
-                    <button mat-raised-button color="accent" class="m-1">Voltar</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+                    <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
                   </div>
             </table>
         </form>
