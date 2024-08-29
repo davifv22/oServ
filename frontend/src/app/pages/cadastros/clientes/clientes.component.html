@@ -3,7 +3,7 @@
 <mat-card class="containerPage">
 	<mat-card-content>
 		<div class="buttons">
-			<small><button (click)="openDialog()" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></button></small>
+			<small><button (click)="openDialog(Clientes)" class="nav-link"><i class="fa-solid fa-plus"></i> <span>Inserir</span></button></small>
 			<small><button class="nav-link"><i class="fa-solid fa-print"> </i> <span>Listagem</span> </button></small>
 		</div>
 		<mat-form-field>
@@ -45,9 +45,9 @@
 					<td mat-cell *matCellDef="let cliente"> {{cliente.doc}} </td>
 				</ng-container>
 
-				<ng-container matColumnDef="endereco">
-					<th mat-header-cell *matHeaderCellDef> Endereço </th>
-					<td mat-cell *matCellDef="let cliente"> {{cliente.endereco}} - {{cliente.bairro}} </td>
+				<ng-container matColumnDef="cep">
+					<th mat-header-cell *matHeaderCellDef> CEP </th>
+					<td mat-cell *matCellDef="let cliente"> {{cliente.cep}} </td>
 				</ng-container>
 
 				<ng-container matColumnDef="cidade">
@@ -55,14 +55,9 @@
 					<td mat-cell *matCellDef="let cliente"> {{cliente.cidade}} </td>
 				</ng-container>
 
-				<!-- <ng-container matColumnDef="cep">
-				<th mat-header-cell *matHeaderCellDef> CEP </th>
-				<td mat-cell *matCellDef="let cliente"> {{cliente.cep}} </td>
-			</ng-container> -->
-
 				<ng-container matColumnDef="dtCadastro">
 					<th mat-header-cell *matHeaderCellDef> Data Cadastro </th>
-					<td mat-cell *matCellDef="let cliente"> {{ cliente.dtCadastro| date:'dd/MM/yyyy' }} </td>
+					<td mat-cell *matCellDef="let cliente"> {{ cliente.dtCadastro }} </td>
 				</ng-container>
 
 				<ng-container matColumnDef="situacao">
@@ -75,7 +70,7 @@
 
 				<ng-container matColumnDef="detalhes">
 					<th mat-header-cell *matHeaderCellDef> Detalhes </th>
-					<td mat-cell *matCellDef="let cliente"> <a><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
+					<td mat-cell *matCellDef="let cliente"> <a (click)="openDialog(cliente)" class="nav-link"><i class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
 				</ng-container>
 
 				<tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>

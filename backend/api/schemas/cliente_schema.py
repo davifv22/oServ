@@ -17,4 +17,4 @@ class ClienteSchema(ma.SQLAlchemyAutoSchema):
     cep = fields.String(required=True)
     situacao = fields.Boolean(required=False)
     observacao = fields.String(required=True)
-    dtCadastro = fields.String(required=True)
+    dtCadastro = fields.String(required=False)
