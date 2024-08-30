@@ -63,7 +63,7 @@ export class SetorComponent implements OnInit {
 
   ngOnInit(): void {
     this.title = 'SETORES'
-    this.per_page = 20
+    this.per_page = 10
     this.getSetores(1, this.per_page)
   }
 

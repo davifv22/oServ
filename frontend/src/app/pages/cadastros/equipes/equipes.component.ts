@@ -73,7 +73,7 @@ export class EquipesComponent implements OnInit {
 
   ngOnInit(): void {
     this.title = 'EQUIPES';
-    this.per_page = 20;
+    this.per_page = 10;
     this.getEquipes(1, this.per_page);
   }
 
