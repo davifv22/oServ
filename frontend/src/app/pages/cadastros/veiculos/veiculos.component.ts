@@ -13,6 +13,7 @@ import { MatSortModule } from '@angular/material/sort'
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
+import { EquipesComponent } from '../equipes/equipes.component'
 
 @Component({
   selector: 'app-veiculos',
@@ -42,6 +43,10 @@ export class VeiculosComponent implements OnInit {
       this.paginate = Object.values(data)
       this.Veiculos = new MatTableDataSource(data.results);
     })
+  }
+
+  openEquipe(): void {
+    this.modal.open(EquipesComponent, { });
   }
 
   applyFilter(event: Event) {

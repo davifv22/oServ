@@ -9,5 +9,5 @@ class EquipeSchema(ma.SQLAlchemyAutoSchema):
         fields = ('idEquipe', 'descricao', 'idSetor', 'situacao')
 
     descricao = fields.String(required=True)
-    idSetor = fields.String(required=True)
-    situacao = fields.String(required=False)
+    idSetor = fields.Integer(required=True)
+    situacao = fields.Boolean(required=False)

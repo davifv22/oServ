@@ -1,5 +1,7 @@
 import { Component, OnInit} from '@angular/core'
 import { GerenciarFuncionariosComponent } from './gerenciar-funcionarios/gerenciar-funcionarios.component'
+import { EquipesComponent } from '../equipes/equipes.component'
+import { SetorComponent } from '../setor/setor.component'
 import { SubMenuComponent } from "../../../components/sub-menu/sub-menu.component"
 import { CommonModule } from '@angular/common'
 import { FuncionariosService } from '../../../services/cadastros/funcionarios.service'
@@ -55,6 +57,14 @@ export class FuncionariosComponent implements OnInit {
     } else {
       this.modal.open(GerenciarFuncionariosComponent, { });
     }
+  }
+
+  openEquipe(): void {
+    this.modal.open(EquipesComponent, { });
+  }
+
+  openSetor(): void {
+    this.modal.open(SetorComponent, { });
   }
 
   perPageSelected() {
