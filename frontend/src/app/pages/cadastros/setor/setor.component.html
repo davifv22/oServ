@@ -1,0 +1,110 @@
+<mat-card>
+    <mat-dialog-content class="mat-typography">
+        <h2 *ngIf="this.data == null">CADASTRAR SETOR</h2>
+        <h2 *ngIf="this.data !== null">ALTERAR SETOR #{{ this.data.idSetor }}</h2>
+        <hr>
+        <form #f="ngForm" (ngSubmit)="gSetor(f)" noValidate>
+            <table class="row g-2 w-100" cellspacing="0">
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Descrição</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.descricao: '' }}" id="descricao"
+                            name="descricao">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Situação</mat-label>
+                        <mat-select id="situacao" name="situacao" ngModel="{{ this.data ? this.data.situacao: true }}">
+                            <mat-option value="true">ATIVO</mat-option>
+                            <mat-option value="false">INATIVO</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="w-100 text-end">
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+                    <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
+                </div>
+            </table>
+        </form>
+        <div *ngIf="this.data == null">
+            <hr>
+            <mat-form-field class="w-100">
+                <mat-label><i class="fa-solid fa-magnifying-glass"></i> Localizar</mat-label>
+                <input matInput (keyup)="applyFilter($event)" #input>
+            </mat-form-field>
+            <div class="form-select-sm text-end">
+                <small>Item por página: </small>
+                <select [(ngModel)]="per_page" (ngModelChange)="perPageSelected()">
+                    <option value="10" selected>10</option>
+                    <option value="20">20</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+            <div class="table-responsive">
+                <table mat-table matSort [dataSource]="Setor">
+                    <ng-container matColumnDef="idSetor">
+                        <th mat-header-cell mat-sort-header="idSetor" *matHeaderCellDef> # </th>
+                        <td mat-cell *matCellDef="let setor"> {{setor.idSetor}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="descricao">
+                        <th mat-header-cell *matHeaderCellDef> Descrição </th>
+                        <td mat-cell *matCellDef="let setor"> {{setor.descricao}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="situacao">
+                        <th mat-header-cell *matHeaderCellDef> Situação </th>
+                        <td mat-cell *matCellDef="let setor">
+                            <i class="fa-solid fa-circle-check" style="color: green;" title="Ativo"
+                                *ngIf="setor.situacao"></i>
+                            <i class="fa-solid fa-circle-exclamation" style="color: red;" title="Suspenso"
+                                *ngIf="!setor.situacao"></i>
+                        </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="detalhes">
+                        <th mat-header-cell *matHeaderCellDef> Detalhes </th>
+                        <td mat-cell *matCellDef="let setor"> <a (click)="open(setor)" class="nav-link"><i
+                                    class="fa-solid fa-circle-info text-primary" title="Detalhes"></i></a> </td>
+                    </ng-container>
+
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                    <tr class="mat-row" *matNoDataRow>
+                        <td class="mat-cell text-center" colspan="100">
+                            <p class="m-2 fs-6"> Nenhum registro encontrado: " {{input.value}} "</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="paginationPage" *ngIf="!input.value">
+                <small>
+                    <p class="mt-2 fs-6">Total de registros: {{paginate['0']}} - Exibindo página: {{paginate['2']}} de
+                        {{paginate['1']}}</p>
+                </small>
+                <nav>
+                    <ul class="pagination pagination-sm">
+                        <li class="page-item user-select-none">
+                            <a class="page-link" *ngIf="paginate['5']"
+                                (click)="getSetores(paginate['5'], paginate['3'])"><i class="fa-solid fa-backward"></i>
+                                Anterior</a>
+                            <a class="page-link disabled" *ngIf="!paginate['5']"><i class="fa-solid fa-backward"></i>
+                                Anterior</a>
+                        </li>
+                        <li class="page-item user-select-none">
+                            <a class="page-link" *ngIf="paginate['4']"
+                                (click)="getSetores(paginate['4'], paginate['3'])">Próximo <i
+                                    class="fa-solid fa-forward"></i></a>
+                            <a class="page-link disabled" *ngIf="!paginate['4']">Próximo <i
+                                    class="fa-solid fa-forward"></i></a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </mat-dialog-content>
+</mat-card>

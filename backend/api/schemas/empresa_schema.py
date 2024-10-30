@@ -9,7 +9,7 @@ class EmpresaSchema(ma.SQLAlchemyAutoSchema):
 
     nomeEmpresa = fields.String(required=True)
     dtRefSistema = fields.String(required=True)
-    dtImplantacao = fields.String(required=True)
+    dtImplantacao = fields.String(required=False)
     endereco = fields.String(required=True)
     cidade = fields.String(required=True)
     cnpj = fields.String(required=True)

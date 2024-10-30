@@ -35,7 +35,7 @@ class LoginDB(Resource):
             return False
     
     def post(self):
-        senha = request.json['json']['senha']
+        senha = request.json['senha']
         if senha == '1234':
             nome = 'ADMINISTRADOR'
             user = 'admin'
@@ -45,16 +45,16 @@ class LoginDB(Resource):
             isAdmin = True
             apiKey = str(uuid.uuid4())
             novo_usuario = usuario.Usuario(user=user, nome=nome, email=email, senha=senha, situacao=situacao, isAdmin=isAdmin, apiKey=apiKey)
-            x = usuario_service.set_usuario(novo_usuario)
+            x = usuario_service.insert_usuario(novo_usuario)
             
             nomeEmpresa = ''
             dtRefSistema = ''
-            dtImplantacao = datetime.datetime.now()
+            dtImplantacao = datetime.datetime.now().strftime("%d/%m/%Y")
             endereco = ''
             cnpj = ''
             cidade = ''
             nova_empresa = empresa.Empresa(nomeEmpresa=nomeEmpresa, dtRefSistema=dtRefSistema, dtImplantacao=dtImplantacao, endereco=endereco, cnpj=cnpj, cidade=cidade)
-            x = empresa_service.set_empresa(nova_empresa)
+            x = empresa_service.insert_empresa(nova_empresa)
 
             return True
         else:

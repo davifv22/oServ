@@ -27,7 +27,7 @@ export class ClientesComponent implements OnInit {
   paginate: any[] = []
   per_page:number = 0
   search:string = ''
-  displayedColumns: string[] = ['idCliente', 'nome', 'telefone', 'email', 'doc', 'endereco', 'cidade', 'dtCadastro', 'situacao', 'detalhes'];
+  displayedColumns: string[] = ['idCliente', 'nome', 'telefone', 'email', 'doc', 'cep', 'cidade', 'dtCadastro', 'situacao', 'detalhes'];
 
   constructor(private clientesService: ClientesService, public modal: MatDialog) {}
 
@@ -49,8 +49,12 @@ export class ClientesComponent implements OnInit {
     this.Clientes.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarClientesComponent, { });
+  openDialog(cliente: Clientes): void {
+    if (cliente.idCliente > 0) {
+      this.modal.open(GerenciarClientesComponent, { data:cliente });
+    } else {
+      this.modal.open(GerenciarClientesComponent, { });
+    }
   }
 
   perPageSelected() {

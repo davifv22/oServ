@@ -14,19 +14,6 @@ app-header {
     box-shadow: 1px 1px 5px #232323;
 }
 
-app-footer {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-    width: 100%;
-    background-color: #232323;
-    box-shadow: 1px 1px 5px #232323;
-    color: #fff;
-    padding: .25rem;
-    text-align: center;
-    z-index: 999;
-}
-
 mat-drawer-container {
     position: fixed;
     padding-top: 3.05rem;

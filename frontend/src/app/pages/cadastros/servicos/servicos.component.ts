@@ -49,8 +49,12 @@ export class ServicosComponent implements OnInit {
     this.Servicos.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarServicosComponent, { });
+  openDialog(servico: Servicos): void {
+    if (servico.idServico > 0) {
+      this.modal.open(GerenciarServicosComponent, { data:servico });
+    } else {
+      this.modal.open(GerenciarServicosComponent, { });
+    }
   }
 
   perPageSelected() {

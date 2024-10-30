@@ -39,8 +39,8 @@ class UsuariosList(Resource):
             isAdmin = request.json['isAdmin']
             apiKey = str(uuid.uuid4())
             novo_usuario = usuario.Usuario(user=user, nome=nome, email=email, senha=senha, situacao=situacao, isAdmin=isAdmin, apiKey=apiKey)
-            x = usuario_service.set_usuario(novo_usuario)
-            
+            x = usuario_service.insert_usuario(novo_usuario)
+
             return make_response(us.jsonify(x), 201)
 
 class UsuarioDetail(Resource):

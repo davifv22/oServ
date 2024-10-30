@@ -11,4 +11,4 @@ class ServicoSchema(ma.SQLAlchemyAutoSchema):
     descricao = fields.String(required=True)
     tipo = fields.Integer(required=True)
     valor = fields.String(required=True)
-    situacao = fields.Boolean(required=True)
+    situacao = fields.Boolean(required=False)

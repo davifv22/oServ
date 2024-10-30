@@ -36,6 +36,6 @@ export class EmpresaService {
     let apiKey = sessionStorage.getItem('apiKey');
 
     const params = { apiKey: `${apiKey}` };
-    return this.http.post<any>(`${this.apiUrl}/empresa`, { json }, { params });
+    return this.http.post<any>(`${this.apiUrl}/empresa`, json, { params });
   }
 }

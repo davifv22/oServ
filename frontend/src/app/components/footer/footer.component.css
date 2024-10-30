@@ -1,9 +1,0 @@
-footer>small {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-evenly;
-}
-
-footer>small>p {
-    margin: 0;
-}

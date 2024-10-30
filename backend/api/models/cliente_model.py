@@ -8,7 +8,6 @@ class ClienteModel(db.Model):
     email = db.Column(db.String(50), nullable=False)
     doc = db.Column(db.String(30), nullable=False)
     endereco = db.Column(db.String(100), nullable=False)
-    bairro = db.Column(db.String(50), nullable=False)
     cidade = db.Column(db.String(50), nullable=False)
     cep = db.Column(db.String(9), nullable=False)
     situacao = db.Column(db.Boolean, nullable=False)

@@ -13,6 +13,7 @@ import { MatSortModule } from '@angular/material/sort'
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
+import { EquipesComponent } from '../equipes/equipes.component'
 
 @Component({
   selector: 'app-veiculos',
@@ -44,13 +45,21 @@ export class VeiculosComponent implements OnInit {
     })
   }
 
+  openEquipe(): void {
+    this.modal.open(EquipesComponent, { });
+  }
+
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.Veiculos.filter = filterValue.trim().toLowerCase();
   }
 
-  openDialog(): void {
-    this.modal.open(GerenciarVeiculosComponent, { });
+  openDialog(veiculo: Veiculos): void {
+    if (veiculo.idVeiculo > 0) {
+      this.modal.open(GerenciarVeiculosComponent, { data:veiculo });
+    } else {
+      this.modal.open(GerenciarVeiculosComponent, { });
+    }
   }
 
   perPageSelected() {

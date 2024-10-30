@@ -1,19 +1,29 @@
-<div>
-    <button mat-menu-item [routerLink]="['']"> <i class="fa-solid fa-house"> </i> HOME</button>
-    <button mat-menu-item> <i class="fa-solid fa-square-plus"> </i> CADASTROS</button>
-    <!-- [matMenuTriggerFor]="cadastros" -->
+<button mat-menu-item [routerLink]="['']"> <i class="fa-solid fa-house"> </i> HOME</button>
+
+<cdk-accordion>
+  <cdk-accordion-item #cadastros="cdkAccordionItem">
+    <div (click)="cadastros.toggle()">
+      <button [style.background-color]="cadastros.expanded ? '#979797' : ''" mat-menu-item><i class="fa-solid fa-square-plus"> </i> CADASTROS
+        {{cadastros.expanded ? '&#11206;' : '&#11208;' }}
+      </button>
+    </div>
+
+
+    <div class="sub-menu" [style.display]="cadastros.expanded ? '' : 'none'">
+      <button mat-menu-item [routerLink]="['cadastro/clientes']"> <i class="fa-solid fa-user-tag"> </i> CLIENTES</button>
+      <button mat-menu-item [routerLink]="['cadastro/funcionarios']"> <i class="fa-solid fa-users"> </i> FUNCIONÁRIOS</button>
+      <button mat-menu-item [routerLink]="['cadastro/servicos']"> <i class="fa-solid fa-tags"> </i> SERVIÇOS</button>
+      <button mat-menu-item [routerLink]="['cadastro/tipo-requerimento']"> <i class="fa-solid fa-screwdriver-wrench"> </i> TIPO REQUERIMENTO</button>
+      <button mat-menu-item [routerLink]="['cadastro/veiculos']"> <i class="fa-solid fa-truck"> </i> VEÍCULOS</button>
+      <button mat-menu-item [routerLink]="['cadastro/pre-orcamento']"> <i class="fa-solid fa-list-check"> </i> PRÉ-ORÇAMENTO</button>
+    </div>
+  </cdk-accordion-item>
+</cdk-accordion>
 
     <mat-menu>
     </mat-menu>
-    <button mat-menu-item [routerLink]="['cadastro/funcionarios']"> <i class="fa-solid fa-users"> </i> FUNCIONÁRIOS</button>
-    <button mat-menu-item [routerLink]="['cadastro/clientes']"> <i class="fa-solid fa-user-tag"> </i> CLIENTES</button>
-    <button mat-menu-item [routerLink]="['cadastro/servicos']"> <i class="fa-solid fa-tags"> </i> SERVIÇOS</button>
-    <button mat-menu-item [routerLink]="['cadastro/tipo-requerimento']"> <i class="fa-solid fa-screwdriver-wrench"> </i> TIPO REQUERIMENTO</button>
-    <button mat-menu-item [routerLink]="['cadastro/veiculos']"> <i class="fa-solid fa-truck"> </i> VEÍCULOS</button>
-    <button mat-menu-item [routerLink]="['cadastro/pre-orcamento']"> <i class="fa-solid fa-list-check"> </i> PRÉ-ORÇAMENTO</button>
 
 
     <button mat-menu-item [routerLink]="['gestao-oserv']"> <i class="fa-solid fa-screwdriver-wrench"> </i> GESTÃO OSERV</button>
     <button mat-menu-item [routerLink]="['financeiro-oserv']"> <i class="fa-solid fa-money-bill"> </i> FINANCEIRO OSERV</button>
     <button mat-menu-item [routerLink]="['parametrizacao']"> <i class="fa-solid fa-gears"> </i> PARAMETRIZAÇÃO</button>
-</div>

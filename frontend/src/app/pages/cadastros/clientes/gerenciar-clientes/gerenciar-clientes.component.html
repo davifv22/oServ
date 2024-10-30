@@ -1,64 +1,84 @@
 <mat-card>
-	<mat-card-content>
-		<h1>Cadastrar Cliente:</h1>
-		<hr>
-		<form #f="ngForm" noValidate>
-			<table class="row g-2 w-100" cellspacing="0">
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>Nome</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>Telefone</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>E-mail</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>DOC</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>Endereço</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>Cidade</mat-label>
-						<input matInput ngModel="" id="nomeEmpresa" name="nomeEmpresa">
-					</mat-form-field>
-				</div>
-				<div class="col-md-6">
-					<mat-form-field class="w-100">
-						<mat-label>Situação</mat-label>
-						<mat-select>
-							<mat-option value="option1">Option 1</mat-option>
-							<mat-option value="option2">Option 2</mat-option>
-							<mat-option value="option3">Option 3</mat-option>
-					<!-- @for (food of foods; track food) {
-						<mat-option [value]="food.value">{{food.viewValue}}</mat-option>
-					} -->
-						</mat-select>
-					</mat-form-field>
-				</div>
-				<div class="w-100 text-end">
-					<button mat-raised-button color="primary" class="m-1">Atualizar</button>
-          <button mat-raised-button color="warn" class="m-1">Excluir</button>
-          <button mat-raised-button color="accent" class="m-1">Voltar</button>
-				</div>
-			</table>
-		</form>
-	</mat-card-content>
+    <mat-dialog-content class="mat-typography">
+        <h2 *ngIf="this.data == null">CADASTRAR CLIENTE</h2>
+        <h2 *ngIf="this.data !== null">ALTERAR CLIENTE #{{ this.data.idCliente }}</h2>
+        <hr>
+        <form #f="ngForm" (ngSubmit)="Cliente(f)" noValidate>
+            <table class="row g-2 w-100" cellspacing="0">
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Nome</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.nome: '' }}" id="nome" name="nome">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Telefone</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.telefone: '' }}" id="telefone"
+                            name="telefone">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>E-mail</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.email: '' }}" id="email" name="email">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>DOC</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.doc: '' }}" id="doc" name="doc">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Endereço</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.endereco: '' }}" id="endereco"
+                            name="endereco">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>CEP</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.cep: '' }}" id="cep" name="cep">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Cidade</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.cidade: '' }}" id="cidade" name="cidade">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Situação</mat-label>
+                        <mat-select id="situacao" name="situacao"
+                            ngModel="{{  this.data ? this.data.situacao: true  }}">
+                            <mat-option value="true">ATIVO</mat-option>
+                            <mat-option value="false">INATIVO</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6">
+                    <mat-form-field class="w-100">
+                        <mat-label>Observação</mat-label>
+                        <input matInput ngModel="{{ this.data ? this.data.observacao: '' }}" id="observacao"
+                            name="observacao">
+                    </mat-form-field>
+                </div>
+                <div class="col-md-6" *ngIf="this.data">
+                    <mat-form-field class="w-100">
+                        <mat-label>Data Cadastro</mat-label>
+                        <input disabled matInput ngModel="{{ this.data ? this.data.dtCadastro: '' }}" id="dtCadastro"
+                            name="dtCadastro">
+                    </mat-form-field>
+                </div>
+                <div class="w-100 text-end">
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data == null">Inserir</button>
+                    <button mat-raised-button color="primary" class="m-1" *ngIf="this.data !== null">Alterar</button>
+                    <button mat-raised-button mat-dialog-close color="warn" class="m-1">Voltar</button>
+                </div>
+            </table>
+        </form>
+    </mat-dialog-content>
 </mat-card>
