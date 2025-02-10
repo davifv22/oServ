@@ -14,14 +14,14 @@ import { BoletosModel } from '../src/models/boletos_model';
 import { BoletosServicosModel } from '../src/models/boletos_servicos_model';
 import { VeiculosModel } from '../src/models/veiculos_model';
 import { logger } from '../logs/logger';
-import { ControleModel } from '../src/models/controle_model';
+import { ControlesModel } from '../src/models/controles_model';
 
 // Função para sincronizar as tabelas com o banco de dados
 export const createTables_v1 = async () => {
     try {
         logger.info('Criando tabelas...');
 
-        ControleModel
+        ControlesModel
         EmpresaModel
         UsuariosModel
         SetoresModel
@@ -39,9 +39,7 @@ export const createTables_v1 = async () => {
 
         await db.sync({alter: false});
 
-        await ControleModel.create({
-            versao_sistema: '1.0.0'
-        });
+        await ControlesModel.create({versao_sistema: '1.0.0'});
 
         logger.info('Tabelas sincronizadas com sucesso!');
         // await UsuariosModel.create({
@@ -56,11 +54,6 @@ export const createTables_v1 = async () => {
         //     is_admin: false, // Se é admin ou não
         //     api_key: 'api-key-unique', // API Key
         // });
-
-        // const users = await UsuariosModel.findAll();
-
-        // users.every(user => user instanceof UsuariosModel)
-        // logger.info('All users:', JSON.stringify(users, null, 2));
 
     } catch (error) {
         logger.error('Erro ao criar tabelas:', error);

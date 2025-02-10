@@ -102,3 +102,34 @@
 [09/02/2025 19:05:32] ERROR: Erro ao verificar ou criar banco de dados: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONTROLES' at line 1
 [09/02/2025 19:06:19] ERROR: Erro ao verificar ou criar banco de dados: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONTROLES' at line 1
 [09/02/2025 19:06:26] ERROR: Erro ao verificar ou criar banco de dados: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONTROLES' at line 1
+[09/02/2025 20:00:03] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:00:27] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:00:42] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:00:48] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:00:53] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:01:14] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:01:52] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:03:12] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:03:15] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:03:17] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:03:25] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:03:29] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:04:54] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:05:21] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:05:27] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:05:33] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:08:51] ERROR: Erro ao verificar tabelas: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'db.CONTROLES' at line 1
+[09/02/2025 20:09:01] ERROR: Erro ao verificar tabelas: You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'CONTROLES' at line 1
+[09/02/2025 20:09:59] ERROR: Erro ao verificar tabelas: "replacements" must be an array or a plain object, but received "[process.env.DATABASE]" instead.
+[09/02/2025 20:10:01] ERROR: Erro ao verificar tabelas: "replacements" must be an array or a plain object, but received "CO0NTROLES" instead.
+[09/02/2025 20:10:04] ERROR: Erro ao verificar tabelas: "replacements" must be an array or a plain object, but received "CONTROLES" instead.
+[09/02/2025 20:10:08] ERROR: Erro ao verificar tabelas: "replacements" must be an array or a plain object, but received "[process.env.DATABASE]" instead.
+[09/02/2025 20:10:39] ERROR: Erro ao verificar tabelas: result_s is not defined
+[09/02/2025 20:11:07] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:11:12] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:11:21] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:11:23] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:11:28] ERROR: Erro ao criar tabelas: Validation error
+[09/02/2025 20:14:39] ERROR: Erro ao verificar ou criar banco de dados: No database selected
+[09/02/2025 20:30:28] ERROR: Erro ao buscar usuários: Table 'db.usuarios' doesn't exist
+[09/02/2025 20:35:31] ERROR: Erro ao buscar usuários: Table 'db.usuarios' doesn't exist

@@ -21,10 +21,11 @@ export async function checkAndCreateDatabase() {
         } else {
             logger.warn(`Banco de dados "${process.env.DATABASE}" já existe.`);
 
-            try {
-                await db.query(`SHOW TABLES LIKE CONTROLES`);
-            } catch (error) {
+            const [results] = await db.query(`SHOW TABLES LIKE ?`, { replacements: ['CONTROLES'] });
+            if (Array.isArray(results) && results.length === 0) {
                 await createTables_v1();
+            } else {
+                logger.info('Tabelas já sincronizadas.');
             }
         }
 

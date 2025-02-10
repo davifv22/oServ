@@ -1,5 +1,5 @@
 import { Op } from 'sequelize';
-import { ControleModel } from '../src/models/controle_model';
+import { ControlesModel } from '../src/models/controles_model';
 import { db } from './config';
 import { createTables_v1 } from './create_tables_v1';
 import { logger } from '../logs/logger';
@@ -14,7 +14,7 @@ export async function versionControl() {
     const packageJson = JSON.parse(fs.readFileSync(path.join(__dirname, '../package.json'), 'utf-8'));
 
     logger.info('Buscando versão do banco de dados!');
-    const versaoDB = await ControleModel.findOne({
+    const versaoDB = await ControlesModel.findOne({
         where: {id: {[Op.eq]: 1,},},
         attributes: ['versao_sistema'],
     });

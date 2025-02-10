@@ -1,17 +1,21 @@
+import { logger } from "../../logs/logger";
 import { UsuariosModel } from "../models/usuarios_model";
 
-export const fetchAndLogUsers = async () => {
-  try {
-    // Recupera todos os usuários
-    const users = await UsuariosModel.findAll();
+export const getUsuarios = async () => {
+    try {
+        logger.info('Buscando todos os usuários...');
+        const usuarios = await UsuariosModel.findAll();
 
-    // Verifica se todos os itens retornados são instâncias de UsuariosModel
-    console.log(users.every(user => user instanceof UsuariosModel)); // true
+        if (usuarios.every(usuario => usuario instanceof UsuariosModel) && usuarios.length > 0) {
+            logger.info("Todos os usuários foram retornados com sucesso!")
+            return usuarios;
+        } else {
+            logger.warn('Nenhum usuário encontrado...');
+            return 'Nenhum usuário encontrado...';
+        }
 
-    // Log dos usuários em formato JSON
-    console.log('All users:', JSON.stringify(users, null, 2));
-  } catch (error) {
-    console.error('Erro ao buscar usuários:', error);
-  }
+    } catch (error) {
+        logger.error('Erro ao buscar usuários:', error);
+    }
 };
 
