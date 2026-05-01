@@ -8,15 +8,16 @@ datasource db {
 }
 
 model Company {
-  id         String   @id @default(uuid())
-  name       String
-  email      String
-  subdomain  String   @unique
-  createdAt  DateTime @default(now())
-  users      User[]
-  customers  Customer[]
-  employees  Employee[]
-  services   Service[]
+  id            String         @id @default(uuid())
+  name          String
+  email         String
+  subdomain     String         @unique
+  createdAt     DateTime       @default(now())
+  users         User[]
+  customers     Customer[]
+  employees     Employee[]
+  services      Service[]
+  serviceOrders ServiceOrder[]
 }
 
 model User {
@@ -35,8 +36,11 @@ model Customer {
   companyId  String
   company    Company  @relation(fields: [companyId], references: [id])
   name       String
+  document   String?
   email      String?
-  userId     String?
+  phone      String?
+  orders     ServiceOrder[]
+  createdAt  DateTime @default(now())
 }
 
 model Employee {
@@ -45,8 +49,11 @@ model Employee {
   company       Company  @relation(fields: [companyId], references: [id])
   name          String
   email         String?
+  phone         String?
+  position      String?
   hasAccess     Boolean  @default(false)
   userId        String?
+  createdAt     DateTime @default(now())
 }
 
 model Service {
@@ -55,11 +62,41 @@ model Service {
   company    Company  @relation(fields: [companyId], references: [id])
   name       String
   price      Float
+  createdAt  DateTime @default(now())
+}
+
+model ServiceOrder {
+  id          String             @id @default(uuid())
+  companyId   String
+  company     Company            @relation(fields: [companyId], references: [id])
+  customerId  String?
+  customer    Customer?          @relation(fields: [customerId], references: [id])
+  title       String
+  description String?
+  status      ServiceOrderStatus @default(OPEN)
+  priority    Priority           @default(MEDIUM)
+  total       Float              @default(0)
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
 }
 
 enum Role {
   OWNER
   ADMIN
   EMPLOYEE
-  CUSTOMER
+}
+
+enum ServiceOrderStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_CUSTOMER
+  FINISHED
+  CANCELED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
 }
