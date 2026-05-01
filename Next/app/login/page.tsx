@@ -34,17 +34,21 @@ export default function Login() {
 
   return (
     <div className="d-flex justify-content-center align-items-center vh-100 bg-light">
-      <form onSubmit={handleLogin} className="card p-4 shadow-sm" style={{ width: 320 }}>
-        <h4 className="mb-3">Login</h4>
+      <form onSubmit={handleLogin} className="card p-4 shadow-sm" style={{ width: 340 }}>
+        <h4 className="mb-1">Login</h4>
+        <p className="text-muted small mb-3">Acesse sua empresa no oServ.</p>
 
         <input className="form-control mb-2" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
         <input type="password" className="form-control mb-2" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} required />
 
-        {error && <small className="text-danger">{error}</small>}
+        {error && <small className="text-danger d-block mb-2">{error}</small>}
 
-        <button className="btn btn-primary mt-2" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
+        <button className="btn btn-primary mt-2 w-100" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</button>
 
-        <a href="/registro" className="text-center small mt-3 d-block">Criar conta</a>
+        <div className="text-center mt-3">
+          <small className="text-muted d-block mb-2">Ainda não tem uma conta?</small>
+          <a href="/registro" className="btn btn-outline-success w-100">Registrar empresa</a>
+        </div>
       </form>
     </div>
   )
