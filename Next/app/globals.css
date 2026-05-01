@@ -1,6 +1,79 @@
+:root {
+  --app-bg: #f8f9fa;
+  --app-card: #ffffff;
+  --app-text: #212529;
+  --app-muted: #6c757d;
+  --app-border: #dee2e6;
+  --app-sidebar: #212529;
+  --app-sidebar-text: #ffffff;
+  --app-header: #ffffff;
+  --app-input: #ffffff;
+}
+
+[data-theme='dark'] {
+  --app-bg: #0f172a;
+  --app-card: #111827;
+  --app-text: #e5e7eb;
+  --app-muted: #9ca3af;
+  --app-border: #374151;
+  --app-sidebar: #020617;
+  --app-sidebar-text: #e5e7eb;
+  --app-header: #111827;
+  --app-input: #1f2937;
+}
+
+body {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.app-shell {
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.app-sidebar {
+  background: var(--app-sidebar) !important;
+  color: var(--app-sidebar-text) !important;
+}
+
+.app-header,
+.card,
+.modal-card,
+.table {
+  background: var(--app-card) !important;
+  color: var(--app-text) !important;
+}
+
+.app-main {
+  background: var(--app-bg) !important;
+}
+
+.text-muted {
+  color: var(--app-muted) !important;
+}
+
+.form-control,
+.form-select {
+  background: var(--app-input) !important;
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+.form-control::placeholder {
+  color: var(--app-muted) !important;
+}
+
+.table th,
+.table td {
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
 .kanban-column {
   min-width: 280px;
-  background: #f8f9fa;
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
   border-radius: 10px;
   padding: 10px;
 }
@@ -12,10 +85,25 @@
 }
 
 .kanban-card {
-  background: white;
+  background: var(--app-card);
+  border: 1px solid var(--app-border);
+  color: var(--app-text);
   border-radius: 8px;
   padding: 12px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.responsible-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #0d6efd;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .loader-wrapper {
@@ -73,7 +161,8 @@
 }
 
 .modal-card {
-  background: white;
+  background: var(--app-card);
+  color: var(--app-text);
   border-radius: 14px;
   padding: 20px;
   width: min(520px, 92vw);
