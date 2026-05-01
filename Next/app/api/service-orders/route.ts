@@ -7,97 +7,69 @@ function getCompanyId(req: Request) {
   return req.headers.get('x-company-id')
 }
 
-export async function GET(req: Request) {
-  const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
-
-  const { searchParams } = new URL(req.url)
-  const status = searchParams.get('status') || undefined
-  const responsibleEmployeeId = searchParams.get('responsibleEmployeeId') || undefined
-
-  const orders = await prisma.serviceOrder.findMany({
-    where: {
-      companyId,
-      ...(status ? { status: status as any } : {}),
-      ...(responsibleEmployeeId ? { responsibleEmployeeId } : {})
-    },
-    include: {
-      customer: true,
-      responsibleEmployee: true,
-      comments: { select: { id: true } }
-    },
-    orderBy: { createdAt: 'desc' }
-  })
-
-  return NextResponse.json(orders)
-}
-
-export async function POST(req: Request) {
-  const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
-
-  const body = await req.json()
-
-  const order = await prisma.serviceOrder.create({
-    data: {
-      companyId,
-      title: body.title,
-      description: body.description,
-      customerId: body.customerId || null,
-      responsibleEmployeeId: body.responsibleEmployeeId || null,
-      priority: body.priority || 'MEDIUM',
-      status: body.status || 'OPEN',
-      total: Number(body.total || 0)
-    },
-    include: {
-      customer: true,
-      responsibleEmployee: true
-    }
-  })
-
-  return NextResponse.json(order)
+function getUserId(req: Request) {
+  return req.headers.get('x-user-id')
 }
 
 export async function PATCH(req: Request) {
   const companyId = getCompanyId(req)
+  const userId = getUserId(req)
+
   if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
 
   const body = await req.json()
   if (!body.id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
 
-  const current = await prisma.serviceOrder.findFirst({ where: { id: body.id, companyId } })
+  const current = await prisma.serviceOrder.findFirst({
+    where: { id: body.id, companyId },
+    include: { comments: true }
+  })
+
   if (!current) return NextResponse.json({ error: 'OS não encontrada' }, { status: 404 })
 
   const order = await prisma.serviceOrder.update({
     where: { id: body.id },
     data: {
-      ...(body.title !== undefined ? { title: body.title } : {}),
-      ...(body.description !== undefined ? { description: body.description } : {}),
-      ...(body.customerId !== undefined ? { customerId: body.customerId || null } : {}),
-      ...(body.responsibleEmployeeId !== undefined ? { responsibleEmployeeId: body.responsibleEmployeeId || null } : {}),
-      ...(body.priority !== undefined ? { priority: body.priority } : {}),
       ...(body.status !== undefined ? { status: body.status } : {}),
-      ...(body.total !== undefined ? { total: Number(body.total || 0) } : {})
-    },
-    include: {
-      customer: true,
-      responsibleEmployee: true,
-      comments: { select: { id: true } }
+      ...(body.title !== undefined ? { title: body.title } : {})
     }
   })
 
+  if (body.status && body.status !== current.status) {
+    await prisma.serviceOrderAuditLog.create({
+      data: {
+        serviceOrderId: current.id,
+        actorId: userId || null,
+        action: 'STATUS_CHANGED',
+        field: 'status',
+        oldValue: current.status,
+        newValue: body.status,
+        message: `Status alterado de ${current.status} para ${body.status}`
+      }
+    })
+
+    const interactedUsers = await prisma.user.findMany({
+      where: {
+        companyId,
+        OR: [
+          { id: current.comments.map(c => c.authorId) }
+        ]
+      }
+    })
+
+    for (const user of interactedUsers) {
+      if (user.id === userId) continue
+
+      await prisma.notification.create({
+        data: {
+          userId: user.id,
+          kind: 'SERVICE_ORDER_UPDATED',
+          title: 'Atualização de OS',
+          body: `A OS "${current.title}" mudou para ${body.status}`
+        }
+      })
+    }
+  }
+
   return NextResponse.json(order)
-}
-
-export async function DELETE(req: Request) {
-  const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
-
-  const { searchParams } = new URL(req.url)
-  const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
-
-  await prisma.serviceOrder.deleteMany({ where: { id, companyId } })
-
-  return NextResponse.json({ success: true })
 }
