@@ -28,6 +28,7 @@ model User {
   email      String   @unique
   password   String
   role       Role
+  comments   ServiceOrderComment[]
   createdAt  DateTime @default(now())
 }
 
@@ -67,20 +68,31 @@ model Service {
 }
 
 model ServiceOrder {
-  id                    String             @id @default(uuid())
+  id                    String                @id @default(uuid())
   companyId             String
-  company               Company            @relation(fields: [companyId], references: [id])
+  company               Company               @relation(fields: [companyId], references: [id])
   customerId            String?
-  customer              Customer?          @relation(fields: [customerId], references: [id])
+  customer              Customer?             @relation(fields: [customerId], references: [id])
   responsibleEmployeeId String?
-  responsibleEmployee   Employee?          @relation(fields: [responsibleEmployeeId], references: [id])
+  responsibleEmployee   Employee?             @relation(fields: [responsibleEmployeeId], references: [id])
   title                 String
   description           String?
-  status                ServiceOrderStatus @default(OPEN)
-  priority              Priority           @default(MEDIUM)
-  total                 Float              @default(0)
-  createdAt             DateTime           @default(now())
-  updatedAt             DateTime           @updatedAt
+  status                ServiceOrderStatus    @default(OPEN)
+  priority              Priority              @default(MEDIUM)
+  total                 Float                 @default(0)
+  comments              ServiceOrderComment[]
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+}
+
+model ServiceOrderComment {
+  id             String       @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id])
+  authorId       String
+  author         User         @relation(fields: [authorId], references: [id])
+  message        String       @db.Text
+  createdAt      DateTime     @default(now())
 }
 
 enum Role {
