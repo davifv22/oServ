@@ -21,16 +21,17 @@ model Company {
 }
 
 model User {
-  id               String                  @id @default(uuid())
+  id               String                @id @default(uuid())
   companyId        String
-  company          Company                 @relation(fields: [companyId], references: [id])
+  company          Company               @relation(fields: [companyId], references: [id])
   name             String
-  email            String                  @unique
+  email            String                @unique
   password         String
   role             Role
-  comments         ServiceOrderComment[]   @relation("CommentAuthor")
+  comments         ServiceOrderComment[] @relation("CommentAuthor")
   mentionedIn      CommentMention[]
-  createdAt        DateTime                @default(now())
+  notifications    Notification[]
+  createdAt        DateTime              @default(now())
 }
 
 model Customer {
@@ -106,6 +107,23 @@ model CommentMention {
   createdAt DateTime            @default(now())
 
   @@unique([commentId, userId])
+}
+
+model Notification {
+  id        String           @id @default(uuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id])
+  kind      NotificationKind
+  title     String
+  body      String           @db.Text
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+}
+
+enum NotificationKind {
+  MENTION
+  SERVICE_ORDER_UPDATED
+  SERVICE_ORDER_ASSIGNED
 }
 
 enum Role {
