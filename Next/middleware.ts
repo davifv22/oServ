@@ -3,6 +3,8 @@ import type { NextRequest } from 'next/server'
 import { jwtVerify } from 'jose'
 
 const PUBLIC_ROUTES = ['/login', '/registro', '/planos']
+const PUBLIC_API = ['/api/auth']
+
 const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'development-secret')
 
 function getSubdomain(host: string) {
@@ -20,9 +22,11 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
   const host = request.headers.get('host') || ''
   const tenant = getSubdomain(host)
-  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route))
 
-  if (isPublicRoute) {
+  const isPublicRoute = PUBLIC_ROUTES.some(route => pathname.startsWith(route))
+  const isPublicApi = PUBLIC_API.some(route => pathname.startsWith(route))
+
+  if (isPublicRoute || isPublicApi) {
     return NextResponse.next()
   }
 
@@ -36,19 +40,23 @@ export async function middleware(request: NextRequest) {
 
   try {
     const { payload } = await jwtVerify(token, secret)
+
     const tokenSubdomain = payload.subdomain as string | undefined
 
     if (tenant && tokenSubdomain && tenant !== tokenSubdomain) {
       const url = request.nextUrl.clone()
-      url.hostname = host.includes('localhost') ? `${tokenSubdomain}.localhost` : `${tokenSubdomain}.${host.split('.').slice(1).join('.')}`
+      url.hostname = host.includes('localhost')
+        ? `${tokenSubdomain}.localhost`
+        : `${tokenSubdomain}.${host.split('.').slice(1).join('.')}`
       return NextResponse.redirect(url)
     }
 
-    const response = NextResponse.next()
-    response.headers.set('x-company-id', String(payload.companyId))
-    response.headers.set('x-user-id', String(payload.userId))
-    response.headers.set('x-user-role', String(payload.role))
-    return response
+    const requestHeaders = new Headers(request.headers)
+    requestHeaders.set('x-company-id', String(payload.companyId))
+    requestHeaders.set('x-user-id', String(payload.userId))
+    requestHeaders.set('x-user-role', String(payload.role))
+
+    return NextResponse.next({ request: { headers: requestHeaders } })
   } catch {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
@@ -57,5 +65,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)']
+  matcher: ['/((?!_next/static|_next/image|favicon.ico).*)']
 }
