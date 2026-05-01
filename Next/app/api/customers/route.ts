@@ -37,3 +37,36 @@ export async function POST(req: Request) {
 
   return NextResponse.json(customer)
 }
+
+export async function PATCH(req: Request) {
+  const companyId = getCompanyId(req)
+  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+
+  const body = await req.json()
+  if (!body.id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
+
+  const updated = await prisma.customer.updateMany({
+    where: { id: body.id, companyId },
+    data: {
+      name: body.name,
+      document: body.document,
+      email: body.email,
+      phone: body.phone
+    }
+  })
+
+  return NextResponse.json(updated)
+}
+
+export async function DELETE(req: Request) {
+  const companyId = getCompanyId(req)
+  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+
+  const { searchParams } = new URL(req.url)
+  const id = searchParams.get('id')
+  if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
+
+  await prisma.customer.deleteMany({ where: { id, companyId } })
+
+  return NextResponse.json({ success: true })
+}
