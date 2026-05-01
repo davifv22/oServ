@@ -21,15 +21,16 @@ model Company {
 }
 
 model User {
-  id         String   @id @default(uuid())
-  companyId  String
-  company    Company  @relation(fields: [companyId], references: [id])
-  name       String
-  email      String   @unique
-  password   String
-  role       Role
-  comments   ServiceOrderComment[]
-  createdAt  DateTime @default(now())
+  id               String                  @id @default(uuid())
+  companyId        String
+  company          Company                 @relation(fields: [companyId], references: [id])
+  name             String
+  email            String                  @unique
+  password         String
+  role             Role
+  comments         ServiceOrderComment[]   @relation("CommentAuthor")
+  mentionedIn      CommentMention[]
+  createdAt        DateTime                @default(now())
 }
 
 model Customer {
@@ -86,13 +87,25 @@ model ServiceOrder {
 }
 
 model ServiceOrderComment {
-  id             String       @id @default(uuid())
+  id             String           @id @default(uuid())
   serviceOrderId String
-  serviceOrder   ServiceOrder @relation(fields: [serviceOrderId], references: [id])
+  serviceOrder   ServiceOrder     @relation(fields: [serviceOrderId], references: [id])
   authorId       String
-  author         User         @relation(fields: [authorId], references: [id])
-  message        String       @db.Text
-  createdAt      DateTime     @default(now())
+  author         User             @relation("CommentAuthor", fields: [authorId], references: [id])
+  message        String           @db.Text
+  mentions       CommentMention[]
+  createdAt      DateTime         @default(now())
+}
+
+model CommentMention {
+  id        String              @id @default(uuid())
+  commentId String
+  comment   ServiceOrderComment @relation(fields: [commentId], references: [id])
+  userId    String
+  user      User                @relation(fields: [userId], references: [id])
+  createdAt DateTime            @default(now())
+
+  @@unique([commentId, userId])
 }
 
 enum Role {
