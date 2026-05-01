@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Company {
+  id         String   @id @default(uuid())
+  name       String
+  email      String
+  subdomain  String   @unique
+  createdAt  DateTime @default(now())
+  users      User[]
+  customers  Customer[]
+  employees  Employee[]
+  services   Service[]
+}
+
+model User {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  name       String
+  email      String   @unique
+  password   String
+  role       Role
+  createdAt  DateTime @default(now())
+}
+
+model Customer {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  name       String
+  email      String?
+  userId     String?
+}
+
+model Employee {
+  id            String   @id @default(uuid())
+  companyId     String
+  company       Company  @relation(fields: [companyId], references: [id])
+  name          String
+  email         String?
+  hasAccess     Boolean  @default(false)
+  userId        String?
+}
+
+model Service {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  name       String
+  price      Float
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  EMPLOYEE
+  CUSTOMER
+}
