@@ -15,26 +15,35 @@ const columns = [
 
 export default function Kanban() {
   const [orders, setOrders] = useState<any[]>([])
+  const [customers, setCustomers] = useState<any[]>([])
   const [employees, setEmployees] = useState<any[]>([])
+  const [services, setServices] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [syncing, setSyncing] = useState(false)
   const [toast, setToast] = useState<any>(null)
   const [search, setSearch] = useState('')
   const [priority, setPriority] = useState('ALL')
   const [responsible, setResponsible] = useState('ALL')
   const [lastSync, setLastSync] = useState<Date | null>(null)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [form, setForm] = useState<any>({ priority: 'MEDIUM', total: 0 })
 
   async function load(showLoader = false) {
     if (showLoader) setLoading(true)
     setSyncing(true)
 
-    const [ordersRes, employeesRes] = await Promise.all([
+    const [ordersRes, employeesRes, customersRes, servicesRes] = await Promise.all([
       fetch('/api/service-orders'),
-      fetch('/api/employees')
+      fetch('/api/employees'),
+      fetch('/api/customers'),
+      fetch('/api/services')
     ])
 
     if (ordersRes.ok) setOrders(await ordersRes.json())
     if (employeesRes.ok) setEmployees(await employeesRes.json())
+    if (customersRes.ok) setCustomers(await customersRes.json())
+    if (servicesRes.ok) setServices(await servicesRes.json())
 
     setLastSync(new Date())
     setSyncing(false)
@@ -56,6 +65,49 @@ export default function Kanban() {
       return matchesSearch && matchesPriority && matchesResponsible
     })
   }, [orders, search, priority, responsible])
+
+  function openNewOrderModal() {
+    setForm({ priority: 'MEDIUM', total: 0 })
+    setModalOpen(true)
+  }
+
+  function handleSelectService(serviceId: string) {
+    const service = services.find(item => item.id === serviceId)
+    setForm((prev: any) => ({
+      ...prev,
+      serviceId,
+      title: prev.title || service?.name || '',
+      total: service?.price || 0
+    }))
+  }
+
+  async function createOrder(e: React.FormEvent) {
+    e.preventDefault()
+
+    if (!form.title || !form.customerId) {
+      setToast({ message: 'Informe título e cliente para criar a OS', type: 'error' })
+      return
+    }
+
+    setSaving(true)
+
+    const response = await fetch('/api/service-orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(form)
+    })
+
+    setSaving(false)
+
+    if (response.ok) {
+      setToast({ message: 'OS criada com sucesso', type: 'success' })
+      setModalOpen(false)
+      setForm({ priority: 'MEDIUM', total: 0 })
+      await load(false)
+    } else {
+      setToast({ message: 'Erro ao criar OS', type: 'error' })
+    }
+  }
 
   async function updateStatus(id: string, status: string) {
     const response = await fetch('/api/service-orders', {
@@ -104,9 +156,10 @@ export default function Kanban() {
           </small>
         </div>
 
-        <button className="btn btn-outline-primary" onClick={() => load(false)}>
-          Atualizar agora
-        </button>
+        <div className="d-flex gap-2">
+          <button className="btn btn-outline-primary" onClick={() => load(false)}>Atualizar agora</button>
+          <button className="btn btn-primary" onClick={openNewOrderModal}>+ Nova OS</button>
+        </div>
       </div>
 
       <div className="card p-3 mb-3">
@@ -136,9 +189,7 @@ export default function Kanban() {
           </div>
 
           <div className="col-md-2">
-            <button className="btn btn-outline-secondary w-100" onClick={() => { setSearch(''); setPriority('ALL'); setResponsible('ALL') }}>
-              Limpar
-            </button>
+            <button className="btn btn-outline-secondary w-100" onClick={() => { setSearch(''); setPriority('ALL'); setResponsible('ALL') }}>Limpar</button>
           </div>
         </div>
       </div>
@@ -160,12 +211,7 @@ export default function Kanban() {
                     {columnOrders.map((order, index) => (
                       <Draggable key={order.id} draggableId={order.id} index={index}>
                         {(provided, snapshot) => (
-                          <div
-                            ref={provided.innerRef}
-                            {...provided.draggableProps}
-                            {...provided.dragHandleProps}
-                            className={`kanban-card ${snapshot.isDragging ? 'kanban-card-dragging' : ''}`}
-                          >
+                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`kanban-card ${snapshot.isDragging ? 'kanban-card-dragging' : ''}`}>
                             <div className="d-flex justify-content-between gap-2">
                               <strong>{order.title}</strong>
                               <span className="badge bg-warning text-dark">{order.priority}</span>
@@ -187,6 +233,85 @@ export default function Kanban() {
           })}
         </div>
       </DragDropContext>
+
+      {modalOpen && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-card modal-card-lg">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <div>
+                <h5 className="mb-1">Nova Ordem de Serviço</h5>
+                <small className="text-muted">Preencha os dados para abrir uma nova OS no Kanban.</small>
+              </div>
+              <button className="btn btn-sm btn-outline-secondary" onClick={() => setModalOpen(false)}>Fechar</button>
+            </div>
+
+            <form onSubmit={createOrder}>
+              <div className="row g-3">
+                <div className="col-md-6">
+                  <label className="form-label">Título</label>
+                  <input className="form-control" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Banner 2x1" />
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Cliente</label>
+                  <select className="form-select" value={form.customerId || ''} onChange={e => setForm({ ...form, customerId: e.target.value })}>
+                    <option value="">Selecione</option>
+                    {customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Serviço</label>
+                  <select className="form-select" value={form.serviceId || ''} onChange={e => handleSelectService(e.target.value)}>
+                    <option value="">Selecione</option>
+                    {services.map(service => <option key={service.id} value={service.id}>{service.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-6">
+                  <label className="form-label">Responsável</label>
+                  <select className="form-select" value={form.responsibleEmployeeId || ''} onChange={e => setForm({ ...form, responsibleEmployeeId: e.target.value })}>
+                    <option value="">Sem responsável</option>
+                    {employees.map(employee => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">Prioridade</label>
+                  <select className="form-select" value={form.priority || 'MEDIUM'} onChange={e => setForm({ ...form, priority: e.target.value })}>
+                    <option value="LOW">Baixa</option>
+                    <option value="MEDIUM">Média</option>
+                    <option value="HIGH">Alta</option>
+                    <option value="URGENT">Urgente</option>
+                  </select>
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">Valor</label>
+                  <input className="form-control" type="number" value={form.total || 0} onChange={e => setForm({ ...form, total: Number(e.target.value) })} />
+                </div>
+
+                <div className="col-md-4">
+                  <label className="form-label">Status inicial</label>
+                  <select className="form-select" value={form.status || 'OPEN'} onChange={e => setForm({ ...form, status: e.target.value })}>
+                    {columns.map(col => <option key={col.key} value={col.key}>{col.title}</option>)}
+                  </select>
+                </div>
+
+                <div className="col-12">
+                  <label className="form-label">Descrição</label>
+                  <textarea className="form-control" rows={4} value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Detalhes do pedido, medidas, observações e prazo." />
+                </div>
+              </div>
+
+              <div className="d-flex justify-content-end gap-2 mt-4">
+                <button type="button" className="btn btn-outline-secondary" onClick={() => setModalOpen(false)}>Cancelar</button>
+                <button className="btn btn-success" disabled={saving}>{saving ? 'Salvando...' : 'Criar OS'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
