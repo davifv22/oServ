@@ -28,17 +28,18 @@ model Company {
 }
 
 model User {
-  id               String                @id @default(uuid())
+  id               String                 @id @default(uuid())
   companyId        String
-  company          Company               @relation(fields: [companyId], references: [id])
+  company          Company                @relation(fields: [companyId], references: [id])
   name             String
-  email            String                @unique
+  email            String                 @unique
   password         String
   role             Role
-  comments         ServiceOrderComment[] @relation("CommentAuthor")
+  comments         ServiceOrderComment[]  @relation("CommentAuthor")
+  auditLogs        ServiceOrderAuditLog[] @relation("AuditActor")
   mentionedIn      CommentMention[]
   notifications    Notification[]
-  createdAt        DateTime              @default(now())
+  createdAt        DateTime               @default(now())
 }
 
 model Customer {
@@ -77,21 +78,22 @@ model Service {
 }
 
 model ServiceOrder {
-  id                    String                @id @default(uuid())
+  id                    String                 @id @default(uuid())
   companyId             String
-  company               Company               @relation(fields: [companyId], references: [id])
+  company               Company                @relation(fields: [companyId], references: [id])
   customerId            String?
-  customer              Customer?             @relation(fields: [customerId], references: [id])
+  customer              Customer?              @relation(fields: [customerId], references: [id])
   responsibleEmployeeId String?
-  responsibleEmployee   Employee?             @relation(fields: [responsibleEmployeeId], references: [id])
+  responsibleEmployee   Employee?              @relation(fields: [responsibleEmployeeId], references: [id])
   title                 String
   description           String?
-  status                ServiceOrderStatus    @default(OPEN)
-  priority              Priority              @default(MEDIUM)
-  total                 Float                 @default(0)
+  status                ServiceOrderStatus     @default(OPEN)
+  priority              Priority               @default(MEDIUM)
+  total                 Float                  @default(0)
   comments              ServiceOrderComment[]
-  createdAt             DateTime              @default(now())
-  updatedAt             DateTime              @updatedAt
+  auditLogs             ServiceOrderAuditLog[]
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
 }
 
 model ServiceOrderComment {
@@ -103,6 +105,20 @@ model ServiceOrderComment {
   message        String           @db.Text
   mentions       CommentMention[]
   createdAt      DateTime         @default(now())
+}
+
+model ServiceOrderAuditLog {
+  id             String                 @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder           @relation(fields: [serviceOrderId], references: [id])
+  actorId        String?
+  actor          User?                  @relation("AuditActor", fields: [actorId], references: [id])
+  action         ServiceOrderAuditAction
+  field          String?
+  oldValue       String?
+  newValue       String?
+  message        String                 @db.Text
+  createdAt      DateTime               @default(now())
 }
 
 model CommentMention {
@@ -131,6 +147,14 @@ enum NotificationKind {
   MENTION
   SERVICE_ORDER_UPDATED
   SERVICE_ORDER_ASSIGNED
+}
+
+enum ServiceOrderAuditAction {
+  CREATED
+  STATUS_CHANGED
+  UPDATED
+  COMMENTED
+  ASSIGNED
 }
 
 enum Role {
