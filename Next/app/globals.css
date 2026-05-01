@@ -1,0 +1,19 @@
+.kanban-column {
+  min-width: 280px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  padding: 10px;
+}
+
+.kanban-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.kanban-card {
+  background: white;
+  border-radius: 8px;
+  padding: 12px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
