@@ -19,6 +19,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const [user, setUser] = useState<any>(null)
   const [company, setCompany] = useState<any>(null)
   const [theme, setTheme] = useState<'light' | 'dark'>('light')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
     fetch('/api/profile').then(r => r.json()).then(setUser).catch(() => {})
@@ -38,43 +39,53 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   }
 
   return (
-    <div className="d-flex min-vh-100 app-shell">
-      <aside className="sidebar app-sidebar text-white p-3" style={{ width: 260 }}>
-        <h4 className="mb-4">{company?.tradeName || company?.name || 'oServ'}</h4>
-        <ul className="nav flex-column gap-1">
+    <div className="app-shell">
+      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''}`}>
+        <div className="sidebar-brand">
+          <div>
+            <h4 className="mb-0">{company?.tradeName || company?.name || 'oServ'}</h4>
+            <small>{company?.subdomain ? `${company.subdomain}.oserv.com` : 'Gestão de OS'}</small>
+          </div>
+          <button className="btn btn-sm btn-outline-light d-lg-none" onClick={() => setSidebarOpen(false)}>×</button>
+        </div>
+
+        <nav className="sidebar-nav">
           {menuItems.map(item => (
-            <li key={item.href}>
-              <a href={item.href} className="nav-link text-white d-flex align-items-center gap-2">
-                <i className={item.icon}></i>
-                <span>{item.label}</span>
-              </a>
-            </li>
+            <a key={item.href} href={item.href} className="sidebar-link" onClick={() => setSidebarOpen(false)}>
+              <i className={item.icon}></i>
+              <span>{item.label}</span>
+            </a>
           ))}
-        </ul>
+        </nav>
       </aside>
 
-      <main className="flex-grow-1 app-main">
-        <header className="app-header shadow-sm p-3 d-flex justify-content-between align-items-center">
-          <div>
-            <strong>{user?.name || 'Usuário'}</strong>
-            <small className="text-muted d-block">{user?.email}</small>
+      {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
+
+      <div className="app-content">
+        <header className="app-header">
+          <div className="d-flex align-items-center gap-3 min-w-0">
+            <button className="btn btn-outline-secondary d-lg-none" onClick={() => setSidebarOpen(true)}>
+              ☰
+            </button>
+            <div className="min-w-0">
+              <strong className="d-block text-truncate">{user?.name || 'Usuário'}</strong>
+              <small className="text-muted d-block text-truncate">{user?.email}</small>
+            </div>
           </div>
 
-          <div className="d-flex align-items-center gap-2">
+          <div className="header-actions">
             <button className="btn btn-outline-secondary" onClick={toggleTheme}>
               {theme === 'dark' ? '☀️' : '🌙'}
             </button>
-
             <NotificationBell />
-
             <form action="/api/auth/logout" method="post">
               <button className="btn btn-outline-danger">Sair</button>
             </form>
           </div>
         </header>
 
-        <div className="p-4">{children}</div>
-      </main>
+        <main className="app-page">{children}</main>
+      </div>
     </div>
   )
 }
