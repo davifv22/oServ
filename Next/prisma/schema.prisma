@@ -44,16 +44,17 @@ model Customer {
 }
 
 model Employee {
-  id            String   @id @default(uuid())
-  companyId     String
-  company       Company  @relation(fields: [companyId], references: [id])
-  name          String
-  email         String?
-  phone         String?
-  position      String?
-  hasAccess     Boolean  @default(false)
-  userId        String?
-  createdAt     DateTime @default(now())
+  id             String         @id @default(uuid())
+  companyId      String
+  company        Company        @relation(fields: [companyId], references: [id])
+  name           String
+  email          String?
+  phone          String?
+  position       String?
+  hasAccess      Boolean        @default(false)
+  userId         String?
+  assignedOrders ServiceOrder[]
+  createdAt      DateTime       @default(now())
 }
 
 model Service {
@@ -66,18 +67,20 @@ model Service {
 }
 
 model ServiceOrder {
-  id          String             @id @default(uuid())
-  companyId   String
-  company     Company            @relation(fields: [companyId], references: [id])
-  customerId  String?
-  customer    Customer?          @relation(fields: [customerId], references: [id])
-  title       String
-  description String?
-  status      ServiceOrderStatus @default(OPEN)
-  priority    Priority           @default(MEDIUM)
-  total       Float              @default(0)
-  createdAt   DateTime           @default(now())
-  updatedAt   DateTime           @updatedAt
+  id                    String             @id @default(uuid())
+  companyId             String
+  company               Company            @relation(fields: [companyId], references: [id])
+  customerId            String?
+  customer              Customer?          @relation(fields: [customerId], references: [id])
+  responsibleEmployeeId String?
+  responsibleEmployee   Employee?          @relation(fields: [responsibleEmployeeId], references: [id])
+  title                 String
+  description           String?
+  status                ServiceOrderStatus @default(OPEN)
+  priority              Priority           @default(MEDIUM)
+  total                 Float              @default(0)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
 }
 
 enum Role {
