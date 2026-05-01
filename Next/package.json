@@ -1,27 +1,36 @@
 {
-  "name": "oserv-next-frontend",
+  "name": "oserv-next-saas",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev -p 3000",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start -p 3000",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^6.5.2",
+    "@prisma/client": "^5.18.0",
+    "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
+    "jose": "^5.6.3",
     "next": "^14.2.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "recharts": "^2.12.7"
+    "recharts": "^2.12.7",
+    "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
     "@types/node": "^20.14.10",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.5",
+    "prisma": "^5.18.0",
     "typescript": "^5.5.3"
   }
 }
