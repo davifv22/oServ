@@ -10,7 +10,14 @@ datasource db {
 model Company {
   id            String         @id @default(uuid())
   name          String
+  tradeName     String?
+  document      String?
   email         String
+  phone         String?
+  address       String?
+  city          String?
+  state         String?
+  zipCode       String?
   subdomain     String         @unique
   createdAt     DateTime       @default(now())
   users         User[]
