@@ -18,15 +18,28 @@ const menuItems = [
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null)
   const [company, setCompany] = useState<any>(null)
+  const [theme, setTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     fetch('/api/profile').then(r => r.json()).then(setUser).catch(() => {})
     fetch('/api/company').then(r => r.json()).then(setCompany).catch(() => {})
+
+    const saved = localStorage.getItem('theme') as 'light' | 'dark' | null
+    const initial = saved || 'light'
+    setTheme(initial)
+    document.documentElement.setAttribute('data-theme', initial)
   }, [])
 
+  function toggleTheme() {
+    const next = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    localStorage.setItem('theme', next)
+    document.documentElement.setAttribute('data-theme', next)
+  }
+
   return (
-    <div className="d-flex min-vh-100">
-      <aside className="sidebar bg-dark text-white p-3" style={{ width: 260 }}>
+    <div className="d-flex min-vh-100 app-shell">
+      <aside className="sidebar app-sidebar text-white p-3" style={{ width: 260 }}>
         <h4 className="mb-4">{company?.tradeName || company?.name || 'oServ'}</h4>
         <ul className="nav flex-column gap-1">
           {menuItems.map(item => (
@@ -40,14 +53,20 @@ export default function DashboardShell({ children }: { children: React.ReactNode
         </ul>
       </aside>
 
-      <main className="flex-grow-1 bg-light">
-        <header className="bg-white shadow-sm p-3 d-flex justify-content-between align-items-center">
+      <main className="flex-grow-1 app-main">
+        <header className="app-header shadow-sm p-3 d-flex justify-content-between align-items-center">
           <div>
             <strong>{user?.name || 'Usuário'}</strong>
             <small className="text-muted d-block">{user?.email}</small>
           </div>
+
           <div className="d-flex align-items-center gap-2">
+            <button className="btn btn-outline-secondary" onClick={toggleTheme}>
+              {theme === 'dark' ? '☀️' : '🌙'}
+            </button>
+
             <NotificationBell />
+
             <form action="/api/auth/logout" method="post">
               <button className="btn btn-outline-danger">Sair</button>
             </form>
