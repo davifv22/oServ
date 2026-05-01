@@ -1,39 +1,133 @@
 "use client"
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import Loader from '@/components/Loader'
+import Toast from '@/components/Toast'
 
 export default function Clientes() {
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [phone, setPhone] = useState('')
+  const [list, setList] = useState<any[]>([])
+  const [modal, setModal] = useState(false)
+  const [form, setForm] = useState<any>({})
+  const [loading, setLoading] = useState(false)
+  const [toast, setToast] = useState<any>(null)
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function load() {
+    setLoading(true)
+    const response = await fetch('/api/customers')
+    if (response.ok) setList(await response.json())
+    setLoading(false)
+  }
+
+  useEffect(() => { load() }, [])
+
+  function openNew() {
+    setForm({})
+    setModal(true)
+  }
+
+  function openEdit(customer: any) {
+    setForm(customer)
+    setModal(true)
+  }
+
+  async function save(e: React.FormEvent) {
     e.preventDefault()
+    setLoading(true)
 
-    await fetch('/api/customers', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name, email, phone })
-    })
+    try {
+      const response = await fetch('/api/customers', {
+        method: form.id ? 'PATCH' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form)
+      })
 
-    setName('')
-    setEmail('')
-    setPhone('')
+      if (!response.ok) throw new Error('Erro ao salvar cliente')
+
+      setToast({ message: 'Cliente salvo com sucesso', type: 'success' })
+      setModal(false)
+      setForm({})
+      await load()
+    } catch {
+      setToast({ message: 'Erro ao salvar cliente', type: 'error' })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function remove(id: string) {
+    if (!confirm('Deseja excluir este cliente?')) return
+
+    try {
+      const response = await fetch(`/api/customers?id=${id}`, { method: 'DELETE' })
+      if (!response.ok) throw new Error('Erro ao excluir cliente')
+      setToast({ message: 'Cliente removido com sucesso', type: 'info' })
+      await load()
+    } catch {
+      setToast({ message: 'Erro ao excluir cliente', type: 'error' })
+    }
   }
 
   return (
     <div>
-      <h2>Clientes</h2>
-      <p className="text-muted">Cadastro de clientes da empresa.</p>
-
-      <form onSubmit={handleSubmit} className="card p-3 mb-4">
-        <div className="row g-2">
-          <div className="col-md-4"><input className="form-control" placeholder="Nome" value={name} onChange={e => setName(e.target.value)} /></div>
-          <div className="col-md-4"><input className="form-control" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} /></div>
-          <div className="col-md-3"><input className="form-control" placeholder="Telefone" value={phone} onChange={e => setPhone(e.target.value)} /></div>
-          <div className="col-md-1"><button className="btn btn-primary w-100">Salvar</button></div>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h2>Clientes</h2>
+          <p className="text-muted mb-0">Gerencie os clientes usados nas ordens de serviço.</p>
         </div>
-      </form>
+        <button className="btn btn-primary" onClick={openNew}>Novo cliente</button>
+      </div>
+
+      {loading ? (
+        <Loader label="Carregando clientes..." />
+      ) : (
+        <div className="card p-3">
+          <table className="table table-hover mb-0">
+            <thead>
+              <tr>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Telefone</th>
+                <th className="text-end">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {list.length === 0 && (
+                <tr><td colSpan={4} className="text-muted text-center">Nenhum cliente cadastrado.</td></tr>
+              )}
+              {list.map(customer => (
+                <tr key={customer.id}>
+                  <td>{customer.name}</td>
+                  <td>{customer.email || '-'}</td>
+                  <td>{customer.phone || '-'}</td>
+                  <td className="text-end">
+                    <button className="btn btn-sm btn-outline-primary me-2" onClick={() => openEdit(customer)}>Editar</button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={() => remove(customer.id)}>Excluir</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {modal && (
+        <div className="modal-backdrop-custom">
+          <div className="modal-card">
+            <h5>{form.id ? 'Editar cliente' : 'Novo cliente'}</h5>
+            <form onSubmit={save} className="mt-3">
+              <input className="form-control mb-2" placeholder="Nome" value={form.name || ''} onChange={e => setForm({ ...form, name: e.target.value })} />
+              <input className="form-control mb-2" placeholder="Email" value={form.email || ''} onChange={e => setForm({ ...form, email: e.target.value })} />
+              <input className="form-control mb-3" placeholder="Telefone" value={form.phone || ''} onChange={e => setForm({ ...form, phone: e.target.value })} />
+              <div className="text-end">
+                <button type="button" className="btn btn-outline-secondary me-2" onClick={() => setModal(false)}>Cancelar</button>
+                <button className="btn btn-success">Salvar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   )
 }
