@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from 'react'
-import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd'
+import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd'
 import Loader from '@/components/Loader'
 import Toast from '@/components/Toast'
 
@@ -156,13 +156,13 @@ export default function Kanban() {
           </small>
         </div>
 
-        <div className="d-flex gap-2">
+        <div className="d-flex gap-2 flex-wrap">
           <button className="btn btn-outline-primary" onClick={() => load(false)}>Atualizar agora</button>
           <button className="btn btn-primary" onClick={openNewOrderModal}>+ Nova OS</button>
         </div>
       </div>
 
-      <div className="card p-3 mb-3">
+      <div className="card p-3 mb-3 kanban-filter-card">
         <div className="row g-2 align-items-end">
           <div className="col-md-4">
             <label className="form-label">Buscar</label>
@@ -202,31 +202,32 @@ export default function Kanban() {
             return (
               <Droppable key={col.key} droppableId={col.key}>
                 {(provided, snapshot) => (
-                  <div ref={provided.innerRef} {...provided.droppableProps} className={`kanban-column ${snapshot.isDraggingOver ? 'kanban-column-active' : ''}`}>
+                  <section ref={provided.innerRef} {...provided.droppableProps} className={`kanban-column ${snapshot.isDraggingOver ? 'kanban-column-active' : ''}`}>
                     <div className="kanban-column-header">
                       <strong>{col.title}</strong>
                       <span className="badge bg-secondary">{columnOrders.length}</span>
                     </div>
 
-                    {columnOrders.map((order, index) => (
-                      <Draggable key={order.id} draggableId={order.id} index={index}>
-                        {(provided, snapshot) => (
-                          <div ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`kanban-card ${snapshot.isDragging ? 'kanban-card-dragging' : ''}`}>
-                            <div className="d-flex justify-content-between gap-2">
-                              <strong>{order.title}</strong>
-                              <span className="badge bg-warning text-dark">{order.priority}</span>
-                            </div>
-                            <small className="d-block text-muted mt-2">{order.customer?.name || 'Sem cliente'}</small>
-                            <small className="d-block text-muted">Responsável: {order.responsibleEmployee?.name || 'Sem responsável'}</small>
-                            <div className="mt-2">R$ {Number(order.total || 0).toFixed(2)}</div>
-                            <a className="btn btn-sm btn-outline-primary mt-2" href={`/ordens-servico/${order.id}`}>Abrir</a>
-                          </div>
-                        )}
-                      </Draggable>
-                    ))}
-
-                    {provided.placeholder}
-                  </div>
+                    <div className="kanban-column-body">
+                      {columnOrders.map((order, index) => (
+                        <Draggable key={order.id} draggableId={order.id} index={index}>
+                          {(provided, snapshot) => (
+                            <article ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} className={`kanban-card ${snapshot.isDragging ? 'kanban-card-dragging' : ''}`}>
+                              <div className="d-flex justify-content-between gap-2">
+                                <strong>{order.title}</strong>
+                                <span className="badge bg-warning text-dark">{order.priority}</span>
+                              </div>
+                              <small className="d-block text-muted mt-2">{order.customer?.name || 'Sem cliente'}</small>
+                              <small className="d-block text-muted">Responsável: {order.responsibleEmployee?.name || 'Sem responsável'}</small>
+                              <div className="mt-2">R$ {Number(order.total || 0).toFixed(2)}</div>
+                              <a className="btn btn-sm btn-outline-primary mt-2" href={`/ordens-servico/${order.id}`}>Abrir</a>
+                            </article>
+                          )}
+                        </Draggable>
+                      ))}
+                      {provided.placeholder}
+                    </div>
+                  </section>
                 )}
               </Droppable>
             )
@@ -247,61 +248,14 @@ export default function Kanban() {
 
             <form onSubmit={createOrder}>
               <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">Título</label>
-                  <input className="form-control" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Banner 2x1" />
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Cliente</label>
-                  <select className="form-select" value={form.customerId || ''} onChange={e => setForm({ ...form, customerId: e.target.value })}>
-                    <option value="">Selecione</option>
-                    {customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
-                  </select>
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Serviço</label>
-                  <select className="form-select" value={form.serviceId || ''} onChange={e => handleSelectService(e.target.value)}>
-                    <option value="">Selecione</option>
-                    {services.map(service => <option key={service.id} value={service.id}>{service.name}</option>)}
-                  </select>
-                </div>
-
-                <div className="col-md-6">
-                  <label className="form-label">Responsável</label>
-                  <select className="form-select" value={form.responsibleEmployeeId || ''} onChange={e => setForm({ ...form, responsibleEmployeeId: e.target.value })}>
-                    <option value="">Sem responsável</option>
-                    {employees.map(employee => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
-                  </select>
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label">Prioridade</label>
-                  <select className="form-select" value={form.priority || 'MEDIUM'} onChange={e => setForm({ ...form, priority: e.target.value })}>
-                    <option value="LOW">Baixa</option>
-                    <option value="MEDIUM">Média</option>
-                    <option value="HIGH">Alta</option>
-                    <option value="URGENT">Urgente</option>
-                  </select>
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label">Valor</label>
-                  <input className="form-control" type="number" value={form.total || 0} onChange={e => setForm({ ...form, total: Number(e.target.value) })} />
-                </div>
-
-                <div className="col-md-4">
-                  <label className="form-label">Status inicial</label>
-                  <select className="form-select" value={form.status || 'OPEN'} onChange={e => setForm({ ...form, status: e.target.value })}>
-                    {columns.map(col => <option key={col.key} value={col.key}>{col.title}</option>)}
-                  </select>
-                </div>
-
-                <div className="col-12">
-                  <label className="form-label">Descrição</label>
-                  <textarea className="form-control" rows={4} value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Detalhes do pedido, medidas, observações e prazo." />
-                </div>
+                <div className="col-md-6"><label className="form-label">Título</label><input className="form-control" value={form.title || ''} onChange={e => setForm({ ...form, title: e.target.value })} placeholder="Ex: Banner 2x1" /></div>
+                <div className="col-md-6"><label className="form-label">Cliente</label><select className="form-select" value={form.customerId || ''} onChange={e => setForm({ ...form, customerId: e.target.value })}><option value="">Selecione</option>{customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}</option>)}</select></div>
+                <div className="col-md-6"><label className="form-label">Serviço</label><select className="form-select" value={form.serviceId || ''} onChange={e => handleSelectService(e.target.value)}><option value="">Selecione</option>{services.map(service => <option key={service.id} value={service.id}>{service.name}</option>)}</select></div>
+                <div className="col-md-6"><label className="form-label">Responsável</label><select className="form-select" value={form.responsibleEmployeeId || ''} onChange={e => setForm({ ...form, responsibleEmployeeId: e.target.value })}><option value="">Sem responsável</option>{employees.map(employee => <option key={employee.id} value={employee.id}>{employee.name}</option>)}</select></div>
+                <div className="col-md-4"><label className="form-label">Prioridade</label><select className="form-select" value={form.priority || 'MEDIUM'} onChange={e => setForm({ ...form, priority: e.target.value })}><option value="LOW">Baixa</option><option value="MEDIUM">Média</option><option value="HIGH">Alta</option><option value="URGENT">Urgente</option></select></div>
+                <div className="col-md-4"><label className="form-label">Valor</label><input className="form-control" type="number" value={form.total || 0} onChange={e => setForm({ ...form, total: Number(e.target.value) })} /></div>
+                <div className="col-md-4"><label className="form-label">Status inicial</label><select className="form-select" value={form.status || 'OPEN'} onChange={e => setForm({ ...form, status: e.target.value })}>{columns.map(col => <option key={col.key} value={col.key}>{col.title}</option>)}</select></div>
+                <div className="col-12"><label className="form-label">Descrição</label><textarea className="form-control" rows={4} value={form.description || ''} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Detalhes do pedido, medidas, observações e prazo." /></div>
               </div>
 
               <div className="d-flex justify-content-end gap-2 mt-4">
