@@ -13,6 +13,7 @@ import { MatSortModule } from '@angular/material/sort'
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
+import { PrintService } from '../../../services/print.service'
 
 @Component({
   selector: 'app-servicos',
@@ -29,7 +30,7 @@ export class ServicosComponent implements OnInit {
   search:string = ''
   displayedColumns: string[] = ['idServico', 'descricao', 'tipo', 'valor', 'situacao', 'detalhes'];
 
-  constructor(private servicoService: ServicosService, public modal: MatDialog) {}
+  constructor(private servicoService: ServicosService, public modal: MatDialog, private printService: PrintService) {}
 
   ngOnInit(): void {
     this.title = 'SERVIÇOS'
@@ -47,6 +48,16 @@ export class ServicosComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.Servicos.filter = filterValue.trim().toLowerCase();
+  }
+
+  imprimirListagem(): void {
+    this.printService.printList<Servicos>('LISTAGEM DE SERVIÇOS', [
+      { label: '#', field: 'idServico', width: 45 },
+      { label: 'Descrição', field: 'descricao', width: '*' },
+      { label: 'Tipo', field: 'tipo', width: 70 },
+      { label: 'Valor', field: 'valor', width: 80 },
+      { label: 'Situação', field: 'situacao', width: 70 }
+    ], this.Servicos.filteredData ?? this.Servicos.data ?? []);
   }
 
   openDialog(servico: Servicos): void {
