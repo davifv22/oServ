@@ -13,6 +13,7 @@ import { MatSortModule } from '@angular/material/sort'
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
+import { PrintService } from '../../../services/print.service'
 
 @Component({
   selector: 'app-clientes',
@@ -29,7 +30,7 @@ export class ClientesComponent implements OnInit {
   search:string = ''
   displayedColumns: string[] = ['idCliente', 'nome', 'telefone', 'email', 'doc', 'cep', 'cidade', 'dtCadastro', 'situacao', 'detalhes'];
 
-  constructor(private clientesService: ClientesService, public modal: MatDialog) {}
+  constructor(private clientesService: ClientesService, public modal: MatDialog, private printService: PrintService) {}
 
   ngOnInit(): void {
     this.title = 'CLIENTES'
@@ -47,6 +48,20 @@ export class ClientesComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.Clientes.filter = filterValue.trim().toLowerCase();
+  }
+
+  imprimirListagem(): void {
+    this.printService.printList<Clientes>('LISTAGEM DE CLIENTES', [
+      { label: '#', field: 'idCliente', width: 35 },
+      { label: 'Nome', field: 'nome', width: '*' },
+      { label: 'Telefone', field: 'telefone', width: 75 },
+      { label: 'E-mail', field: 'email', width: '*' },
+      { label: 'Documento', field: 'doc', width: 80 },
+      { label: 'CEP', field: 'cep', width: 60 },
+      { label: 'Cidade', field: 'cidade', width: 80 },
+      { label: 'Cadastro', field: 'dtCadastro', width: 70 },
+      { label: 'Situação', field: 'situacao', width: 55 }
+    ], this.Clientes.filteredData ?? this.Clientes.data ?? []);
   }
 
   openDialog(cliente: Clientes): void {
