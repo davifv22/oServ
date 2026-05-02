@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Documentação oServ - Swagger UI</title>
+  <title>Documentação oServ - Swagger UI (Refatorado)</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css" />
   <style>
     html, body { margin: 0; padding: 0; height: 100%; }
@@ -16,7 +16,7 @@
   <script>
     window.onload = () => {
       SwaggerUIBundle({
-        url: 'openapi.yaml',
+        url: 'openapi_refactored.yaml',
         dom_id: '#swagger-ui',
         presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
         layout: "BaseLayout",

@@ -1,11 +1,11 @@
 openapi: 3.0.3
 info:
-  title: oServ API
-  version: "1.0.0"
+  title: oServ API (Refatorado)
+  version: "1.0.1"
   description: |
-    Esta especificação OpenAPI documenta a API do sistema **oServ**.  
-    O serviço expõe recursos de boletos, boletos‑serviços, clientes, controles, empresa, equipes, funcionários, ordens de serviços, pré‑orçamentos, requerimentos, serviços, setores, tipos de requerimentos, usuários e veículos.  
-    Todas as rotas abaixo são prefixadas pelo caminho base `/api` conforme definido no arquivo `app.ts`【18561569972942†L17-L33】.
+    Documentação atualizada da API do sistema **oServ** após a refatoração.  
+    As rotas continuam prefixadas por `/api`, conforme o arquivo `app.ts`【958971593870761†L17-L33】.  
+    Esta especificação descreve todos os endpoints disponíveis, os modelos de dados e as respostas.
 servers:
   - url: http://localhost:3000/api
     description: Servidor local de desenvolvimento
@@ -13,11 +13,11 @@ servers:
 paths:
   /boletos:
     get:
-      summary: Lista de boletos
-      description: Retorna todos os boletos cadastrados no sistema.  Cada boleto registra valores, vencimento, situação e relaciona‑se a um requerimento e cliente【338594470086647†L6-L47】.
+      summary: Listar boletos
+      description: Retorna todos os boletos existentes【958971593870761†L19-L31】. Cada boleto contém dados de valor, vencimento e relacionamentos com clientes e requerimentos【338594470086647†L6-L47】.
       responses:
         "200":
-          description: Lista de boletos retornada com sucesso
+          description: Lista de boletos
           content:
             application/json:
               schema:
@@ -28,11 +28,11 @@ paths:
           description: Nenhum boleto encontrado
   /boletos-servicos:
     get:
-      summary: Lista de boletos por serviço
-      description: Retorna todos os registros que relacionam boletos a serviços【895649798174835†L5-L47】.
+      summary: Listar boletos por serviço
+      description: Recupera registros de serviços vinculados a boletos【895649798174835†L5-L47】.
       responses:
         "200":
-          description: Lista de boletos‑serviços retornada
+          description: Lista de boletos-serviços
           content:
             application/json:
               schema:
@@ -43,11 +43,11 @@ paths:
           description: Nenhum registro encontrado
   /clientes:
     get:
-      summary: Lista de clientes
+      summary: Listar clientes
       description: Retorna todos os clientes cadastrados【744901310195182†L3-L59】.
       responses:
         "200":
-          description: Lista de clientes retornada com sucesso
+          description: Lista de clientes
           content:
             application/json:
               schema:
@@ -58,11 +58,11 @@ paths:
           description: Nenhum cliente encontrado
   /controles:
     get:
-      summary: Versões de sistema
-      description: Retorna os registros de controle contendo a versão do sistema【124848214801143†L3-L17】.
+      summary: Listar controles do sistema
+      description: Exibe os registros de controle, como a versão do sistema【124848214801143†L3-L17】.
       responses:
         "200":
-          description: Lista de registros de controle
+          description: Lista de controles
           content:
             application/json:
               schema:
@@ -73,11 +73,11 @@ paths:
           description: Nenhum controle encontrado
   /empresa:
     get:
-      summary: Dados da empresa
-      description: Retorna os dados da empresa cadastrada【107465177237162†L3-L43】.
+      summary: Obter dados da empresa
+      description: Retorna os dados da empresa configurada【627712243301178†L3-L43】.
       responses:
         "200":
-          description: Dados da empresa retornados
+          description: Dados da empresa retornados com sucesso
           content:
             application/json:
               schema:
@@ -88,11 +88,11 @@ paths:
           description: Nenhum registro encontrado
   /equipes:
     get:
-      summary: Lista de equipes
-      description: Retorna todas as equipes existentes, indicando setor e situação【893009957163900†L4-L43】.
+      summary: Listar equipes
+      description: Retorna todas as equipes existentes, incluindo o setor e a situação【893009957163900†L4-L43】.
       responses:
         "200":
-          description: Lista de equipes retornada
+          description: Lista de equipes
           content:
             application/json:
               schema:
@@ -103,11 +103,11 @@ paths:
           description: Nenhuma equipe encontrada
   /funcionarios:
     get:
-      summary: Lista de funcionários
+      summary: Listar funcionários
       description: Retorna todos os funcionários cadastrados【690778012733600†L5-L66】.
       responses:
         "200":
-          description: Lista de funcionários retornada com sucesso
+          description: Lista de funcionários
           content:
             application/json:
               schema:
@@ -118,8 +118,8 @@ paths:
           description: Nenhum funcionário encontrado
   /ordens-servicos:
     get:
-      summary: Lista de ordens de serviço
-      description: Retorna todas as ordens de serviço emitidas【667099911598614†L6-L85】.
+      summary: Listar ordens de serviço
+      description: Retorna todas as ordens de serviço abertas ou concluídas【667099911598614†L6-L85】.
       responses:
         "200":
           description: Lista de ordens de serviço
@@ -133,11 +133,11 @@ paths:
           description: Nenhuma ordem encontrada
   /pre-orcamentos:
     get:
-      summary: Lista de pré‑orçamentos
+      summary: Listar pré‑orçamentos
       description: Retorna todos os pré‑orçamentos cadastrados【133890943648202†L3-L42】.
       responses:
         "200":
-          description: Lista de pré‑orçamentos retornada
+          description: Lista de pré‑orçamentos
           content:
             application/json:
               schema:
@@ -148,11 +148,11 @@ paths:
           description: Nenhum pré‑orçamento encontrado
   /requerimentos:
     get:
-      summary: Lista de requerimentos
-      description: Retorna todos os requerimentos registrados no sistema【78070113188095†L6-L88】.
+      summary: Listar requerimentos
+      description: Retorna todos os requerimentos registrados【78070113188095†L6-L88】.
       responses:
         "200":
-          description: Lista de requerimentos retornada
+          description: Lista de requerimentos
           content:
             application/json:
               schema:
@@ -163,8 +163,8 @@ paths:
           description: Nenhum requerimento encontrado
   /servicos:
     get:
-      summary: Lista de serviços
-      description: Retorna todos os serviços disponíveis【458227734551936†L3-L41】.
+      summary: Listar serviços
+      description: Retorna todos os serviços cadastrados【458227734551936†L3-L41】.
       responses:
         "200":
           description: Lista de serviços
@@ -178,11 +178,11 @@ paths:
           description: Nenhum serviço encontrado
   /setores:
     get:
-      summary: Lista de setores
-      description: Retorna todos os setores cadastrados【936666573802810†L3-L28】.
+      summary: Listar setores
+      description: Retorna todos os setores existentes【936666573802810†L3-L28】.
       responses:
         "200":
-          description: Lista de setores retornada
+          description: Lista de setores
           content:
             application/json:
               schema:
@@ -193,11 +193,11 @@ paths:
           description: Nenhum setor encontrado
   /tipos-requerimentos:
     get:
-      summary: Lista de tipos de requerimentos
+      summary: Listar tipos de requerimentos
       description: Retorna todos os tipos de requerimento disponíveis【287770204310926†L3-L39】.
       responses:
         "200":
-          description: Lista de tipos de requerimento
+          description: Lista de tipos de requerimentos
           content:
             application/json:
               schema:
@@ -208,7 +208,7 @@ paths:
           description: Nenhum tipo encontrado
   /usuarios:
     get:
-      summary: Lista de usuários
+      summary: Listar usuários
       description: Retorna todos os usuários cadastrados【356398610036450†L3-L58】.
       responses:
         "200":
@@ -223,11 +223,11 @@ paths:
           description: Nenhum usuário encontrado
   /veiculos:
     get:
-      summary: Lista de veículos
+      summary: Listar veículos
       description: Retorna todos os veículos cadastrados【507380931529015†L3-L51】.
       responses:
         "200":
-          description: Lista de veículos retornada
+          description: Lista de veículos
           content:
             application/json:
               schema:
@@ -244,10 +244,8 @@ components:
       properties:
         id_boleto:
           type: integer
-          description: Identificador do boleto
         id_requerimento:
           type: integer
-          description: Identificador do requerimento associado
         valor_total:
           type: number
           format: decimal
@@ -263,13 +261,9 @@ components:
           nullable: true
         id_cliente:
           type: integer
-          description: Identificador do cliente associado
         situacao:
           type: string
-          enum:
-            - PENDENTE
-            - PAGO
-            - CANCELADO
+          enum: [PENDENTE, PAGO, CANCELADO]
         dt_criacao:
           type: string
           format: date-time
@@ -281,10 +275,8 @@ components:
       properties:
         id_servico:
           type: integer
-          description: Identificador do serviço
         id_boleto:
           type: integer
-          description: Identificador do boleto
         valor:
           type: number
           format: decimal
@@ -303,12 +295,7 @@ components:
           type: string
         situacao:
           type: string
-          enum:
-            - PENDENTE
-            - ESTORNADO
-            - INCLUIDO
-            - PAGO
-            - CANCELADO
+          enum: [PENDENTE, ESTORNADO, INCLUIDO, PAGO, CANCELADO]
         dt_criacao:
           type: string
           format: date-time
@@ -334,9 +321,7 @@ components:
           type: integer
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         observacao:
           type: string
           nullable: true
@@ -392,9 +377,7 @@ components:
           type: integer
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -420,9 +403,7 @@ components:
           type: string
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -458,11 +439,7 @@ components:
           type: integer
         situacao:
           type: string
-          enum:
-            - EM_ABERTO
-            - EM_ANDAMENTO
-            - CONCLUIDA
-            - CANCELADA
+          enum: [EM_ABERTO, EM_ANDAMENTO, CONCLUIDA, CANCELADA]
         observacao:
           type: string
           nullable: true
@@ -488,9 +465,7 @@ components:
           format: decimal
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -525,11 +500,7 @@ components:
           nullable: true
         situacao:
           type: string
-          enum:
-            - ABERTO
-            - EM_ANDAMENTO
-            - CONCLUIDO
-            - CANCELADO
+          enum: [ABERTO, EM_ANDAMENTO, CONCLUIDO, CANCELADO]
         dt_criacao:
           type: string
           format: date-time
@@ -545,19 +516,13 @@ components:
           type: string
         tipo:
           type: string
-          enum:
-            - MANUTENCAO
-            - INSTALACAO
-            - SUPORTE
-            - OUTROS
+          enum: [MANUTENCAO, INSTALACAO, SUPORTE, OUTROS]
         valor:
           type: number
           format: decimal
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -573,9 +538,7 @@ components:
           type: string
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -595,9 +558,7 @@ components:
           type: boolean
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
@@ -623,9 +584,7 @@ components:
           type: integer
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - INATIVO
+          enum: [ATIVO, INATIVO]
         is_admin:
           type: boolean
         api_key:
@@ -655,10 +614,7 @@ components:
           nullable: true
         situacao:
           type: string
-          enum:
-            - ATIVO
-            - MANUTENCAO
-            - INATIVO
+          enum: [ATIVO, MANUTENCAO, INATIVO]
         dt_criacao:
           type: string
           format: date-time
