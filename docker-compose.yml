@@ -1,0 +1,48 @@
+services:
+  app:
+    build:
+      context: ./Next
+      dockerfile: Dockerfile
+    container_name: oserv-next-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    env_file:
+      - ./Next/.env.example
+    environment:
+      DATABASE_URL: mysql://oserv:oserv_password@db:3306/oserv
+      NEXT_PUBLIC_APP_DOMAIN: localhost
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - oserv-network
+
+  db:
+    image: mysql:8.0
+    container_name: oserv-mysql
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: oserv
+      MYSQL_USER: oserv
+      MYSQL_PASSWORD: oserv_password
+      MYSQL_ROOT_PASSWORD: root_password
+    volumes:
+      - oserv_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - oserv-network
+
+volumes:
+  oserv_mysql_data:
+
+networks:
+  oserv-network:
+    driver: bridge
