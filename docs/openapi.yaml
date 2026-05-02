@@ -1,50 +1,194 @@
 openapi: 3.0.3
 info:
-  title: oServ API (Refatorado)
-  version: "1.0.1"
+  title: oServ API (Next.js)
+  version: "1.0.0"
   description: |
-    Documentação atualizada da API do sistema **oServ** após a refatoração.  
-    As rotas continuam prefixadas por `/api`, conforme o arquivo `app.ts`【958971593870761†L17-L33】.  
-    Esta especificação descreve todos os endpoints disponíveis, os modelos de dados e as respostas.
+    Documentação da API do sistema **oServ** após a migração para **Next.js Fullstack**.  
+    Todas as rotas de API estão sob o prefixo `/api` e seguem a arquitetura multiempresa descrita nos documentos do projeto.  
+    As principais rotas listadas no arquivo `README.md` incluem autenticação, gerenciamento da empresa, perfis, cadastros, ordens de serviço, comentários e notificações【890973672335846†L291-L352】.  
+    Esta especificação também considera as entidades e campos sugeridos na proposta de arquitetura SaaS multiempresa【169360353382499†L31-L120】.
 servers:
-  - url: http://localhost:3000/api
+  - url: http://localhost:3000
     description: Servidor local de desenvolvimento
 
 paths:
-  /boletos:
+  ## ------------------------
+  ## Autenticação
+  ## ------------------------
+  /api/subdomain/check:
     get:
-      summary: Listar boletos
-      description: Retorna todos os boletos existentes【958971593870761†L19-L31】. Cada boleto contém dados de valor, vencimento e relacionamentos com clientes e requerimentos【338594470086647†L6-L47】.
+      summary: Verificar disponibilidade de subdomínio
+      description: |
+        Verifica se um subdomínio informado está disponível ou já existe para cadastro.  
+        Esta rota é pública e não exige autenticação.  
+        A rota é citada no middleware e no fluxo de registro da empresa【4745690822504†L80-L101】.
+      parameters:
+        - name: subdomain
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Subdomínio desejado, sem o sufixo de domínio.
       responses:
         "200":
-          description: Lista de boletos
+          description: Resultado da verificação
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Boleto'
-        "204":
-          description: Nenhum boleto encontrado
-  /boletos-servicos:
-    get:
-      summary: Listar boletos por serviço
-      description: Recupera registros de serviços vinculados a boletos【895649798174835†L5-L47】.
+                $ref: '#/components/schemas/SubdomainCheckResponse'
+  /api/auth/register-company:
+    post:
+      summary: Registrar empresa e usuário proprietário
+      description: |
+        Cria uma nova empresa assinante, cadastra o usuário **OWNER** e inicia a assinatura inicial.  
+        O endpoint é listado como rota principal para autenticação【890973672335846†L291-L299】 e recomendado para o fluxo de primeiro registro【169360353382499†L152-L160】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterCompanyRequest'
       responses:
-        "200":
-          description: Lista de boletos-serviços
+        "201":
+          description: Empresa criada com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/BoletoServico'
+                $ref: '#/components/schemas/RegisterCompanyResponse'
+        "400":
+          description: Dados inválidos ou subdomínio indisponível
+  /api/auth/login:
+    post:
+      summary: Autenticar usuário
+      description: |
+        Efetua o login de um usuário existente. Retorna um token de autenticação (cookie HTTP-only) e redirecionamento para o dashboard apropriado.  
+        Rota listada na seção de autenticação【890973672335846†L291-L299】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        "200":
+          description: Login realizado com sucesso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        "401":
+          description: Credenciais inválidas
+  /api/auth/logout:
+    post:
+      summary: Sair da sessão atual
+      description: |
+        Encerra a sessão do usuário removendo o cookie de autenticação.  
+        Rota listada como parte das APIs de autenticação【890973672335846†L291-L299】.
+      responses:
         "204":
-          description: Nenhum registro encontrado
-  /clientes:
+          description: Logout realizado com sucesso
+
+  ## ------------------------
+  ## Empresa e Perfil
+  ## ------------------------
+  /api/company:
+    get:
+      summary: Obter dados da empresa atual
+      description: |
+        Retorna as informações da empresa autenticada.  
+        Rota citada em `README.md`【890973672335846†L302-L308】.
+      responses:
+        "200":
+          description: Dados da empresa
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar dados da empresa
+      description: |
+        Atualiza os dados da empresa atual.  
+        Os campos enviados no corpo substituirão os valores existentes.  
+        Rota citada em `README.md`【890973672335846†L302-L308】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyUpdateRequest'
+      responses:
+        "200":
+          description: Empresa atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+  /api/profile:
+    get:
+      summary: Obter perfil do usuário
+      description: |
+        Retorna as informações do usuário autenticado.  
+        Rota citada em `README.md`【890973672335846†L302-L308】.
+      responses:
+        "200":
+          description: Perfil do usuário
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar perfil do usuário
+      description: |
+        Atualiza dados do usuário autenticado, como nome, email ou senha.  
+        Rota citada em `README.md`【890973672335846†L302-L308】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdateRequest'
+      responses:
+        "200":
+          description: Perfil atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Cadastros: Clientes
+  ## ------------------------
+  /api/customers:
     get:
       summary: Listar clientes
-      description: Retorna todos os clientes cadastrados【744901310195182†L3-L59】.
+      description: |
+        Retorna todos os clientes cadastrados da empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L310-L327】.
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Página para paginação (opcional).
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+          description: Quantidade de itens por página (opcional).
       responses:
         "200":
           description: Lista de clientes
@@ -53,58 +197,104 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Cliente'
-        "204":
-          description: Nenhum cliente encontrado
-  /controles:
-    get:
-      summary: Listar controles do sistema
-      description: Exibe os registros de controle, como a versão do sistema【124848214801143†L3-L17】.
+                  $ref: '#/components/schemas/Customer'
+        "401":
+          description: Não autenticado
+    post:
+      summary: Cadastrar cliente
+      description: |
+        Cria um novo cliente para a empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L310-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerCreateRequest'
       responses:
-        "200":
-          description: Lista de controles
+        "201":
+          description: Cliente criado com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Controle'
-        "204":
-          description: Nenhum controle encontrado
-  /empresa:
-    get:
-      summary: Obter dados da empresa
-      description: Retorna os dados da empresa configurada【627712243301178†L3-L43】.
+                $ref: '#/components/schemas/Customer'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar cliente
+      description: |
+        Atualiza os dados de um cliente existente. O corpo deve conter o identificador do cliente e os campos a serem atualizados.  
+        Endpoint listado em `README.md`【890973672335846†L310-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CustomerUpdateRequest'
       responses:
         "200":
-          description: Dados da empresa retornados com sucesso
+          description: Cliente atualizado
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Empresa'
+                $ref: '#/components/schemas/Customer'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    delete:
+      summary: Excluir cliente
+      description: |
+        Remove um cliente pelo identificador informado na query string.  
+        Endpoint listado em `README.md`【890973672335846†L310-L327】.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Identificador do cliente a ser removido.
+      responses:
         "204":
-          description: Nenhum registro encontrado
-  /equipes:
-    get:
-      summary: Listar equipes
-      description: Retorna todas as equipes existentes, incluindo o setor e a situação【893009957163900†L4-L43】.
+          description: Cliente excluído com sucesso
+        "401":
+          description: Não autenticado
+  /api/customers/{id}/create-access:
+    post:
+      summary: Criar acesso de portal para cliente
+      description: |
+        Gera um usuário e credenciais de acesso para um cliente existente, permitindo que ele acompanhe serviços pelo portal.  
+        Esta rota é recomendada no documento de arquitetura SaaS【169360353382499†L175-L183】.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identificador do cliente.
       responses:
         "200":
-          description: Lista de equipes
+          description: Acesso criado com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Equipe'
-        "204":
-          description: Nenhuma equipe encontrada
-  /funcionarios:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Cadastros: Funcionários
+  ## ------------------------
+  /api/employees:
     get:
       summary: Listar funcionários
-      description: Retorna todos os funcionários cadastrados【690778012733600†L5-L66】.
+      description: |
+        Retorna todos os funcionários cadastrados da empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L318-L327】.
       responses:
         "200":
           description: Lista de funcionários
@@ -113,58 +303,104 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Funcionario'
-        "204":
-          description: Nenhum funcionário encontrado
-  /ordens-servicos:
-    get:
-      summary: Listar ordens de serviço
-      description: Retorna todas as ordens de serviço abertas ou concluídas【667099911598614†L6-L85】.
+                  $ref: '#/components/schemas/Employee'
+        "401":
+          description: Não autenticado
+    post:
+      summary: Cadastrar funcionário
+      description: |
+        Cria um novo funcionário para a empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L318-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeCreateRequest'
       responses:
-        "200":
-          description: Lista de ordens de serviço
+        "201":
+          description: Funcionário criado
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OrdemServico'
-        "204":
-          description: Nenhuma ordem encontrada
-  /pre-orcamentos:
-    get:
-      summary: Listar pré‑orçamentos
-      description: Retorna todos os pré‑orçamentos cadastrados【133890943648202†L3-L42】.
+                $ref: '#/components/schemas/Employee'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar funcionário
+      description: |
+        Atualiza os dados de um funcionário existente.  
+        Endpoint listado em `README.md`【890973672335846†L318-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmployeeUpdateRequest'
       responses:
         "200":
-          description: Lista de pré‑orçamentos
+          description: Funcionário atualizado
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PreOrcamento'
+                $ref: '#/components/schemas/Employee'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    delete:
+      summary: Excluir funcionário
+      description: |
+        Remove um funcionário pelo identificador informado na query string.  
+        Endpoint listado em `README.md`【890973672335846†L318-L327】.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Identificador do funcionário a ser removido.
+      responses:
         "204":
-          description: Nenhum pré‑orçamento encontrado
-  /requerimentos:
-    get:
-      summary: Listar requerimentos
-      description: Retorna todos os requerimentos registrados【78070113188095†L6-L88】.
+          description: Funcionário removido
+        "401":
+          description: Não autenticado
+  /api/employees/{id}/create-access:
+    post:
+      summary: Criar acesso de usuário para funcionário
+      description: |
+        Gera um usuário com credenciais de sistema para um funcionário existente.  
+        Esta rota é recomendada no documento de arquitetura SaaS【169360353382499†L175-L183】.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identificador do funcionário.
       responses:
         "200":
-          description: Lista de requerimentos
+          description: Acesso criado com sucesso
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Requerimento'
-        "204":
-          description: Nenhum requerimento encontrado
-  /servicos:
+                $ref: '#/components/schemas/User'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Cadastros: Serviços
+  ## ------------------------
+  /api/services:
     get:
       summary: Listar serviços
-      description: Retorna todos os serviços cadastrados【458227734551936†L3-L41】.
+      description: |
+        Retorna todos os serviços cadastrados da empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L323-L327】.
       responses:
         "200":
           description: Lista de serviços
@@ -173,451 +409,911 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Servico'
-        "204":
-          description: Nenhum serviço encontrado
-  /setores:
-    get:
-      summary: Listar setores
-      description: Retorna todos os setores existentes【936666573802810†L3-L28】.
+                  $ref: '#/components/schemas/Service'
+        "401":
+          description: Não autenticado
+    post:
+      summary: Cadastrar serviço
+      description: |
+        Cria um novo serviço para a empresa autenticada.  
+        Endpoint listado em `README.md`【890973672335846†L323-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceCreateRequest'
+      responses:
+        "201":
+          description: Serviço criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar serviço
+      description: |
+        Atualiza os dados de um serviço existente.  
+        Endpoint listado em `README.md`【890973672335846†L323-L327】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceUpdateRequest'
       responses:
         "200":
-          description: Lista de setores
+          description: Serviço atualizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Service'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    delete:
+      summary: Excluir serviço
+      description: |
+        Remove um serviço pelo identificador informado na query string.  
+        Endpoint listado em `README.md`【890973672335846†L323-L327】.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Identificador do serviço a ser removido.
+      responses:
+        "204":
+          description: Serviço removido
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Ordens de serviço
+  ## ------------------------
+  /api/service-orders:
+    get:
+      summary: Listar ordens de serviço
+      description: |
+        Retorna todas as ordens de serviço da empresa autenticada.  
+        Filtros opcionais permitem listar por status ou por responsável【890973672335846†L331-L343】.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [OPEN, IN_PROGRESS, COMPLETED, CANCELLED]
+          description: Filtrar pelo status da ordem.
+        - name: responsibleEmployeeId
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Filtrar ordens pelo ID do funcionário responsável.
+      responses:
+        "200":
+          description: Lista de ordens de serviço
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Setor'
-        "204":
-          description: Nenhum setor encontrado
-  /tipos-requerimentos:
-    get:
-      summary: Listar tipos de requerimentos
-      description: Retorna todos os tipos de requerimento disponíveis【287770204310926†L3-L39】.
+                  $ref: '#/components/schemas/ServiceOrder'
+        "401":
+          description: Não autenticado
+    post:
+      summary: Cadastrar ordem de serviço
+      description: |
+        Cria uma nova ordem de serviço.  
+        Endpoint listado em `README.md`【890973672335846†L331-L337】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderCreateRequest'
+      responses:
+        "201":
+          description: Ordem de serviço criada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Atualizar ordem de serviço
+      description: |
+        Atualiza dados de uma ordem de serviço existente, como status ou informações adicionais.  
+        Endpoint listado em `README.md`【890973672335846†L331-L337】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceOrderUpdateRequest'
       responses:
         "200":
-          description: Lista de tipos de requerimentos
+          description: Ordem de serviço atualizada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceOrder'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+    delete:
+      summary: Excluir ordem de serviço
+      description: |
+        Remove uma ordem de serviço pelo ID informado na query string.  
+        Endpoint listado em `README.md`【890973672335846†L331-L337】.
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+          description: Identificador da ordem de serviço.
+      responses:
+        "204":
+          description: Ordem removida
+        "401":
+          description: Não autenticado
+  /api/service-orders/{id}/comments:
+    get:
+      summary: Listar comentários da ordem
+      description: |
+        Retorna todos os comentários associados a uma ordem de serviço.  
+        Endpoint listado em `README.md`【890973672335846†L345-L352】.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identificador da ordem de serviço.
+      responses:
+        "200":
+          description: Lista de comentários
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/TipoRequerimento'
-        "204":
-          description: Nenhum tipo encontrado
-  /usuarios:
+                  $ref: '#/components/schemas/Comment'
+        "401":
+          description: Não autenticado
+    post:
+      summary: Adicionar comentário à ordem
+      description: |
+        Adiciona um novo comentário à ordem de serviço especificada.  
+        Endpoint listado em `README.md`【890973672335846†L345-L352】.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Identificador da ordem de serviço.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentCreateRequest'
+      responses:
+        "201":
+          description: Comentário criado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Notificações
+  ## ------------------------
+  /api/notifications:
     get:
-      summary: Listar usuários
-      description: Retorna todos os usuários cadastrados【356398610036450†L3-L58】.
+      summary: Listar notificações
+      description: |
+        Retorna todas as notificações internas do usuário autenticado.  
+        Endpoint listado em `README.md`【890973672335846†L345-L352】.
       responses:
         "200":
-          description: Lista de usuários
+          description: Lista de notificações
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Usuario'
-        "204":
-          description: Nenhum usuário encontrado
-  /veiculos:
-    get:
-      summary: Listar veículos
-      description: Retorna todos os veículos cadastrados【507380931529015†L3-L51】.
+                  $ref: '#/components/schemas/Notification'
+        "401":
+          description: Não autenticado
+    patch:
+      summary: Marcar notificações como lidas
+      description: |
+        Atualiza o status de uma ou mais notificações para lidas.  
+        Endpoint listado em `README.md`【890973672335846†L345-L352】.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids:
+                  type: array
+                  items:
+                    type: string
+                  description: Lista de IDs de notificações a serem marcadas como lidas.
+              required:
+                - ids
       responses:
         "200":
-          description: Lista de veículos
+          description: Notificações atualizadas
+        "400":
+          description: Dados inválidos
+        "401":
+          description: Não autenticado
+
+  ## ------------------------
+  ## Planos de assinatura e usuário atual
+  ## ------------------------
+  /api/subscription-plans:
+    get:
+      summary: Listar planos de assinatura
+      description: |
+        Retorna todos os planos de assinatura disponíveis para contratação.  
+        Rota recomendada na arquitetura SaaS【169360353382499†L105-L120】.
+      responses:
+        "200":
+          description: Lista de planos de assinatura
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Veiculo'
-        "204":
-          description: Nenhum veículo encontrado
+                  $ref: '#/components/schemas/SubscriptionPlan'
+  /api/me:
+    get:
+      summary: Obter informações do usuário autenticado
+      description: |
+        Retorna as informações básicas do usuário autenticado, incluindo ID, nome, email, papel e ID da empresa.  
+        Rota recomendada na arquitetura SaaS【169360353382499†L175-L183】.
+      responses:
+        "200":
+          description: Dados do usuário autenticado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthPayload'
+        "401":
+          description: Não autenticado
 
 components:
   schemas:
-    Boleto:
+    ## Tipos auxiliares
+    PlanId:
+      type: string
+      description: Plano de assinatura escolhido.
+      enum:
+        - STARTER
+        - PRO
+        - ENTERPRISE
+    Role:
+      type: string
+      description: Papel do usuário no sistema【169360353382499†L25-L29】.
+      enum:
+        - OWNER
+        - ADMIN
+        - EMPLOYEE
+        - CUSTOMER
+    Status:
+      type: string
+      description: Status genérico (ativo/inativo).
+      enum:
+        - ACTIVE
+        - INACTIVE
+    OrderStatus:
+      type: string
+      description: Status de uma ordem de serviço.
+      enum:
+        - OPEN
+        - IN_PROGRESS
+        - COMPLETED
+        - CANCELLED
+    SubdomainCheckResponse:
       type: object
       properties:
-        id_boleto:
-          type: integer
-        id_requerimento:
-          type: integer
-        valor_total:
-          type: number
-          format: decimal
-        observacao:
+        available:
+          type: boolean
+          description: Indica se o subdomínio está disponível para uso.
+        exists:
+          type: boolean
+          description: Indica se o subdomínio já existe.
+        reason:
           type: string
-          nullable: true
-        dt_vencimento:
-          type: string
-          format: date
-        dt_baixa:
-          type: string
-          format: date
-          nullable: true
-        id_cliente:
-          type: integer
-        situacao:
-          type: string
-          enum: [PENDENTE, PAGO, CANCELADO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    BoletoServico:
+          description: Motivo da indisponibilidade, quando aplicável.
+      required:
+        - available
+    AuthPayload:
       type: object
+      description: Dados presentes no token de autenticação【4745690822504†L138-L239】.
       properties:
-        id_servico:
-          type: integer
-        id_boleto:
-          type: integer
-        valor:
-          type: number
-          format: decimal
-        dt_estorno:
+        userId:
           type: string
-          format: date
-          nullable: true
-        dt_inclusao:
+        companyId:
           type: string
-          format: date
-          nullable: true
-        dt_vencimento:
+        role:
+          $ref: '#/components/schemas/Role'
+        subdomain:
           type: string
-          format: date
-        complemento:
-          type: string
-        situacao:
-          type: string
-          enum: [PENDENTE, ESTORNADO, INCLUIDO, PAGO, CANCELADO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Cliente:
+      required:
+        - userId
+        - companyId
+        - role
+        - subdomain
+    ## Entidades principais
+    Company:
       type: object
-      properties:
-        id_cliente:
-          type: integer
-        nome:
-          type: string
-        telefone:
-          type: string
-        email:
-          type: string
-        cpf_cnpj:
-          type: string
-        cep:
-          type: string
-        num:
-          type: integer
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        observacao:
-          type: string
-          nullable: true
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Controle:
-      type: object
+      description: Entidade empresa assinante【169360353382499†L33-L47】.
       properties:
         id:
-          type: integer
-        versao_sistema:
           type: string
-        dt_criacao:
+        name:
+          type: string
+        tradeName:
+          type: string
+        document:
+          type: string
+          description: CNPJ ou CPF.
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        subdomain:
+          type: string
+        createdAt:
           type: string
           format: date-time
-        dt_atualizacao:
+        updatedAt:
           type: string
           format: date-time
-    Empresa:
+      required:
+        - id
+        - name
+        - document
+        - subdomain
+        - status
+    User:
       type: object
+      description: Entidade usuário【169360353382499†L49-L64】.
       properties:
-        id_empresa:
-          type: integer
-        nome_empresa:
+        id:
           type: string
-        dt_ref_sistema:
+        companyId:
           type: string
-          format: date
-        cep:
-          type: string
-        num:
-          type: integer
-        cpf_cnpj:
-          type: string
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Equipe:
-      type: object
-      properties:
-        id_equipe:
-          type: integer
-        descricao:
-          type: string
-        id_setor:
-          type: integer
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Funcionario:
-      type: object
-      properties:
-        id_funcionario:
-          type: integer
-        id_user:
-          type: integer
-        nome:
-          type: string
-        id_equipe:
-          type: integer
-        cep:
-          type: string
-        num:
-          type: integer
-        cpf_cnpj:
-          type: string
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    OrdemServico:
-      type: object
-      properties:
-        id_os:
-          type: integer
-        id_requerimento:
-          type: integer
-        descricao:
-          type: string
-        dt_inicio:
-          type: string
-          format: date
-          nullable: true
-        dt_termino:
-          type: string
-          format: date
-          nullable: true
-        dt_cancelamento:
-          type: string
-          format: date
-          nullable: true
-        id_veiculo:
-          type: integer
-        id_funcionario:
-          type: integer
-        km_rodados:
-          type: integer
-        situacao:
-          type: string
-          enum: [EM_ABERTO, EM_ANDAMENTO, CONCLUIDA, CANCELADA]
-        observacao:
-          type: string
-          nullable: true
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    PreOrcamento:
-      type: object
-      properties:
-        id_pre_orcamento:
-          type: integer
-        descricao:
-          type: string
-        id_servico:
-          type: integer
-        tipo_requerimento:
-          type: integer
-        valor:
-          type: number
-          format: decimal
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Requerimento:
-      type: object
-      properties:
-        id_requerimento:
-          type: integer
-        nome_requerente:
-          type: string
-        cep_requerente:
-          type: string
-        num_requerente:
-          type: integer
-        cep_servico:
-          type: string
-        num_servico:
-          type: integer
-        cpf_cnpj:
-          type: string
-        id_cliente:
-          type: integer
-        id_funcionario:
-          type: integer
-        tipo_requerimento:
-          type: integer
-        observacao:
-          type: string
-          nullable: true
-        situacao:
-          type: string
-          enum: [ABERTO, EM_ANDAMENTO, CONCLUIDO, CANCELADO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Servico:
-      type: object
-      properties:
-        id_servico:
-          type: integer
-        descricao:
-          type: string
-        tipo:
-          type: string
-          enum: [MANUTENCAO, INSTALACAO, SUPORTE, OUTROS]
-        valor:
-          type: number
-          format: decimal
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Setor:
-      type: object
-      properties:
-        id_setor:
-          type: integer
-        descricao:
-          type: string
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    TipoRequerimento:
-      type: object
-      properties:
-        id_tipo_requerimento:
-          type: integer
-        descricao:
-          type: string
-        emite_orcamento:
-          type: boolean
-        emite_os:
-          type: boolean
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        dt_criacao:
-          type: string
-          format: date-time
-        dt_atualizacao:
-          type: string
-          format: date-time
-    Usuario:
-      type: object
-      properties:
-        id_user:
-          type: integer
-        user:
-          type: string
-        nome:
+        name:
           type: string
         email:
           type: string
-        cpf_cnpj:
-          type: string
-        cep:
-          type: string
-        num:
-          type: integer
-        situacao:
-          type: string
-          enum: [ATIVO, INATIVO]
-        is_admin:
-          type: boolean
-        api_key:
-          type: string
-        dt_criacao:
+          format: email
+        role:
+          $ref: '#/components/schemas/Role'
+        status:
+          $ref: '#/components/schemas/Status'
+        lastLoginAt:
           type: string
           format: date-time
-        dt_atualizacao:
+        createdAt:
           type: string
           format: date-time
-    Veiculo:
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyId
+        - name
+        - email
+        - role
+        - status
+    Customer:
       type: object
+      description: Entidade cliente【169360353382499†L66-L80】.
       properties:
-        id_veiculo:
-          type: integer
-        modelo:
+        id:
           type: string
-        marca:
+        companyId:
           type: string
-        placa:
+        userId:
           type: string
-        km_rodados:
-          type: integer
-        dt_ult_manutencao:
-          type: string
-          format: date
           nullable: true
-        situacao:
+        name:
           type: string
-          enum: [ATIVO, MANUTENCAO, INATIVO]
-        dt_criacao:
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        createdAt:
           type: string
           format: date-time
-        dt_atualizacao:
+        updatedAt:
           type: string
           format: date-time
+      required:
+        - id
+        - companyId
+        - name
+    Employee:
+      type: object
+      description: Entidade funcionário【169360353382499†L84-L100】.
+      properties:
+        id:
+          type: string
+        companyId:
+          type: string
+        userId:
+          type: string
+          nullable: true
+        name:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        hasSystemAccess:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyId
+        - name
+    Service:
+      type: object
+      description: Entidade serviço oferecido pela empresa. Os campos se baseiam nos modelos originais do Express e nos requisitos do SaaS.
+      properties:
+        id:
+          type: string
+        companyId:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/Status'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyId
+        - name
+        - price
+    ServiceOrder:
+      type: object
+      description: Entidade ordem de serviço que organiza solicitações de clientes.
+      properties:
+        id:
+          type: string
+        companyId:
+          type: string
+        customerId:
+          type: string
+        serviceIds:
+          type: array
+          items:
+            type: string
+          description: Lista de IDs de serviços incluídos na ordem.
+        responsibleEmployeeId:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        title:
+          type: string
+        description:
+          type: string
+        total:
+          type: number
+          format: double
+        openedAt:
+          type: string
+          format: date-time
+        dueDate:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - companyId
+        - customerId
+        - serviceIds
+        - status
+        - openedAt
+    Comment:
+      type: object
+      description: Comentário dentro de uma ordem de serviço.
+      properties:
+        id:
+          type: string
+        serviceOrderId:
+          type: string
+        userId:
+          type: string
+        content:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - serviceOrderId
+        - userId
+        - content
+    Notification:
+      type: object
+      description: Notificação interna para um usuário.
+      properties:
+        id:
+          type: string
+        userId:
+          type: string
+        message:
+          type: string
+        read:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - message
+        - read
+    SubscriptionPlan:
+      type: object
+      description: Plano de assinatura disponível【169360353382499†L105-L120】.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        monthlyPrice:
+          type: number
+          format: double
+        annualPrice:
+          type: number
+          format: double
+        maxUsers:
+          type: integer
+        maxCustomers:
+          type: integer
+        maxOrders:
+          type: integer
+        features:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+      required:
+        - id
+        - name
+        - monthlyPrice
+        - isActive
+    ## Schemas de requisição
+    RegisterCompanyRequest:
+      type: object
+      description: Dados necessários para registrar uma nova empresa e seu proprietário.
+      properties:
+        ownerName:
+          type: string
+        ownerEmail:
+          type: string
+          format: email
+        ownerPassword:
+          type: string
+        companyName:
+          type: string
+        tradeName:
+          type: string
+        document:
+          type: string
+        companyEmail:
+          type: string
+          format: email
+        companyPhone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+        subdomain:
+          type: string
+        plan:
+          $ref: '#/components/schemas/PlanId'
+        rememberMe:
+          type: boolean
+      required:
+        - ownerName
+        - ownerEmail
+        - ownerPassword
+        - companyName
+        - document
+        - subdomain
+        - plan
+    RegisterCompanyResponse:
+      type: object
+      description: Resposta ao registrar empresa.
+      properties:
+        company:
+          $ref: '#/components/schemas/Company'
+        owner:
+          $ref: '#/components/schemas/User'
+        redirectTo:
+          type: string
+          description: URL de redirecionamento após o cadastro (ex. `/dashboard`).
+    LoginRequest:
+      type: object
+      description: Dados necessários para efetuar login.
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        rememberMe:
+          type: boolean
+      required:
+        - email
+        - password
+    LoginResponse:
+      type: object
+      description: Resposta de login.
+      properties:
+        redirectTo:
+          type: string
+          description: URL de redirecionamento após login.
+    CompanyUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar a empresa.
+      properties:
+        name:
+          type: string
+        tradeName:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        status:
+          $ref: '#/components/schemas/Status'
+        subdomain:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        zipCode:
+          type: string
+    UserUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar o usuário.
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+        role:
+          $ref: '#/components/schemas/Role'
+    CustomerCreateRequest:
+      type: object
+      description: Dados necessários para criar um cliente.
+      properties:
+        name:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+      required:
+        - name
+    CustomerUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar um cliente.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+    EmployeeCreateRequest:
+      type: object
+      description: Dados necessários para criar um funcionário.
+      properties:
+        name:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        hasSystemAccess:
+          type: boolean
+      required:
+        - name
+    EmployeeUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar um funcionário.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        document:
+          type: string
+        email:
+          type: string
+          format: email
+        phone:
+          type: string
+        position:
+          type: string
+        hasSystemAccess:
+          type: boolean
+    ServiceCreateRequest:
+      type: object
+      description: Dados necessários para criar um serviço.
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+      required:
+        - name
+        - price
+    ServiceUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar um serviço.
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: double
+        status:
+          $ref: '#/components/schemas/Status'
+    ServiceOrderCreateRequest:
+      type: object
+      description: Dados necessários para criar uma ordem de serviço.
+      properties:
+        customerId:
+          type: string
+        serviceIds:
+          type: array
+          items:
+            type: string
+        title:
+          type: string
+        description:
+          type: string
+        total:
+          type: number
+          format: double
+        dueDate:
+          type: string
+          format: date-time
+        responsibleEmployeeId:
+          type: string
+      required:
+        - customerId
+        - serviceIds
+        - title
+    ServiceOrderUpdateRequest:
+      type: object
+      description: Campos permitidos para atualizar uma ordem de serviço.
+      properties:
+        id:
+          type: string
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        title:
+          type: string
+        description:
+          type: string
+        total:
+          type: number
+          format: double
+        dueDate:
+          type: string
+          format: date-time
+        responsibleEmployeeId:
+          type: string
+    CommentCreateRequest:
+      type: object
+      description: Dados necessários para adicionar um comentário.
+      properties:
+        content:
+          type: string
+      required:
+        - content

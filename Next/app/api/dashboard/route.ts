@@ -1,7 +1,6 @@
-import { NextResponse } from 'next/server'
-import { Priority, PrismaClient, ServiceOrderStatus } from '@prisma/client'
-
-const prisma = new PrismaClient()
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { Priority, ServiceOrderStatus } from '@prisma/client'
 
 const STATUS_ORDER: ServiceOrderStatus[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'FINISHED', 'CANCELED']
 const PRIORITY_ORDER: Priority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
@@ -245,3 +244,5 @@ export async function GET(req: Request) {
 
   return NextResponse.json(payload)
 }
+
+

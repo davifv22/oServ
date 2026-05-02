@@ -1,11 +1,9 @@
-import { NextResponse } from 'next/server'
-import { CompanyPlan, PrismaClient } from '@prisma/client'
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { CompanyPlan } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 import { signAuthHandoffToken, signAuthToken } from '@/lib/auth'
 import { buildTenantUrl, getCookieDomain, isValidSubdomain, resolveRequestOrigin, sanitizeSubdomain } from '@/lib/tenant'
-
-const prisma = new PrismaClient()
-
 const ALLOWED_PLANS: CompanyPlan[] = ['STARTER', 'PRO', 'ENTERPRISE']
 
 type RegisterCompanyBody = {
@@ -149,3 +147,6 @@ export async function POST(req: Request) {
 
   return response
 }
+
+
+

@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { removeImageByPublicPath, saveImageFile } from '@/lib/upload'
-
-const prisma = new PrismaClient()
-
 function getCompanyId(req: Request) {
   return req.headers.get('x-company-id')
 }
@@ -95,3 +92,4 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json(updated)
 }
+

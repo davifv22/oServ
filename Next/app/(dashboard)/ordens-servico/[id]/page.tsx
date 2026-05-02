@@ -1,6 +1,13 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
+import { Textarea } from '@/components/ui/textarea'
+import { formatCurrencyBRL, formatCurrencyInput, formatPhone, numberToCurrencyInput, parseCurrencyInput } from '@/lib/br'
 import Loader from '@/components/Loader'
 import Toast from '@/components/Toast'
 import { exportServiceOrderPdf } from '@/lib/pdf'
@@ -27,7 +34,7 @@ function initials(name?: string) {
 
 function highlightMentions(message: string) {
   return message.split(/(@[\w.-]+)/g).map((part, index) => {
-    if (part.startsWith('@')) return <strong key={index} className="text-primary">{part}</strong>
+    if (part.startsWith('@')) return <strong key={index} className="text-app-accent">{part}</strong>
     return <span key={index}>{part}</span>
   })
 }
@@ -106,20 +113,24 @@ function priorityLabel(priority?: string) {
 }
 
 function statusBadgeClass(status?: string) {
-  if (status === 'OPEN') return 'bg-primary'
-  if (status === 'IN_PROGRESS') return 'bg-info badge-contrast'
-  if (status === 'WAITING_CUSTOMER') return 'bg-warning badge-contrast'
-  if (status === 'FINISHED') return 'bg-success'
-  if (status === 'CANCELED') return 'bg-danger'
-  return 'bg-secondary'
+  if (status === 'OPEN') return 'border-sky-400/30 bg-sky-500/20 text-sky-100'
+  if (status === 'IN_PROGRESS') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
+  if (status === 'WAITING_CUSTOMER') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (status === 'FINISHED') return 'border-emerald-400/30 bg-emerald-500/20 text-emerald-100'
+  if (status === 'CANCELED') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
 }
 
 function priorityBadgeClass(priority?: string) {
-  if (priority === 'LOW') return 'bg-secondary'
-  if (priority === 'MEDIUM') return 'bg-info badge-contrast'
-  if (priority === 'HIGH') return 'bg-warning badge-contrast'
-  if (priority === 'URGENT') return 'bg-danger'
-  return 'bg-secondary'
+  if (priority === 'LOW') return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+  if (priority === 'MEDIUM') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
+  if (priority === 'HIGH') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (priority === 'URGENT') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+}
+
+function pillClassName(tone: string) {
+  return `inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${tone}`
 }
 
 export default function ServiceOrderDetail({ params }: { params: { id: string } }) {
@@ -133,6 +144,12 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
   const [toast, setToast] = useState<any>(null)
   const [editModalOpen, setEditModalOpen] = useState(false)
   const [timelineModalOpen, setTimelineModalOpen] = useState(false)
+  const [printModalOpen, setPrintModalOpen] = useState(false)
+  const [printingPdf, setPrintingPdf] = useState(false)
+  const [printOptions, setPrintOptions] = useState({
+    includeComments: true,
+    includeTimeline: true
+  })
   const [editSaving, setEditSaving] = useState(false)
   const loadErrorShownRef = useRef(false)
   const [editForm, setEditForm] = useState<any>({
@@ -142,7 +159,8 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
     responsibleEmployeeId: '',
     status: 'OPEN',
     priority: 'MEDIUM',
-    total: 0
+    total: 0,
+    totalInput: '0,00'
   })
 
   async function load() {
@@ -178,16 +196,32 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
     }
   }
 
-  async function printOrderPdf() {
+  function openPrintModal() {
     if (!order) {
-      setToast({ message: 'Dados da OS ainda não carregaram', type: 'error' })
+      setToast({ message: 'Dados da OS ainda nao carregaram', type: 'error' })
       return
     }
 
+    setPrintModalOpen(true)
+  }
+
+  async function printOrderPdf() {
+    if (!order) return
+
+    const pipelineTimeline = timeline.filter(item => item?.type !== 'comment')
+    setPrintingPdf(true)
+
     try {
-      await exportServiceOrderPdf(order, comments, `os-${params.id}.pdf`)
+      await exportServiceOrderPdf(order, comments, `os-${params.id}.pdf`, {
+        includeComments: printOptions.includeComments,
+        includeTimeline: printOptions.includeTimeline,
+        timeline: pipelineTimeline
+      })
+      setPrintModalOpen(false)
     } catch {
       setToast({ message: 'Erro ao gerar PDF da OS', type: 'error' })
+    } finally {
+      setPrintingPdf(false)
     }
   }
 
@@ -252,7 +286,8 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
       responsibleEmployeeId: order.responsibleEmployeeId || '',
       status: order.status || 'OPEN',
       priority: order.priority || 'MEDIUM',
-      total: Number(order.total || 0)
+      total: Number(order.total || 0),
+      totalInput: numberToCurrencyInput(order.total || 0)
     })
 
     setEditModalOpen(true)
@@ -264,6 +299,12 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
     if (!order?.id) return
     if (!String(editForm.title || '').trim()) {
       setToast({ message: 'Informe o titulo da OS', type: 'error' })
+      return
+    }
+
+    const parsedTotal = parseCurrencyInput(editForm.totalInput)
+    if (parsedTotal < 0) {
+      setToast({ message: 'Informe um valor total valido', type: 'error' })
       return
     }
 
@@ -281,7 +322,7 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
           responsibleEmployeeId: editForm.responsibleEmployeeId || null,
           status: editForm.status,
           priority: editForm.priority,
-          total: Number(editForm.total || 0)
+          total: parsedTotal
         })
       })
 
@@ -306,275 +347,352 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
   }
 
   return (
-    <div className="service-order-detail-page">
-      <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div className="service-order-detail-page space-y-4">
+      <div className="flex flex-wrap justify-between items-start gap-3">
         <div>
-          <a href="/ordens-servico" className="btn btn-sm btn-outline-secondary mb-3">Voltar para Kanban</a>
-          <h2 className="mb-1">Detalhes da Ordem de Servico</h2>
-          <p className="text-muted mb-0">Comentarios, interacao da equipe e timeline completa da OS.</p>
+          <Button variant="outline" size="sm" className="mb-3 bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" asChild>
+            <a href="/ordens-servico?view=kanban">
+              <i className="fa-solid fa-arrow-left mr-1" />
+              Voltar para Kanban
+            </a>
+          </Button>
+          <h2 className="text-3xl font-bold">Detalhes da Ordem de Servico</h2>
+          <p className="text-muted-foreground">Comentarios, interacao da equipe e timeline completa da OS.</p>
         </div>
 
-        <div className="card p-3 service-order-summary-card">
-          <small className="text-muted">Identificador da OS</small>
-          <strong className="text-break">{params.id}</strong>
-          <small className="text-muted mt-2">{loading ? 'Sincronizando...' : 'Atualizacao automatica ativa'}</small>
-        </div>
+        <Card className="service-order-summary-card min-w-[220px]">
+          <CardContent className="p-3 space-y-1">
+            <small className="text-muted-foreground block">Identificador da OS</small>
+            <strong className="break-all">{params.id}</strong>
+            <small className="text-muted-foreground block pt-1">{loading ? 'Sincronizando...' : 'Atualizacao automatica ativa'}</small>
+          </CardContent>
+        </Card>
       </div>
 
-      <div className="card p-3 p-md-4 mb-4">
-        <div className="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-3">
-          <div className="min-w-0">
-            <h5 className="mb-1 text-break">{order?.title || 'OS sem titulo'}</h5>
-            <small className="text-muted d-block">ID: {params.id}</small>
-            <small className="text-muted d-block">Comentarios: {comments.length} | Eventos: {timeline.length}</small>
-          </div>
+      <Card>
+        <CardContent className="p-4 space-y-4">
+          <div className="flex flex-wrap justify-between items-start gap-3">
+            <div className="min-w-0">
+              <h5 className="mb-1 text-xl font-semibold break-words">{order?.title || 'OS sem titulo'}</h5>
+              <small className="text-muted-foreground block">ID: {params.id}</small>
+              <small className="text-muted-foreground block">Comentarios: {comments.length} | Eventos: {timeline.length}</small>
+            </div>
 
-          <div className="d-flex flex-wrap gap-2 align-items-center">
-            <span className={`badge ${statusBadgeClass(order?.status)}`}>{statusLabel(order?.status)}</span>
-            <span className={`badge ${priorityBadgeClass(order?.priority)}`}>{priorityLabel(order?.priority)}</span>
-            <button className="btn btn-sm btn-outline-primary" onClick={() => void printOrderPdf()}>
-              <i className="fa-regular fa-print me-1" />
-              Imprimir OS
-            </button>
-            <button className="btn btn-sm btn-outline-primary" onClick={openEditModal}>
-              <i className="fa-regular fa-pen-to-square me-1" />
-              Editar OS
-            </button>
-            <button className="btn btn-sm btn-outline-secondary" onClick={() => setTimelineModalOpen(true)}>
-              <i className="fa-regular fa-clock me-1" />
-              Abrir timeline
-            </button>
-          </div>
-        </div>
-
-        <div className="row g-3">
-          <div className="col-12">
-            <label className="form-label mb-1 text-muted">Descricao</label>
-            <div className="card p-3">
-              {order?.description?.trim() ? (
-                <p className="mb-0" style={{ whiteSpace: 'pre-wrap' }}>{order.description}</p>
-              ) : (
-                <small className="text-muted">Sem descricao informada.</small>
-              )}
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className={pillClassName(statusBadgeClass(order?.status))}>{statusLabel(order?.status)}</span>
+              <span className={pillClassName(priorityBadgeClass(order?.priority))}>{priorityLabel(order?.priority)}</span>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={openPrintModal}>
+                <i className="fa fa-print mr-1" />
+                Imprimir OS
+              </Button>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={openEditModal}>
+                <i className="fa-regular fa-pen-to-square mr-1" />
+                Editar OS
+              </Button>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setTimelineModalOpen(true)}>
+                <i className="fa-regular fa-clock mr-1" />
+                Abrir timeline
+              </Button>
             </div>
           </div>
 
-          <div className="col-md-4">
-            <label className="form-label mb-1 text-muted">Cliente</label>
-            <div><strong>{order?.customer?.name || 'Sem cliente'}</strong></div>
-            <small className="text-muted d-block">Email: {order?.customer?.email || '-'}</small>
-            <small className="text-muted d-block">Telefone: {order?.customer?.phone || '-'}</small>
-          </div>
+          <div className="grid gap-3 md:grid-cols-12">
+            <div className="md:col-span-12 space-y-2">
+              <label className="text-sm text-muted-foreground">Descricao</label>
+                  {order?.description?.trim() ? (
+                    <p className="mb-0 whitespace-pre-wrap">{order.description}</p>
+                  ) : (
+                    <small className="text-muted-foreground">Sem descricao informada.</small>
+                  )}
+            </div>
 
-          <div className="col-md-4">
-            <label className="form-label mb-1 text-muted">Responsavel</label>
-            <div><strong>{order?.responsibleEmployee?.name || 'Sem responsavel'}</strong></div>
-            <small className="text-muted d-block">Email: {order?.responsibleEmployee?.email || '-'}</small>
-            <small className="text-muted d-block">Telefone: {order?.responsibleEmployee?.phone || '-'}</small>
-          </div>
+            <div className="md:col-span-4 space-y-1">
+              <label className="text-sm text-muted-foreground">Cliente</label>
+              <strong className="block">{order?.customer?.name || 'Sem cliente'}</strong>
+              <small className="text-muted-foreground block">Email: {order?.customer?.email || '-'}</small>
+              <small className="text-muted-foreground block">Telefone: {formatPhone(order?.customer?.phone) || '-'}</small>
+            </div>
 
-          <div className="col-md-4">
-            <label className="form-label mb-1 text-muted">Financeiro e datas</label>
-            <div><strong>R$ {Number(order?.total || 0).toFixed(2)}</strong></div>
-            <small className="text-muted d-block">Criada em: {formatDateTime(order?.createdAt)}</small>
-            <small className="text-muted d-block">Atualizada em: {formatDateTime(order?.updatedAt)}</small>
-          </div>
-        </div>
-      </div>
+            <div className="md:col-span-4 space-y-1">
+              <label className="text-sm text-muted-foreground">Responsavel</label>
+              <strong className="block">{order?.responsibleEmployee?.name || 'Sem responsavel'}</strong>
+              <small className="text-muted-foreground block">Email: {order?.responsibleEmployee?.email || '-'}</small>
+              <small className="text-muted-foreground block">Telefone: {formatPhone(order?.responsibleEmployee?.phone) || '-'}</small>
+            </div>
 
-      <div className="row g-4">
-        <div className="col-12 col-xl-7">
-          <div className="card p-3 p-md-4 mb-4">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <div>
-                <h5 className="mb-1">Comentarios</h5>
-                <small className="text-muted">Use @nome para mencionar alguem da equipe.</small>
+            <div className="md:col-span-4 space-y-1">
+              <label className="text-sm text-muted-foreground">Financeiro e datas</label>
+              <strong className="block">{formatCurrencyBRL(order?.total || 0)}</strong>
+              <small className="text-muted-foreground block">Criada em: {formatDateTime(order?.createdAt)}</small>
+              <small className="text-muted-foreground block">Atualizada em: {formatDateTime(order?.updatedAt)}</small>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-4 xl:grid-cols-12">
+        <div className="xl:col-span-7 space-y-4">
+          <Card>
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center gap-3">
+                <div>
+                  <CardTitle>Comentarios</CardTitle>
+                  <small className="text-muted-foreground">Use @nome para mencionar alguem da equipe.</small>
+                </div>
+                <span className="inline-flex min-w-6 items-center justify-center rounded-full border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs text-muted-foreground">{comments.length}</span>
               </div>
-              <span className="badge bg-secondary">{comments.length}</span>
-            </div>
-
-            <div className="comments-list">
-              {comments.length === 0 && <small className="text-muted">Nenhum comentario ainda.</small>}
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {comments.length === 0 && <small className="text-muted-foreground">Nenhum comentario ainda.</small>}
 
               {comments.map(comment => (
-                <div key={comment.id} className="comment-bubble-row">
-                  <span className="responsible-avatar">{initials(comment.author?.name)}</span>
+                <div key={comment.id} className="flex items-start gap-2">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-app-border bg-app-surface-alt text-xs font-semibold text-app-text">
+                    {initials(comment.author?.name)}
+                  </span>
 
-                  <div className="comment-bubble">
-                    <div className="d-flex flex-wrap justify-content-between gap-2">
+                  <div className="flex-1 rounded-xl border border-app-border bg-app-surface p-3">
+                    <div className="flex flex-wrap justify-between gap-2">
                       <strong>{comment.author?.name || 'Usuario'}</strong>
-                      <small className="text-muted">{formatDateTime(comment.createdAt)}</small>
+                      <small className="text-muted-foreground">{formatDateTime(comment.createdAt)}</small>
                     </div>
 
                     <div className="mt-1">{highlightMentions(comment.message)}</div>
                   </div>
                 </div>
               ))}
-            </div>
-          </div>
+              <form onSubmit={sendComment} className="space-y-3">
+                <Textarea
+                  rows={4}
+                  value={message}
+                  onChange={e => setMessage(e.target.value)}
+                  placeholder="Digite uma atualizacao da OS. Ex: @joao verificar arte final."
+                />
 
-          <form onSubmit={sendComment} className="card p-3 p-md-4">
-            <label className="form-label fw-semibold">Novo comentario</label>
-            <textarea
-              className="form-control"
-              rows={4}
-              value={message}
-              onChange={e => setMessage(e.target.value)}
-              placeholder="Digite uma atualizacao da OS. Ex: @joao verificar arte final."
-            />
-
-            <div className="d-flex justify-content-end mt-3">
-              <button className="btn btn-primary">Enviar comentario</button>
-            </div>
-          </form>
+                <div className="flex justify-end">
+                  <Button className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent">Enviar comentario</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
         </div>
 
-        <div className="col-12 col-xl-5">
-          <div className="card p-3 p-md-4 timeline-card">
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <div>
-                <h5 className="mb-1">Timeline da OS</h5>
-                <small className="text-muted">Abra em modal para visualizar o historico completo com scroll.</small>
+        <div className="xl:col-span-5">
+          <Card className="timeline-card">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-center gap-3">
+                <div>
+                  <CardTitle>Timeline da OS</CardTitle>
+                  <small className="text-muted-foreground">Abra em modal para visualizar o historico completo com scroll.</small>
+                </div>
+                <span className="inline-flex min-w-6 items-center justify-center rounded-full border border-app-border bg-app-surface-alt px-2 py-0.5 text-xs text-muted-foreground">{timeline.length}</span>
               </div>
-              <span className="badge bg-primary">{timeline.length}</span>
-            </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {lastTimelineItem ? (
+                <Card className="shadow-none border-app-border bg-app-surface">
+                  <CardContent className="p-3">
+                    <small className="text-muted-foreground block">Ultimo evento</small>
+                    <strong className="block mt-1">{lastTimelineItem.actor?.name || 'Sistema'}</strong>
+                    <small className="text-muted-foreground block">{formatDateTime(lastTimelineItem.createdAt)}</small>
+                    <p className="mt-2 mb-0">
+                      {lastTimelineItem.type === 'comment' ? lastTimelineItem.message : localizeStatusTokens(lastTimelineItem.message)}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <small className="text-muted-foreground">Nenhum historico ainda.</small>
+              )}
 
-            {lastTimelineItem ? (
-              <div className="card p-3">
-                <small className="text-muted d-block">Ultimo evento</small>
-                <strong className="d-block mt-1">{lastTimelineItem.actor?.name || 'Sistema'}</strong>
-                <small className="text-muted d-block">{formatDateTime(lastTimelineItem.createdAt)}</small>
-                <p className="mb-0 mt-2">
-                  {lastTimelineItem.type === 'comment' ? lastTimelineItem.message : localizeStatusTokens(lastTimelineItem.message)}
-                </p>
-              </div>
-            ) : (
-              <small className="text-muted">Nenhum historico ainda.</small>
-            )}
-
-            <button className="btn btn-outline-primary w-100 mt-3" onClick={() => setTimelineModalOpen(true)}>
-              <i className="fa-regular fa-clock me-1" />
-              Abrir timeline completa
-            </button>
-          </div>
+              <Button variant="outline" className="w-full bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setTimelineModalOpen(true)}>
+                <i className="fa-regular fa-clock mr-1" />
+                Abrir timeline completa
+              </Button>
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {editModalOpen && (
-        <div className="modal-backdrop-custom" onClick={() => setEditModalOpen(false)}>
-          <div className="modal-card modal-card-lg" onClick={e => e.stopPropagation()}>
-            <div className="d-flex justify-content-between align-items-start mb-3">
-              <div>
-                <h5 className="mb-1">Editar Ordem de Servico</h5>
-                <small className="text-muted">Atualize os dados principais da OS.</small>
-              </div>
-              <button className="btn btn-sm btn-outline-secondary" onClick={() => setEditModalOpen(false)}>Fechar</button>
+      {printModalOpen && (
+        <div className="modal-backdrop-custom" onClick={() => { if (!printingPdf) setPrintModalOpen(false) }}>
+          <Card className="modal-card" onClick={e => e.stopPropagation()}>
+            <div className="space-y-2 mb-4">
+              <h5 className="text-lg font-semibold">Confirmar impressao da OS</h5>
+              <small className="text-muted-foreground">Escolha o que deseja incluir no PDF.</small>
             </div>
 
-            <form onSubmit={saveOrderChanges}>
-              <div className="row g-3">
-                <div className="col-md-6">
-                  <label className="form-label">Titulo</label>
-                  <input className="form-control" value={editForm.title || ''} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={printOptions.includeComments}
+                  onChange={e => setPrintOptions(prev => ({ ...prev, includeComments: e.target.checked }))}
+                  disabled={printingPdf}
+                />
+                Incluir comentarios
+              </label>
+
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox
+                  checked={printOptions.includeTimeline}
+                  onChange={e => setPrintOptions(prev => ({ ...prev, includeTimeline: e.target.checked }))}
+                  disabled={printingPdf}
+                />
+                Incluir pipeline/timeline
+              </label>
+            </div>
+
+            <div className="flex justify-end gap-2 mt-5">
+              <Button
+                type="button"
+                variant="outline"
+                className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text"
+                onClick={() => setPrintModalOpen(false)}
+                disabled={printingPdf}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="button"
+                className="bg-emerald-600 hover:bg-emerald-700 text-white"
+                onClick={() => void printOrderPdf()}
+                disabled={printingPdf}
+              >
+                {printingPdf ? 'Gerando PDF...' : 'Imprimir agora'}
+              </Button>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {editModalOpen && (
+        <div className="modal-backdrop-custom" onClick={() => setEditModalOpen(false)}>
+          <Card className="modal-card modal-card-lg" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-start gap-3 mb-3">
+              <div>
+                <h5 className="mb-1 text-lg font-semibold">Editar Ordem de Servico</h5>
+                <small className="text-muted-foreground">Atualize os dados principais da OS.</small>
+              </div>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setEditModalOpen(false)}>Fechar</Button>
+            </div>
+
+            <form onSubmit={saveOrderChanges} className="space-y-4">
+              <div className="grid gap-3 md:grid-cols-12">
+                <div className="md:col-span-6 space-y-2">
+                  <label className="text-sm font-medium">Titulo</label>
+                  <Input value={editForm.title || ''} onChange={e => setEditForm({ ...editForm, title: e.target.value })} />
                 </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Cliente</label>
-                  <select className="form-select" value={editForm.customerId || ''} onChange={e => setEditForm({ ...editForm, customerId: e.target.value })}>
+                <div className="md:col-span-6 space-y-2">
+                  <label className="text-sm font-medium">Cliente</label>
+                  <Select value={editForm.customerId || ''} onChange={e => setEditForm({ ...editForm, customerId: e.target.value })}>
                     <option value="">Sem cliente</option>
                     {customers.map(customer => <option key={customer.id} value={customer.id}>{customer.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
 
-                <div className="col-md-6">
-                  <label className="form-label">Responsavel</label>
-                  <select className="form-select" value={editForm.responsibleEmployeeId || ''} onChange={e => setEditForm({ ...editForm, responsibleEmployeeId: e.target.value })}>
+                <div className="md:col-span-6 space-y-2">
+                  <label className="text-sm font-medium">Responsavel</label>
+                  <Select value={editForm.responsibleEmployeeId || ''} onChange={e => setEditForm({ ...editForm, responsibleEmployeeId: e.target.value })}>
                     <option value="">Sem responsavel</option>
                     {employees.map(employee => <option key={employee.id} value={employee.id}>{employee.name}</option>)}
-                  </select>
+                  </Select>
                 </div>
 
-                <div className="col-md-3">
-                  <label className="form-label">Status</label>
-                  <select className="form-select" value={editForm.status || 'OPEN'} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
+                <div className="md:col-span-3 space-y-2">
+                  <label className="text-sm font-medium">Status</label>
+                  <Select value={editForm.status || 'OPEN'} onChange={e => setEditForm({ ...editForm, status: e.target.value })}>
                     {statusOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                  </select>
+                  </Select>
                 </div>
 
-                <div className="col-md-3">
-                  <label className="form-label">Prioridade</label>
-                  <select className="form-select" value={editForm.priority || 'MEDIUM'} onChange={e => setEditForm({ ...editForm, priority: e.target.value })}>
+                <div className="md:col-span-3 space-y-2">
+                  <label className="text-sm font-medium">Prioridade</label>
+                  <Select value={editForm.priority || 'MEDIUM'} onChange={e => setEditForm({ ...editForm, priority: e.target.value })}>
                     {priorityOptions.map(option => <option key={option.value} value={option.value}>{option.label}</option>)}
-                  </select>
+                  </Select>
                 </div>
 
-                <div className="col-md-4">
-                  <label className="form-label">Valor total</label>
-                  <input className="form-control" type="number" value={editForm.total ?? 0} onChange={e => setEditForm({ ...editForm, total: Number(e.target.value) })} />
+                <div className="md:col-span-4 space-y-2">
+                  <label className="text-sm font-medium">Valor total</label>
+                  <Input
+                    inputMode="numeric"
+                    value={editForm.totalInput || '0,00'}
+                    onChange={e => {
+                      const masked = formatCurrencyInput(e.target.value)
+                      setEditForm({ ...editForm, totalInput: masked, total: parseCurrencyInput(masked) })
+                    }}
+                  />
                 </div>
 
-                <div className="col-12">
-                  <label className="form-label">Descricao</label>
-                  <textarea className="form-control" rows={4} value={editForm.description || ''} onChange={e => setEditForm({ ...editForm, description: e.target.value })} />
+                <div className="md:col-span-12 space-y-2">
+                  <label className="text-sm font-medium">Descricao</label>
+                  <Textarea rows={4} value={editForm.description || ''} onChange={e => setEditForm({ ...editForm, description: e.target.value })} />
                 </div>
               </div>
 
-              <div className="d-flex justify-content-end gap-2 mt-4">
-                <button type="button" className="btn btn-outline-secondary" onClick={() => setEditModalOpen(false)}>Cancelar</button>
-                <button className="btn btn-success" disabled={editSaving}>{editSaving ? 'Salvando...' : 'Salvar alteracoes'}</button>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setEditModalOpen(false)}>Cancelar</Button>
+                <Button className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={editSaving}>{editSaving ? 'Salvando...' : 'Salvar alteracoes'}</Button>
               </div>
             </form>
-          </div>
+          </Card>
         </div>
       )}
 
       {timelineModalOpen && (
         <div className="modal-backdrop-custom" onClick={() => setTimelineModalOpen(false)}>
-          <div className="modal-card modal-card-lg" onClick={e => e.stopPropagation()}>
-            <div className="d-flex justify-content-between align-items-start mb-3">
+          <Card className="modal-card modal-card-lg" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-start gap-3 mb-3">
               <div>
-                <h5 className="mb-1">Timeline da Ordem de Servico</h5>
-                <small className="text-muted">Historico completo com scroll.</small>
+                <h5 className="mb-1 text-lg font-semibold">Timeline da Ordem de Servico</h5>
+                <small className="text-muted-foreground">Historico completo com scroll.</small>
               </div>
-              <button className="btn btn-sm btn-outline-secondary" onClick={() => setTimelineModalOpen(false)}>Fechar</button>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setTimelineModalOpen(false)}>Fechar</Button>
             </div>
 
             <div className="timeline-modal-scroll">
-              <div className="timeline-premium">
-                {timeline.length === 0 && <small className="text-muted">Nenhum historico ainda.</small>}
+              <div className="space-y-4">
+                {timeline.length === 0 && <small className="text-muted-foreground">Nenhum historico ainda.</small>}
 
                 {Object.entries(groupedTimeline).map(([day, items]: any) => (
-                  <div key={day} className="timeline-day-group">
-                    <div className="timeline-day-label">{day}</div>
+                  <div key={day} className="space-y-3">
+                    <div className="sticky top-0 z-10 inline-flex rounded-full border border-app-border bg-app-surface-alt px-3 py-1 text-xs font-medium text-muted-foreground">
+                      {day}
+                    </div>
 
-                    {items.map((item: any) => (
-                      <div key={item.id} className={`timeline-premium-item timeline-${item.type}`}>
-                        <div className="timeline-premium-line" />
-                        <div className="timeline-premium-icon"><i className={getTimelineIconClass(item)} /></div>
+                    <div className="space-y-2">
+                      {items.map((item: any) => (
+                        <div key={item.id} className="rounded-xl border border-app-border bg-app-surface p-3">
+                          <div className="flex items-start gap-3">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-app-border bg-app-surface-alt text-muted-foreground">
+                              <i className={getTimelineIconClass(item)} />
+                            </span>
 
-                        <div className="timeline-premium-content">
-                          <div className="d-flex flex-wrap justify-content-between gap-2">
-                            <strong>{item.actor?.name || 'Sistema'}</strong>
-                            <small className="text-muted">{new Date(item.createdAt).toLocaleTimeString('pt-BR')}</small>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap justify-between gap-2">
+                                <strong>{item.actor?.name || 'Sistema'}</strong>
+                                <small className="text-muted-foreground">{new Date(item.createdAt).toLocaleTimeString('pt-BR')}</small>
+                              </div>
+
+                              <div className="mt-1">
+                                {item.type === 'comment' ? highlightMentions(item.message) : localizeStatusTokens(item.message)}
+                              </div>
+
+                              {item.oldValue && item.newValue && (
+                                <small className="text-muted-foreground block mt-2">
+                                  {translateStatusCode(item.oldValue)} -&gt; {translateStatusCode(item.newValue)}
+                                </small>
+                              )}
+                            </div>
                           </div>
-
-                          <div className="mt-1">
-                            {item.type === 'comment' ? highlightMentions(item.message) : localizeStatusTokens(item.message)}
-                          </div>
-
-                          {item.oldValue && item.newValue && (
-                            <small className="text-muted d-block mt-2">
-                              {translateStatusCode(item.oldValue)} -&gt; {translateStatusCode(item.newValue)}
-                            </small>
-                          )}
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
+          </Card>
         </div>
       )}
 

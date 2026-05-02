@@ -18,6 +18,14 @@ module.exports = {
     },
     extend: {
       colors: {
+        "app-bg": "var(--app-bg)",
+        "app-card": "var(--app-card)",
+        "app-surface": "var(--app-surface)",
+        "app-surface-alt": "var(--app-surface-alt)",
+        "app-text": "var(--app-text)",
+        "app-muted": "var(--app-muted)",
+        "app-border": "var(--app-border)",
+        "app-accent": "var(--app-accent)",
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

@@ -1,8 +1,7 @@
-"use client"
+﻿"use client"
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import NotificationBell from '@/components/NotificationBell'
 import Toast from '@/components/Toast'
 
@@ -19,6 +18,19 @@ const menuItems = [
 ]
 
 const DESKTOP_BREAKPOINT = 992
+const SIDEBAR_COLLAPSED_COOKIE = 'oserv_sidebar_collapsed'
+
+function getCookieValue(name: string) {
+  const cookie = `; ${document.cookie}`
+  const parts = cookie.split(`; ${name}=`)
+  if (parts.length !== 2) return null
+  return decodeURIComponent(parts.pop()!.split(';').shift() || '')
+}
+
+function setCookieValue(name: string, value: string, maxAgeInDays = 365) {
+  const maxAge = maxAgeInDays * 24 * 60 * 60
+  document.cookie = `${name}=${encodeURIComponent(value)}; path=/; max-age=${maxAge}; samesite=lax`
+}
 
 function getInitials(name?: string) {
   if (!name) return 'U'
@@ -30,7 +42,13 @@ function getInitials(name?: string) {
     .toUpperCase()
 }
 
-export default function DashboardShell({ children }: { children: React.ReactNode }) {
+export default function DashboardShell({
+  children,
+  appVersion
+}: {
+  children: React.ReactNode
+  appVersion?: string
+}) {
   const [hydrated, setHydrated] = useState(false)
   const [user, setUser] = useState<any>(null)
   const [company, setCompany] = useState<any>(null)
@@ -39,7 +57,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [isDesktop, setIsDesktop] = useState(true)
   const [loggingOut, setLoggingOut] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
+  const appContentRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     setHydrated(true)
@@ -54,6 +74,10 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     const initial = saved || 'dark'
     setTheme(initial)
     document.documentElement.setAttribute('data-theme', initial)
+    document.documentElement.classList.toggle('dark', initial === 'dark')
+
+    const savedSidebarCollapsed = getCookieValue(SIDEBAR_COLLAPSED_COOKIE)
+    setSidebarCollapsed(savedSidebarCollapsed === '1')
 
     const syncViewport = () => {
       const desktop = window.innerWidth >= DESKTOP_BREAKPOINT
@@ -66,6 +90,17 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
     syncViewport()
     window.addEventListener('resize', syncViewport)
+
+    const appContentEl = appContentRef.current
+    const onAppContentScroll = () => {
+      if (!appContentEl) return
+      setShowBackToTop(appContentEl.scrollTop > 120)
+    }
+
+    if (appContentEl) {
+      onAppContentScroll()
+      appContentEl.addEventListener('scroll', onAppContentScroll, { passive: true })
+    }
 
     const onProfileUpdated = (event: Event) => {
       const customEvent = event as CustomEvent
@@ -84,6 +119,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
     return () => {
       window.removeEventListener('resize', syncViewport)
+      if (appContentEl) {
+        appContentEl.removeEventListener('scroll', onAppContentScroll)
+      }
       window.removeEventListener('oserv:profile-updated', onProfileUpdated)
       window.removeEventListener('oserv:company-updated', onCompanyUpdated)
     }
@@ -94,6 +132,7 @@ export default function DashboardShell({ children }: { children: React.ReactNode
     setTheme(next)
     localStorage.setItem('theme', next)
     document.documentElement.setAttribute('data-theme', next)
+    document.documentElement.classList.toggle('dark', next === 'dark')
   }
 
   async function handleLogout() {
@@ -118,37 +157,45 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
   function toggleSidebar() {
     if (!isDesktop) {
-      setSidebarCollapsed(false)
       setSidebarOpen(prev => !prev)
       return
     }
 
-    setSidebarCollapsed(prev => !prev)
+    setSidebarCollapsed(prev => {
+      const next = !prev
+      setCookieValue(SIDEBAR_COLLAPSED_COOKIE, next ? '1' : '0')
+      return next
+    })
+  }
+
+  function scrollToTop() {
+    const appContentEl = appContentRef.current
+    if (appContentEl) {
+      appContentEl.scrollTo({ top: 0, behavior: 'smooth' })
+      return
+    }
+    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   const companyDisplayName = company?.tradeName || company?.name || 'Empresa'
-  const appName = 'oServ - Gestao ordem de servicos'
+  const appName = 'oServ - Sistema de Gestao de Ordem de Servico'
   const currentYear = hydrated ? new Date().getFullYear() : null
   const sidebarExpanded = isDesktop ? !sidebarCollapsed : sidebarOpen
-  const companyLogoUrl = company?.logoUrl || '/logo-art.png'
+  const appLogoUrl = '/logo.png'
+  const companyLogoUrl = company?.logoUrl || '/logo.png'
+  const systemVersion = (appVersion || process.env.NEXT_PUBLIC_APP_VERSION || '1.0.0').replace(/^v/i, '')
 
   return (
     <div className="app-shell">
-      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''} ${sidebarCollapsed ? 'collapsed' : ''}`}>
+      <aside className={`app-sidebar ${sidebarOpen ? 'open' : ''} ${isDesktop && sidebarCollapsed ? 'collapsed' : ''}`}>
         <div className="sidebar-brand">
-          <div className="sidebar-brand-content">
-            <div className="sidebar-brand-main">
-              <img className="sidebar-brand-logo" src={companyLogoUrl} alt="Logo da empresa" />
-              <div className="sidebar-brand-titles">
-                <h4 className="mb-0">{companyDisplayName}</h4>
-                <small className="sidebar-app-name">{appName}</small>
-              </div>
-            </div>
-            <small className="sidebar-subdomain">{company?.subdomain ? `${company.subdomain}.oserv.com` : 'Gestao de OS'}</small>
-          </div>
           <Button variant="outline" size="sm" className="sidebar-close-btn bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={toggleSidebar}>
             <i className={`fa-solid ${sidebarExpanded ? 'fa-chevron-left' : 'fa-chevron-right'}`} />
+            <span className="sidebar-close-label">Menu</span>
           </Button>
+          <span className="sidebar-version-badge" title={`Versao ${systemVersion}`}>
+            Versao v{systemVersion}
+          </span>
         </div>
 
         <nav className="sidebar-nav">
@@ -172,9 +219,9 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
       {sidebarOpen && <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />}
 
-      <div className="app-content">
+      <div className="app-content" ref={appContentRef}>
         <header className="app-header">
-          <div className="flex items-center gap-3 min-w-0">
+          <div className="header-brand-wrap min-w-0">
             <Button
               variant="outline"
               size="sm"
@@ -185,21 +232,31 @@ export default function DashboardShell({ children }: { children: React.ReactNode
             >
               <i className={`fa-solid ${sidebarOpen ? 'fa-xmark' : 'fa-bars'}`} />
             </Button>
-            <div className="flex items-center gap-2 min-w-0">
+
+            <div className="header-brand-block min-w-0">
+              <img className="header-brand-logo" src={companyLogoUrl} alt="Logo da empresa" />
+              <div className="min-w-0">
+                <strong className="header-brand-company">{companyDisplayName}</strong>
+                <small className="header-brand-app">{appName}</small>
+              </div>
+            </div>
+
+          </div>
+
+          <div className="header-actions">
+            <div className="header-user-wrap">
               {user?.avatarUrl ? (
                 <img className="header-user-avatar" src={user.avatarUrl} alt="Foto do usuario" />
               ) : (
                 <span className="header-user-avatar-fallback">{getInitials(user?.name)}</span>
               )}
 
-              <div className="min-w-0">
-              <strong className="block truncate">{user?.name || 'Usuario'}</strong>
-              <small className="text-muted-foreground block truncate">{user?.email}</small>
+              <div className="min-w-0 header-user-text">
+                <strong className="block truncate">{user?.name || 'Usuario'}</strong>
+                <small className="text-muted-foreground block truncate">{user?.email}</small>
               </div>
             </div>
-          </div>
 
-          <div className="header-actions">
             <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={toggleTheme}>
               <i className={`fa-solid ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`} />
             </Button>
@@ -222,16 +279,28 @@ export default function DashboardShell({ children }: { children: React.ReactNode
 
         <footer className="app-footer">
           <div className="app-footer-brand">
-            <img src={companyLogoUrl} alt="Logo da empresa" />
+            <img src={appLogoUrl} alt="Logo do app" />
             <div>
               <strong>{appName}</strong>
               <small>{companyDisplayName}</small>
             </div>
           </div>
           <small suppressHydrationWarning>
-            {currentYear ? `(c) ${currentYear} oServ Corp. Todos os direitos reservados.` : '(c) oServ Corp. Todos os direitos reservados.'}
+            {currentYear ? `© Copyright ${currentYear} - Desenvolvido por oServ.` : '© Copyright - Desenvolvido por oServ.'}
           </small>
         </footer>
+
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className={`back-to-top-btn ${showBackToTop ? 'visible' : ''}`}
+          onClick={scrollToTop}
+          aria-label="Voltar ao topo"
+          title="Voltar ao topo"
+        >
+          <i className="fa-solid fa-arrow-up" />
+        </Button>
       </div>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

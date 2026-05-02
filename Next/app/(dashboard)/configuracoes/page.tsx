@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { formatPhone, isValidPhone, maskPhone, normalizePhone } from '@/lib/br'
 import Loader from '@/components/Loader'
 import Toast from '@/components/Toast'
 
@@ -20,7 +23,7 @@ function planLabel(plan: CompanyState['plan']) {
 }
 
 export default function Configuracoes() {
-  const [toast, setToast] = useState<any>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [loading, setLoading] = useState(false)
   const [company, setCompany] = useState<CompanyState>({
     name: '',
@@ -39,7 +42,7 @@ export default function Configuracoes() {
       setCompany({
         name: data.name || '',
         email: data.email || '',
-        phone: data.phone || '',
+        phone: formatPhone(data.phone || ''),
         subdomain: data.subdomain || '',
         plan: data.plan || 'STARTER'
       })
@@ -56,13 +59,22 @@ export default function Configuracoes() {
 
   async function save(e: React.FormEvent) {
     e.preventDefault()
+
+    if (company.phone && !isValidPhone(company.phone)) {
+      setToast({ message: 'Telefone invalido. Informe DDD e numero corretos.', type: 'error' })
+      return
+    }
+
     setLoading(true)
 
     try {
       const response = await fetch('/api/company', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(company)
+        body: JSON.stringify({
+          ...company,
+          phone: normalizePhone(company.phone)
+        })
       })
 
       if (!response.ok) throw new Error('Erro ao salvar configuracoes')
@@ -77,56 +89,67 @@ export default function Configuracoes() {
   }
 
   return (
-    <div>
-      <div className="mb-4">
-        <h2>Configuracoes</h2>
-        <p className="text-muted mb-0">Gerencie as preferencias gerais da sua empresa no oServ.</p>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold">Configuracoes</h2>
+        <p className="text-muted-foreground">Gerencie as preferencias gerais da sua empresa no oServ.</p>
       </div>
 
       {loading ? <Loader label="Carregando configuracoes..." /> : (
-        <div className="row g-3">
-          <div className="col-lg-8">
-            <form onSubmit={save} className="card p-4">
-              <h5>Dados da empresa</h5>
-              <p className="text-muted small">Essas informacoes aparecem em relatorios, ordens de servico e comunicacoes internas.</p>
-
-              <div className="row g-3 mt-1">
-                <div className="col-md-6">
-                  <label className="form-label">Nome da empresa</label>
-                  <input className="form-control" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
+        <div className="grid gap-4 lg:grid-cols-12">
+          <Card className="lg:col-span-8">
+            <CardHeader>
+              <CardTitle>Dados da empresa</CardTitle>
+              <p className="text-sm text-muted-foreground">Essas informacoes aparecem em relatorios, ordens de servico e comunicacoes internas.</p>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={save} className="space-y-4">
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Nome da empresa</label>
+                    <Input value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Email principal</label>
+                    <Input value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Telefone</label>
+                    <Input value={company.phone} onChange={e => setCompany({ ...company, phone: maskPhone(e.target.value) })} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Subdominio</label>
+                    <Input value={company.subdomain} disabled placeholder="empresa.oserv.com" />
+                    <small className="block text-muted-foreground">O subdominio e definido no cadastro inicial da empresa.</small>
+                  </div>
                 </div>
-                <div className="col-md-6">
-                  <label className="form-label">Email principal</label>
-                  <input className="form-control" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Telefone</label>
-                  <input className="form-control" value={company.phone} onChange={e => setCompany({ ...company, phone: e.target.value })} />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Subdominio</label>
-                  <input className="form-control" value={company.subdomain} disabled placeholder="empresa.oserv.com" />
-                  <small className="text-muted">O subdominio e definido no cadastro inicial da empresa.</small>
-                </div>
-              </div>
 
-              <div className="text-end mt-4">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Salvar alterações</Button>
-              </div>
-            </form>
-          </div>
+                <div className="flex justify-end">
+                  <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">Salvar alteracoes</Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
 
-          <div className="col-lg-4">
-            <div className="card p-4 mb-3">
-              <h5>Plano atual</h5>
-              <p className="text-muted mb-1">{planLabel(company.plan)}</p>
-              <small className="text-muted">A gestao de planos sera integrada quando o pagamento estiver pronto.</small>
-            </div>
+          <div className="space-y-4 lg:col-span-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Plano atual</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-1">
+                <p className="font-semibold">{planLabel(company.plan)}</p>
+                <small className="text-muted-foreground">A gestao de planos sera integrada quando o pagamento estiver pronto.</small>
+              </CardContent>
+            </Card>
 
-            <div className="card p-4">
-              <h5>Seguranca</h5>
-              <p className="text-muted small mb-0">Somente donos e funcionarios autorizados podem acessar o sistema pelo subdominio da empresa.</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Seguranca</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Somente donos e funcionarios autorizados podem acessar o sistema pelo subdominio da empresa.</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}

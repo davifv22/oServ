@@ -1,15 +1,12 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 function getCompanyId(req: Request) {
   return req.headers.get('x-company-id')
 }
 
 export async function GET(req: Request) {
   const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+  if (!companyId) return NextResponse.json({ error: 'Empresa nÃ£o identificada' }, { status: 401 })
 
   const customers = await prisma.customer.findMany({
     where: { companyId },
@@ -21,7 +18,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+  if (!companyId) return NextResponse.json({ error: 'Empresa nÃ£o identificada' }, { status: 401 })
 
   const body = await req.json()
 
@@ -40,10 +37,10 @@ export async function POST(req: Request) {
 
 export async function PATCH(req: Request) {
   const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+  if (!companyId) return NextResponse.json({ error: 'Empresa nÃ£o identificada' }, { status: 401 })
 
   const body = await req.json()
-  if (!body.id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
+  if (!body.id) return NextResponse.json({ error: 'ID obrigatÃ³rio' }, { status: 400 })
 
   const updated = await prisma.customer.updateMany({
     where: { id: body.id, companyId },
@@ -60,13 +57,14 @@ export async function PATCH(req: Request) {
 
 export async function DELETE(req: Request) {
   const companyId = getCompanyId(req)
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+  if (!companyId) return NextResponse.json({ error: 'Empresa nÃ£o identificada' }, { status: 401 })
 
   const { searchParams } = new URL(req.url)
   const id = searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'ID obrigatório' }, { status: 400 })
+  if (!id) return NextResponse.json({ error: 'ID obrigatÃ³rio' }, { status: 400 })
 
   await prisma.customer.deleteMany({ where: { id, companyId } })
 
   return NextResponse.json({ success: true })
 }
+

@@ -2,6 +2,9 @@
 
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import Toast from '@/components/Toast'
 
 export default function Login() {
@@ -40,40 +43,44 @@ export default function Login() {
   }
 
   return (
-    <div className="auth-page d-flex justify-content-center align-items-center vh-100">
-      <form onSubmit={handleLogin} className="auth-card card p-4 shadow-sm" style={{ width: 360 }}>
-        <div className="text-center mb-3">
-          <img src="/logo.png" alt="oServ - Gestão ordem de serviços" style={{ maxWidth: 170, height: 'auto' }} />
-          <small className="text-muted d-block mt-2">Gestão ordem de serviços</small>
-        </div>
+    <div className="auth-page min-h-screen flex items-center justify-center px-4 py-8">
+      <Card className="auth-card w-full max-w-sm border-app-border">
+        <CardHeader className="space-y-3 text-center">
+          <div className="mx-auto flex flex-col items-center gap-2">
+            <img src="/logo.png" alt="oServ - Gestao ordem de servicos" className="h-auto w-[170px]" />
+            <small className="text-muted-foreground">Gestao ordem de servicos</small>
+          </div>
+          <div>
+            <CardTitle className="text-2xl">Login</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Acesse sua empresa no oServ.</p>
+          </div>
+        </CardHeader>
 
-        <h4 className="mb-1">Login</h4>
-        <p className="text-muted small mb-3">Acesse sua empresa no oServ.</p>
+        <CardContent>
+          <form onSubmit={handleLogin} className="space-y-3">
+            <Input type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
+            <Input type="password" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} required />
 
-        <input className="form-control mb-2" type="email" placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} required />
-        <input type="password" className="form-control mb-2" placeholder="Senha" value={password} onChange={e => setPassword(e.target.value)} required />
+            <label className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+              Lembrar de mim por 30 dias
+            </label>
 
-        <label className="form-check mb-2 d-flex align-items-center gap-2">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            checked={rememberMe}
-            onChange={e => setRememberMe(e.target.checked)}
-          />
-          <span className="form-check-label small">Lembrar de mim por 30 dias</span>
-        </label>
+            {error && <small className="block text-sm text-red-400">{error}</small>}
 
-        {error && <small className="text-danger d-block mb-2">{error}</small>}
+            <Button type="submit" className="w-full bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" disabled={loading}>
+              {loading ? 'Entrando...' : 'Entrar'}
+            </Button>
 
-        <Button type="submit" className="w-full mt-2 bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" disabled={loading}>{loading ? 'Entrando...' : 'Entrar'}</Button>
-
-        <div className="text-center mt-3">
-          <small className="text-muted d-block mb-2">Ainda nao tem uma conta?</small>
-          <Button variant="outline" className="w-full bg-transparent border-green-600 text-green-600 hover:bg-green-50" asChild>
-            <a href="/registro">Registrar empresa</a>
-          </Button>
-        </div>
-      </form>
+            <div className="pt-3 text-center">
+              <small className="block text-muted-foreground mb-2">Ainda nao tem uma conta?</small>
+              <Button variant="outline" className="w-full bg-transparent border-emerald-500/70 text-emerald-300 hover:bg-emerald-500/10" asChild>
+                <a href="/registro">Registrar empresa</a>
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

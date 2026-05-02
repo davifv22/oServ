@@ -1,9 +1,6 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 import { isValidSubdomain, sanitizeSubdomain } from '@/lib/tenant'
-
-const prisma = new PrismaClient()
-
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const rawSubdomain = searchParams.get('subdomain')
@@ -19,3 +16,4 @@ export async function GET(req: Request) {
 
   return NextResponse.json({ available: !exists, exists: Boolean(exists) })
 }
+

@@ -1,8 +1,5 @@
 ﻿import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+import { prisma } from '@/lib/prisma'
 function getCompanyId(req: Request) {
   return req.headers.get('x-company-id')
 }
@@ -332,3 +329,4 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ success: true })
 }
+
