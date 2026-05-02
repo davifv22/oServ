@@ -15,6 +15,7 @@ import { MatSortModule } from '@angular/material/sort'
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
+import { PrintService } from '../../../services/print.service'
 
 @Component({
   selector: 'app-funcionarios',
@@ -31,7 +32,7 @@ export class FuncionariosComponent implements OnInit {
   search:string = ''
   displayedColumns: string[] = ['idFuncionario', 'nome', 'idUser', 'idEquipe', 'situacao', 'detalhes'];
 
-  constructor(private funcionariosService: FuncionariosService, public modal: MatDialog) {}
+  constructor(private funcionariosService: FuncionariosService, public modal: MatDialog, private printService: PrintService) {}
 
   ngOnInit(): void {
     this.title = 'FUNCIONÁRIOS'
@@ -49,6 +50,16 @@ export class FuncionariosComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.Funcionarios.filter = filterValue.trim().toLowerCase();
+  }
+
+  imprimirListagem(): void {
+    this.printService.printList<Funcionarios>('LISTAGEM DE FUNCIONÁRIOS', [
+      { label: '#', field: 'idFuncionario', width: 45 },
+      { label: 'Nome', field: 'nome', width: '*' },
+      { label: 'ID Usuário', field: 'idUser', width: 75 },
+      { label: 'ID Equipe', field: 'idEquipe', width: 75 },
+      { label: 'Situação', field: 'situacao', width: 75 }
+    ], this.Funcionarios.filteredData ?? this.Funcionarios.data ?? []);
   }
 
   openDialog(funcionario: Funcionarios): void {
