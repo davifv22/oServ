@@ -1,0 +1,667 @@
+openapi: 3.0.3
+info:
+  title: oServ API
+  version: "1.0.0"
+  description: |
+    Esta especificação OpenAPI documenta a API do sistema **oServ**.  
+    O serviço expõe recursos de boletos, boletos‑serviços, clientes, controles, empresa, equipes, funcionários, ordens de serviços, pré‑orçamentos, requerimentos, serviços, setores, tipos de requerimentos, usuários e veículos.  
+    Todas as rotas abaixo são prefixadas pelo caminho base `/api` conforme definido no arquivo `app.ts`【18561569972942†L17-L33】.
+servers:
+  - url: http://localhost:3000/api
+    description: Servidor local de desenvolvimento
+
+paths:
+  /boletos:
+    get:
+      summary: Lista de boletos
+      description: Retorna todos os boletos cadastrados no sistema.  Cada boleto registra valores, vencimento, situação e relaciona‑se a um requerimento e cliente【338594470086647†L6-L47】.
+      responses:
+        "200":
+          description: Lista de boletos retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Boleto'
+        "204":
+          description: Nenhum boleto encontrado
+  /boletos-servicos:
+    get:
+      summary: Lista de boletos por serviço
+      description: Retorna todos os registros que relacionam boletos a serviços【895649798174835†L5-L47】.
+      responses:
+        "200":
+          description: Lista de boletos‑serviços retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BoletoServico'
+        "204":
+          description: Nenhum registro encontrado
+  /clientes:
+    get:
+      summary: Lista de clientes
+      description: Retorna todos os clientes cadastrados【744901310195182†L3-L59】.
+      responses:
+        "200":
+          description: Lista de clientes retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Cliente'
+        "204":
+          description: Nenhum cliente encontrado
+  /controles:
+    get:
+      summary: Versões de sistema
+      description: Retorna os registros de controle contendo a versão do sistema【124848214801143†L3-L17】.
+      responses:
+        "200":
+          description: Lista de registros de controle
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Controle'
+        "204":
+          description: Nenhum controle encontrado
+  /empresa:
+    get:
+      summary: Dados da empresa
+      description: Retorna os dados da empresa cadastrada【107465177237162†L3-L43】.
+      responses:
+        "200":
+          description: Dados da empresa retornados
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Empresa'
+        "204":
+          description: Nenhum registro encontrado
+  /equipes:
+    get:
+      summary: Lista de equipes
+      description: Retorna todas as equipes existentes, indicando setor e situação【893009957163900†L4-L43】.
+      responses:
+        "200":
+          description: Lista de equipes retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Equipe'
+        "204":
+          description: Nenhuma equipe encontrada
+  /funcionarios:
+    get:
+      summary: Lista de funcionários
+      description: Retorna todos os funcionários cadastrados【690778012733600†L5-L66】.
+      responses:
+        "200":
+          description: Lista de funcionários retornada com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Funcionario'
+        "204":
+          description: Nenhum funcionário encontrado
+  /ordens-servicos:
+    get:
+      summary: Lista de ordens de serviço
+      description: Retorna todas as ordens de serviço emitidas【667099911598614†L6-L85】.
+      responses:
+        "200":
+          description: Lista de ordens de serviço
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrdemServico'
+        "204":
+          description: Nenhuma ordem encontrada
+  /pre-orcamentos:
+    get:
+      summary: Lista de pré‑orçamentos
+      description: Retorna todos os pré‑orçamentos cadastrados【133890943648202†L3-L42】.
+      responses:
+        "200":
+          description: Lista de pré‑orçamentos retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PreOrcamento'
+        "204":
+          description: Nenhum pré‑orçamento encontrado
+  /requerimentos:
+    get:
+      summary: Lista de requerimentos
+      description: Retorna todos os requerimentos registrados no sistema【78070113188095†L6-L88】.
+      responses:
+        "200":
+          description: Lista de requerimentos retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Requerimento'
+        "204":
+          description: Nenhum requerimento encontrado
+  /servicos:
+    get:
+      summary: Lista de serviços
+      description: Retorna todos os serviços disponíveis【458227734551936†L3-L41】.
+      responses:
+        "200":
+          description: Lista de serviços
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Servico'
+        "204":
+          description: Nenhum serviço encontrado
+  /setores:
+    get:
+      summary: Lista de setores
+      description: Retorna todos os setores cadastrados【936666573802810†L3-L28】.
+      responses:
+        "200":
+          description: Lista de setores retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Setor'
+        "204":
+          description: Nenhum setor encontrado
+  /tipos-requerimentos:
+    get:
+      summary: Lista de tipos de requerimentos
+      description: Retorna todos os tipos de requerimento disponíveis【287770204310926†L3-L39】.
+      responses:
+        "200":
+          description: Lista de tipos de requerimento
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TipoRequerimento'
+        "204":
+          description: Nenhum tipo encontrado
+  /usuarios:
+    get:
+      summary: Lista de usuários
+      description: Retorna todos os usuários cadastrados【356398610036450†L3-L58】.
+      responses:
+        "200":
+          description: Lista de usuários
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Usuario'
+        "204":
+          description: Nenhum usuário encontrado
+  /veiculos:
+    get:
+      summary: Lista de veículos
+      description: Retorna todos os veículos cadastrados【507380931529015†L3-L51】.
+      responses:
+        "200":
+          description: Lista de veículos retornada
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Veiculo'
+        "204":
+          description: Nenhum veículo encontrado
+
+components:
+  schemas:
+    Boleto:
+      type: object
+      properties:
+        id_boleto:
+          type: integer
+          description: Identificador do boleto
+        id_requerimento:
+          type: integer
+          description: Identificador do requerimento associado
+        valor_total:
+          type: number
+          format: decimal
+        observacao:
+          type: string
+          nullable: true
+        dt_vencimento:
+          type: string
+          format: date
+        dt_baixa:
+          type: string
+          format: date
+          nullable: true
+        id_cliente:
+          type: integer
+          description: Identificador do cliente associado
+        situacao:
+          type: string
+          enum:
+            - PENDENTE
+            - PAGO
+            - CANCELADO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    BoletoServico:
+      type: object
+      properties:
+        id_servico:
+          type: integer
+          description: Identificador do serviço
+        id_boleto:
+          type: integer
+          description: Identificador do boleto
+        valor:
+          type: number
+          format: decimal
+        dt_estorno:
+          type: string
+          format: date
+          nullable: true
+        dt_inclusao:
+          type: string
+          format: date
+          nullable: true
+        dt_vencimento:
+          type: string
+          format: date
+        complemento:
+          type: string
+        situacao:
+          type: string
+          enum:
+            - PENDENTE
+            - ESTORNADO
+            - INCLUIDO
+            - PAGO
+            - CANCELADO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Cliente:
+      type: object
+      properties:
+        id_cliente:
+          type: integer
+        nome:
+          type: string
+        telefone:
+          type: string
+        email:
+          type: string
+        cpf_cnpj:
+          type: string
+        cep:
+          type: string
+        num:
+          type: integer
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        observacao:
+          type: string
+          nullable: true
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Controle:
+      type: object
+      properties:
+        id:
+          type: integer
+        versao_sistema:
+          type: string
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Empresa:
+      type: object
+      properties:
+        id_empresa:
+          type: integer
+        nome_empresa:
+          type: string
+        dt_ref_sistema:
+          type: string
+          format: date
+        cep:
+          type: string
+        num:
+          type: integer
+        cpf_cnpj:
+          type: string
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Equipe:
+      type: object
+      properties:
+        id_equipe:
+          type: integer
+        descricao:
+          type: string
+        id_setor:
+          type: integer
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Funcionario:
+      type: object
+      properties:
+        id_funcionario:
+          type: integer
+        id_user:
+          type: integer
+        nome:
+          type: string
+        id_equipe:
+          type: integer
+        cep:
+          type: string
+        num:
+          type: integer
+        cpf_cnpj:
+          type: string
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    OrdemServico:
+      type: object
+      properties:
+        id_os:
+          type: integer
+        id_requerimento:
+          type: integer
+        descricao:
+          type: string
+        dt_inicio:
+          type: string
+          format: date
+          nullable: true
+        dt_termino:
+          type: string
+          format: date
+          nullable: true
+        dt_cancelamento:
+          type: string
+          format: date
+          nullable: true
+        id_veiculo:
+          type: integer
+        id_funcionario:
+          type: integer
+        km_rodados:
+          type: integer
+        situacao:
+          type: string
+          enum:
+            - EM_ABERTO
+            - EM_ANDAMENTO
+            - CONCLUIDA
+            - CANCELADA
+        observacao:
+          type: string
+          nullable: true
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    PreOrcamento:
+      type: object
+      properties:
+        id_pre_orcamento:
+          type: integer
+        descricao:
+          type: string
+        id_servico:
+          type: integer
+        tipo_requerimento:
+          type: integer
+        valor:
+          type: number
+          format: decimal
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Requerimento:
+      type: object
+      properties:
+        id_requerimento:
+          type: integer
+        nome_requerente:
+          type: string
+        cep_requerente:
+          type: string
+        num_requerente:
+          type: integer
+        cep_servico:
+          type: string
+        num_servico:
+          type: integer
+        cpf_cnpj:
+          type: string
+        id_cliente:
+          type: integer
+        id_funcionario:
+          type: integer
+        tipo_requerimento:
+          type: integer
+        observacao:
+          type: string
+          nullable: true
+        situacao:
+          type: string
+          enum:
+            - ABERTO
+            - EM_ANDAMENTO
+            - CONCLUIDO
+            - CANCELADO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Servico:
+      type: object
+      properties:
+        id_servico:
+          type: integer
+        descricao:
+          type: string
+        tipo:
+          type: string
+          enum:
+            - MANUTENCAO
+            - INSTALACAO
+            - SUPORTE
+            - OUTROS
+        valor:
+          type: number
+          format: decimal
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Setor:
+      type: object
+      properties:
+        id_setor:
+          type: integer
+        descricao:
+          type: string
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    TipoRequerimento:
+      type: object
+      properties:
+        id_tipo_requerimento:
+          type: integer
+        descricao:
+          type: string
+        emite_orcamento:
+          type: boolean
+        emite_os:
+          type: boolean
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Usuario:
+      type: object
+      properties:
+        id_user:
+          type: integer
+        user:
+          type: string
+        nome:
+          type: string
+        email:
+          type: string
+        cpf_cnpj:
+          type: string
+        cep:
+          type: string
+        num:
+          type: integer
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - INATIVO
+        is_admin:
+          type: boolean
+        api_key:
+          type: string
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
+    Veiculo:
+      type: object
+      properties:
+        id_veiculo:
+          type: integer
+        modelo:
+          type: string
+        marca:
+          type: string
+        placa:
+          type: string
+        km_rodados:
+          type: integer
+        dt_ult_manutencao:
+          type: string
+          format: date
+          nullable: true
+        situacao:
+          type: string
+          enum:
+            - ATIVO
+            - MANUTENCAO
+            - INATIVO
+        dt_criacao:
+          type: string
+          format: date-time
+        dt_atualizacao:
+          type: string
+          format: date-time
