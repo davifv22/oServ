@@ -11,6 +11,7 @@ model Company {
   id            String         @id @default(uuid())
   name          String
   tradeName     String?
+  logoUrl       String?
   document      String?
   email         String
   phone         String?
@@ -19,6 +20,7 @@ model Company {
   state         String?
   zipCode       String?
   subdomain     String         @unique
+  plan          CompanyPlan    @default(STARTER)
   createdAt     DateTime       @default(now())
   users         User[]
   customers     Customer[]
@@ -32,6 +34,7 @@ model User {
   companyId        String
   company          Company                @relation(fields: [companyId], references: [id])
   name             String
+  avatarUrl        String?
   email            String                 @unique
   password         String
   role             Role
@@ -155,6 +158,12 @@ enum ServiceOrderAuditAction {
   UPDATED
   COMMENTED
   ASSIGNED
+}
+
+enum CompanyPlan {
+  STARTER
+  PRO
+  ENTERPRISE
 }
 
 enum Role {

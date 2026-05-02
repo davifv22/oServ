@@ -11,6 +11,7 @@ const companySelect = {
   id: true,
   name: true,
   tradeName: true,
+  logoUrl: true,
   document: true,
   email: true,
   phone: true,
@@ -19,6 +20,7 @@ const companySelect = {
   state: true,
   zipCode: true,
   subdomain: true,
+  plan: true,
   createdAt: true
 }
 

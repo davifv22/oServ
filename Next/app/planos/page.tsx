@@ -1,3 +1,5 @@
+import { Button } from '@/components/ui/button'
+
 export default function Planos() {
   return (
     <div className="container">
@@ -5,18 +7,20 @@ export default function Planos() {
 
       <div className="row">
         {[
-          { name: 'Starter', price: '49,90', features: ['Até 2 usuários', 'Até 100 clientes'] },
-          { name: 'Pro', price: '99,90', features: ['Até 10 usuários', 'Até 1000 clientes'] },
-          { name: 'Enterprise', price: '199,90', features: ['Usuários ilimitados', 'Clientes ilimitados'] }
+          { id: 'STARTER', name: 'Starter', price: '49,90', features: ['Ate 2 usuarios', 'Ate 100 clientes'] },
+          { id: 'PRO', name: 'Pro', price: '99,90', features: ['Ate 10 usuarios', 'Ate 1000 clientes'] },
+          { id: 'ENTERPRISE', name: 'Enterprise', price: '199,90', features: ['Usuarios ilimitados', 'Clientes ilimitados'] }
         ].map((plan, i) => (
           <div className="col-md-4" key={i}>
             <div className="card p-3">
               <h4>{plan.name}</h4>
-              <h3>R$ {plan.price}/mês</h3>
+              <h3>R$ {plan.price}/mes</h3>
               <ul>
                 {plan.features.map((f, idx) => <li key={idx}>{f}</li>)}
               </ul>
-              <a href={`/registro?plan=${plan.name}`} className="btn btn-primary">Contratar</a>
+              <Button className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" asChild>
+                <a href={`/registro?plan=${plan.id}`}>Contratar</a>
+              </Button>
             </div>
           </div>
         ))}

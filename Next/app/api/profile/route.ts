@@ -16,6 +16,7 @@ export async function GET(req: Request) {
     select: {
       id: true,
       name: true,
+      avatarUrl: true,
       email: true,
       createdAt: true
     }
@@ -41,6 +42,7 @@ export async function PATCH(req: Request) {
     select: {
       id: true,
       name: true,
+      avatarUrl: true,
       email: true,
       createdAt: true
     }

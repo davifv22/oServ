@@ -1,26 +1,54 @@
 "use client"
 
 import { useEffect, useState } from 'react'
+import { Button } from '@/components/ui/button'
 import Loader from '@/components/Loader'
 import Toast from '@/components/Toast'
+
+function getInitials(name?: string) {
+  if (!name) return 'U'
+  return name
+    .split(' ')
+    .map(part => part[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase()
+}
 
 export default function Perfil() {
   const [toast, setToast] = useState<any>(null)
   const [loading, setLoading] = useState(false)
-  const [profile, setProfile] = useState({ name: '', email: '' })
+  const [uploadingAvatar, setUploadingAvatar] = useState(false)
+  const [profile, setProfile] = useState({ name: '', email: '', avatarUrl: '' })
   const [password, setPassword] = useState({ current: '', next: '', confirm: '' })
+
+  function emitProfileUpdated(nextProfile: { name: string; email: string; avatarUrl: string }) {
+    window.dispatchEvent(new CustomEvent('oserv:profile-updated', { detail: nextProfile }))
+  }
 
   async function load() {
     setLoading(true)
-    const response = await fetch('/api/profile')
-    if (response.ok) {
+    try {
+      const response = await fetch('/api/profile')
+      if (!response.ok) throw new Error('Erro ao carregar perfil')
       const data = await response.json()
-      setProfile({ name: data.name || '', email: data.email || '' })
+      const nextProfile = {
+        name: data.name || '',
+        email: data.email || '',
+        avatarUrl: data.avatarUrl || ''
+      }
+      setProfile(nextProfile)
+      emitProfileUpdated(nextProfile)
+    } catch {
+      setToast({ message: 'Erro ao carregar perfil', type: 'error' })
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    void load()
+  }, [])
 
   async function saveProfile(e: React.FormEvent) {
     e.preventDefault()
@@ -30,12 +58,16 @@ export default function Perfil() {
       const response = await fetch('/api/profile', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(profile)
+        body: JSON.stringify({
+          name: profile.name,
+          email: profile.email
+        })
       })
 
       if (!response.ok) throw new Error('Erro ao salvar perfil')
 
       setToast({ message: 'Perfil atualizado com sucesso', type: 'success' })
+      emitProfileUpdated(profile)
       await load()
     } catch {
       setToast({ message: 'Erro ao atualizar perfil', type: 'error' })
@@ -48,19 +80,68 @@ export default function Perfil() {
     e.preventDefault()
 
     if (password.next !== password.confirm) {
-      setToast({ message: 'As senhas não conferem', type: 'error' })
+      setToast({ message: 'As senhas nao conferem', type: 'error' })
       return
     }
 
     setPassword({ current: '', next: '', confirm: '' })
-    setToast({ message: 'Alteração de senha será conectada ao backend na próxima etapa', type: 'info' })
+    setToast({ message: 'Alteracao de senha sera conectada ao backend na proxima etapa', type: 'info' })
+  }
+
+  async function uploadAvatar(file: File) {
+    setUploadingAvatar(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/profile/avatar', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Erro ao enviar foto')
+
+      setProfile(prev => {
+        const nextProfile = { ...prev, avatarUrl: data.avatarUrl || '' }
+        emitProfileUpdated(nextProfile)
+        return nextProfile
+      })
+      setToast({ message: 'Foto de usuario atualizada com sucesso', type: 'success' })
+    } catch (error: any) {
+      setToast({ message: error?.message || 'Erro ao enviar foto de usuario', type: 'error' })
+    } finally {
+      setUploadingAvatar(false)
+    }
+  }
+
+  async function removeAvatar() {
+    setUploadingAvatar(true)
+
+    try {
+      const response = await fetch('/api/profile/avatar', { method: 'DELETE' })
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.error || 'Erro ao remover foto')
+
+      setProfile(prev => {
+        const nextProfile = { ...prev, avatarUrl: data.avatarUrl || '' }
+        emitProfileUpdated(nextProfile)
+        return nextProfile
+      })
+      setToast({ message: 'Foto de usuario removida', type: 'info' })
+    } catch (error: any) {
+      setToast({ message: error?.message || 'Erro ao remover foto de usuario', type: 'error' })
+    } finally {
+      setUploadingAvatar(false)
+    }
   }
 
   return (
     <div>
       <div className="mb-4">
         <h2>Perfil</h2>
-        <p className="text-muted mb-0">Gerencie seus dados pessoais e segurança da conta.</p>
+        <p className="text-muted mb-0">Gerencie seus dados pessoais e seguranca da conta.</p>
       </div>
 
       {loading ? <Loader label="Carregando perfil..." /> : (
@@ -68,7 +149,7 @@ export default function Perfil() {
           <div className="col-lg-8">
             <form onSubmit={saveProfile} className="card p-4 mb-3">
               <h5>Dados pessoais</h5>
-              <p className="text-muted small">Essas informações são usadas dentro do sistema e nos registros de ações.</p>
+              <p className="text-muted small">Essas informacoes sao usadas dentro do sistema e nos registros de acoes.</p>
 
               <div className="row g-3 mt-1">
                 <div className="col-md-6">
@@ -82,7 +163,7 @@ export default function Perfil() {
               </div>
 
               <div className="text-end mt-4">
-                <button className="btn btn-success">Salvar perfil</button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Salvar perfil</Button>
               </div>
             </form>
 
@@ -95,19 +176,54 @@ export default function Perfil() {
               <input className="form-control mb-3" type="password" placeholder="Confirmar nova senha" value={password.confirm} onChange={e => setPassword({ ...password, confirm: e.target.value })} />
 
               <div className="text-end">
-                <button className="btn btn-primary">Alterar senha</button>
+                <Button type="submit" className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent">Alterar senha</Button>
               </div>
             </form>
           </div>
 
           <div className="col-lg-4">
             <div className="card p-4 mb-3">
-              <h5>Segurança da sessão</h5>
-              <p className="text-muted small mb-0">Sua sessão é protegida por cookie seguro e expiração automática.</p>
+              <h5>Foto do usuario</h5>
+              <p className="text-muted small">A foto aparece no cabecalho para identificar a sessao ativa.</p>
+
+              <div className="profile-avatar-wrap mb-3">
+                {profile.avatarUrl ? (
+                  <img className="profile-avatar-preview" src={profile.avatarUrl} alt="Foto do usuario" />
+                ) : (
+                  <span className="profile-avatar-fallback">{getInitials(profile.name)}</span>
+                )}
+              </div>
+
+              <div className="flex gap-2 flex-wrap">
+                <label className="inline-flex items-center px-3 py-2 text-sm font-medium text-app-text bg-transparent border border-app-border rounded-md cursor-pointer hover:bg-app-surface-alt transition-colors">
+                  {uploadingAvatar ? 'Enviando...' : 'Trocar foto'}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    disabled={uploadingAvatar}
+                    onChange={event => {
+                      const file = event.target.files?.[0]
+                      if (file) void uploadAvatar(file)
+                      event.currentTarget.value = ''
+                    }}
+                  />
+                </label>
+
+                <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void removeAvatar()} disabled={uploadingAvatar || !profile.avatarUrl}>
+                  Remover
+                </Button>
+              </div>
             </div>
+
+            <div className="card p-4 mb-3">
+              <h5>Seguranca da sessao</h5>
+              <p className="text-muted small mb-0">Sua sessao e protegida por cookie seguro e expiracao automatica.</p>
+            </div>
+
             <div className="card p-4">
-              <h5>Permissão</h5>
-              <p className="text-muted small mb-0">Seu nível de acesso será exibido aqui conforme o perfil do usuário.</p>
+              <h5>Permissao</h5>
+              <p className="text-muted small mb-0">Seu nivel de acesso sera exibido aqui conforme o perfil do usuario.</p>
             </div>
           </div>
         </div>
