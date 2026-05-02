@@ -1,15 +1,12 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 function getUserId(req: Request) {
   return req.headers.get('x-user-id')
 }
 
 export async function GET(req: Request) {
   const userId = getUserId(req)
-  if (!userId) return NextResponse.json({ error: 'Usuário não identificado' }, { status: 401 })
+  if (!userId) return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o identificado' }, { status: 401 })
 
   const user = await prisma.user.findUnique({
     where: { id: userId },
@@ -22,14 +19,14 @@ export async function GET(req: Request) {
     }
   })
 
-  if (!user) return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
+  if (!user) return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o encontrado' }, { status: 404 })
 
   return NextResponse.json(user)
 }
 
 export async function PATCH(req: Request) {
   const userId = getUserId(req)
-  if (!userId) return NextResponse.json({ error: 'Usuário não identificado' }, { status: 401 })
+  if (!userId) return NextResponse.json({ error: 'UsuÃ¡rio nÃ£o identificado' }, { status: 401 })
 
   const body = await req.json()
 
@@ -50,3 +47,4 @@ export async function PATCH(req: Request) {
 
   return NextResponse.json(user)
 }
+

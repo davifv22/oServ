@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   ResponsiveContainer,
   AreaChart,
@@ -100,20 +102,24 @@ function formatDateTime(value: string) {
 }
 
 function statusBadgeClass(status: string) {
-  if (status === 'OPEN') return 'bg-primary'
-  if (status === 'IN_PROGRESS') return 'bg-info badge-contrast'
-  if (status === 'WAITING_CUSTOMER') return 'bg-warning badge-contrast'
-  if (status === 'FINISHED') return 'bg-success'
-  if (status === 'CANCELED') return 'bg-danger'
-  return 'bg-secondary'
+  if (status === 'OPEN') return 'border-sky-400/30 bg-sky-500/20 text-sky-100'
+  if (status === 'IN_PROGRESS') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
+  if (status === 'WAITING_CUSTOMER') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (status === 'FINISHED') return 'border-emerald-400/30 bg-emerald-500/20 text-emerald-100'
+  if (status === 'CANCELED') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
 }
 
 function priorityBadgeClass(priority: string) {
-  if (priority === 'LOW') return 'bg-secondary'
-  if (priority === 'MEDIUM') return 'bg-info badge-contrast'
-  if (priority === 'HIGH') return 'bg-warning badge-contrast'
-  if (priority === 'URGENT') return 'bg-danger'
-  return 'bg-secondary'
+  if (priority === 'LOW') return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+  if (priority === 'MEDIUM') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
+  if (priority === 'HIGH') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (priority === 'URGENT') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+}
+
+function pillClassName(tone: string) {
+  return `inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${tone}`
 }
 
 export default function DashboardPage() {
@@ -184,84 +190,57 @@ export default function DashboardPage() {
 
   if (!data) {
     return (
-      <div className="card p-4">
-        <h4 className="mb-2">Dashboard indisponivel</h4>
-        <p className="text-muted mb-3">Nao foi possivel buscar os dados agora.</p>
-        <Button className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" onClick={() => void load(false)}>
-          Tentar novamente
-        </Button>
-        {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <h4 className="mb-2 text-xl font-semibold">Dashboard indisponivel</h4>
+          <p className="text-muted-foreground mb-3">Nao foi possivel buscar os dados agora.</p>
+          <Button className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" onClick={() => void load(false)}>
+            Tentar novamente
+          </Button>
+          {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+        </CardContent>
+      </Card>
     )
   }
 
   return (
-    <div className="dashboard-premium">
-      <section className="dashboard-hero-card card p-3 p-md-4 mb-3">
-        <div className="d-flex flex-wrap justify-content-between gap-3 align-items-start">
-          <div>
-            <span className="dashboard-chip">Visao executiva</span>
-            <h2 className="mt-2 mb-1">Dashboard Premium</h2>
-            <p className="text-muted mb-2">
-              Empresa: <strong>{data.company?.tradeName || data.company?.name || 'Empresa'}</strong>
-              {' '}| Plano: <strong>{PLAN_LABEL[data.company?.plan || 'STARTER']}</strong>
-            </p>
-            <small className="text-muted">
-              Ultima atualizacao: {formatDateTime(data.generatedAt)}
-            </small>
+    <div className="dashboard-premium space-y-3">
+      <Card className="dashboard-hero-card">
+        <CardContent className="p-4 md:p-5">
+          <div className="flex flex-wrap justify-between gap-3 items-start">
+            <div>
+              <span className="dashboard-chip">Visao executiva</span>
+              <h2 className="mt-2 mb-1 text-3xl font-bold">Dashboard Premium</h2>
+              <p className="text-muted-foreground mb-2">
+                Empresa: <strong>{data.company?.tradeName || data.company?.name || 'Empresa'}</strong>
+                {' '}| Plano: <strong>{PLAN_LABEL[data.company?.plan || 'STARTER']}</strong>
+              </p>
+              <small className="text-muted-foreground">Ultima atualizacao: {formatDateTime(data.generatedAt)}</small>
+            </div>
+
+            <Button variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void load(true)} disabled={syncing}>
+              <i className={`fa-solid ${syncing ? 'fa-rotate fa-spin' : 'fa-rotate-right'} mr-2`} />
+              {syncing ? 'Sincronizando...' : 'Atualizar dados'}
+            </Button>
           </div>
+        </CardContent>
+      </Card>
 
-          <Button variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void load(true)} disabled={syncing}>
-            <i className={`fa-solid ${syncing ? 'fa-rotate fa-spin' : 'fa-rotate-right'} me-2`} />
-            {syncing ? 'Sincronizando...' : 'Atualizar dados'}
-          </Button>
-        </div>
+      <section className="dashboard-kpi-grid">
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Total de OS</span><strong>{data.counts.orders}</strong><small>{data.counts.open} abertas | {data.counts.inProgress} em andamento</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Clientes</span><strong>{data.counts.customers}</strong><small>Base ativa da empresa</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Equipe</span><strong>{data.counts.employees}</strong><small>{data.counts.employeesWithAccess} com acesso ao sistema</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Servicos</span><strong>{data.counts.services}</strong><small>Catalogo cadastrado</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturamento total</span><strong>{formatCurrency(data.finance.finishedRevenueTotal)}</strong><small>OS finalizadas</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturamento do mes</span><strong>{formatCurrency(data.finance.finishedRevenueThisMonth)}</strong><small>Ticket medio: {formatCurrency(data.finance.averageTicket)}</small></CardContent></Card>
       </section>
 
-      <section className="dashboard-kpi-grid mb-3">
-        <article className="dashboard-kpi-card card p-3">
-          <span>Total de OS</span>
-          <strong>{data.counts.orders}</strong>
-          <small>{data.counts.open} abertas | {data.counts.inProgress} em andamento</small>
-        </article>
-
-        <article className="dashboard-kpi-card card p-3">
-          <span>Clientes</span>
-          <strong>{data.counts.customers}</strong>
-          <small>Base ativa da empresa</small>
-        </article>
-
-        <article className="dashboard-kpi-card card p-3">
-          <span>Equipe</span>
-          <strong>{data.counts.employees}</strong>
-          <small>{data.counts.employeesWithAccess} com acesso ao sistema</small>
-        </article>
-
-        <article className="dashboard-kpi-card card p-3">
-          <span>Servicos</span>
-          <strong>{data.counts.services}</strong>
-          <small>Catalogo cadastrado</small>
-        </article>
-
-        <article className="dashboard-kpi-card card p-3">
-          <span>Faturamento total</span>
-          <strong>{formatCurrency(data.finance.finishedRevenueTotal)}</strong>
-          <small>OS finalizadas</small>
-        </article>
-
-        <article className="dashboard-kpi-card card p-3">
-          <span>Faturamento do mes</span>
-          <strong>{formatCurrency(data.finance.finishedRevenueThisMonth)}</strong>
-          <small>Ticket medio: {formatCurrency(data.finance.averageTicket)}</small>
-        </article>
-      </section>
-
-      <section className="row g-3 mb-3">
-        <div className="col-12 col-xl-7">
-          <div className="card p-3 p-md-4 dashboard-chart-card">
+      <section className="grid gap-3 xl:grid-cols-12">
+        <Card className="dashboard-chart-card xl:col-span-7">
+          <CardContent className="p-4 md:p-5">
             <div className="dashboard-card-head">
-              <h5 className="mb-1">Tendencia mensal</h5>
-              <small className="text-muted">Abertura, conclusao e receita das OS</small>
+              <h5 className="mb-1 text-lg font-semibold">Tendencia mensal</h5>
+              <small className="text-muted-foreground">Abertura, conclusao e receita das OS</small>
             </div>
             <div className="dashboard-chart-wrap">
               <ResponsiveContainer width="100%" height="100%">
@@ -279,27 +258,20 @@ export default function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" />
                   <XAxis dataKey="month" tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} />
                   <YAxis tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--app-surface)',
-                      border: '1px solid var(--app-border)',
-                      borderRadius: 10,
-                      color: 'var(--app-text)'
-                    }}
-                  />
+                  <Tooltip contentStyle={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', borderRadius: 10, color: 'var(--app-text)' }} />
                   <Area type="monotone" dataKey="opened" stroke="#0ea5e9" fill="url(#openedGradient)" strokeWidth={2.2} name="Abertas" />
                   <Area type="monotone" dataKey="finished" stroke="#22c55e" fill="url(#finishedGradient)" strokeWidth={2.2} name="Finalizadas" />
                 </AreaChart>
               </ResponsiveContainer>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="col-12 col-xl-5">
-          <div className="card p-3 p-md-4 dashboard-chart-card h-100">
+        <Card className="dashboard-chart-card xl:col-span-5">
+          <CardContent className="p-4 md:p-5 h-full">
             <div className="dashboard-card-head">
-              <h5 className="mb-1">Distribuicao por status</h5>
-              <small className="text-muted">Volume atual no funil operacional</small>
+              <h5 className="mb-1 text-lg font-semibold">Distribuicao por status</h5>
+              <small className="text-muted-foreground">Volume atual no funil operacional</small>
             </div>
             <div className="dashboard-chart-wrap">
               <ResponsiveContainer width="100%" height="100%">
@@ -307,53 +279,44 @@ export default function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" />
                   <XAxis dataKey="name" tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} />
                   <YAxis tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--app-surface)',
-                      border: '1px solid var(--app-border)',
-                      borderRadius: 10,
-                      color: 'var(--app-text)'
-                    }}
-                  />
+                  <Tooltip contentStyle={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', borderRadius: 10, color: 'var(--app-text)' }} />
                   <Bar dataKey="total" fill="#22b8cf" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </section>
 
-      <section className="row g-3 mb-3">
-        <div className="col-12 col-xl-6">
-          <div className="card p-3 p-md-4 dashboard-list-card h-100">
+      <section className="grid gap-3 xl:grid-cols-12">
+        <Card className="dashboard-list-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
             <div className="dashboard-card-head">
-              <h5 className="mb-1">Top clientes</h5>
-              <small className="text-muted">Clientes com maior volume de ordens</small>
+              <h5 className="mb-1 text-lg font-semibold">Top clientes</h5>
+              <small className="text-muted-foreground">Clientes com maior volume de ordens</small>
             </div>
 
             <div className="dashboard-top-list">
-              {data.topCustomers.length === 0 && (
-                <small className="text-muted">Sem dados de clientes ainda.</small>
-              )}
+              {data.topCustomers.length === 0 && <small className="text-muted-foreground">Sem dados de clientes ainda.</small>}
 
               {data.topCustomers.map((customer, index) => (
                 <div className="dashboard-top-item" key={`${customer.customerId}-${index}`}>
                   <div>
                     <strong>{index + 1}. {customer.name}</strong>
-                    <small className="d-block text-muted">{customer.orders} ordens</small>
+                    <small className="block text-muted-foreground">{customer.orders} ordens</small>
                   </div>
                   <span>{formatCurrency(customer.revenue)}</span>
                 </div>
               ))}
             </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        <div className="col-12 col-xl-6">
-          <div className="card p-3 p-md-4 dashboard-chart-card h-100">
+        <Card className="dashboard-chart-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
             <div className="dashboard-card-head">
-              <h5 className="mb-1">Prioridade das ordens</h5>
-              <small className="text-muted">Distribuicao para balanceamento da equipe</small>
+              <h5 className="mb-1 text-lg font-semibold">Prioridade das ordens</h5>
+              <small className="text-muted-foreground">Distribuicao para balanceamento da equipe</small>
             </div>
             <div className="dashboard-chart-wrap">
               <ResponsiveContainer width="100%" height="100%">
@@ -361,75 +324,62 @@ export default function DashboardPage() {
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--app-border)" />
                   <XAxis dataKey="name" tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} />
                   <YAxis tick={{ fill: 'var(--app-muted)', fontSize: 12 }} axisLine={{ stroke: 'var(--app-border)' }} tickLine={false} allowDecimals={false} />
-                  <Tooltip
-                    contentStyle={{
-                      background: 'var(--app-surface)',
-                      border: '1px solid var(--app-border)',
-                      borderRadius: 10,
-                      color: 'var(--app-text)'
-                    }}
-                  />
+                  <Tooltip contentStyle={{ background: 'var(--app-surface)', border: '1px solid var(--app-border)', borderRadius: 10, color: 'var(--app-text)' }} />
                   <Bar dataKey="total" fill="#f59e0b" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <Card className="dashboard-table-card">
+        <CardContent className="p-4 md:p-5">
+          <div className="dashboard-card-head">
+            <h5 className="mb-1 text-lg font-semibold">Ultimas ordens atualizadas</h5>
+            <small className="text-muted-foreground">Acompanhe rapidamente as OS mais recentes</small>
           </div>
-        </div>
-      </section>
 
-      <section className="card p-3 p-md-4 dashboard-table-card">
-        <div className="dashboard-card-head">
-          <h5 className="mb-1">Ultimas ordens atualizadas</h5>
-          <small className="text-muted">Acompanhe rapidamente as OS mais recentes</small>
-        </div>
+          <div className="mt-2">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>OS</TableHead>
+                  <TableHead>Cliente</TableHead>
+                  <TableHead>Responsavel</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Prioridade</TableHead>
+                  <TableHead>Valor</TableHead>
+                  <TableHead>Atualizada em</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {data.recentOrders.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-muted-foreground">Nenhuma ordem encontrada.</TableCell>
+                  </TableRow>
+                )}
 
-        <div className="table-responsive mt-2">
-          <table className="table align-middle mb-0">
-            <thead>
-              <tr>
-                <th>OS</th>
-                <th>Cliente</th>
-                <th>Responsavel</th>
-                <th>Status</th>
-                <th>Prioridade</th>
-                <th>Valor</th>
-                <th>Atualizada em</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.recentOrders.length === 0 && (
-                <tr>
-                  <td colSpan={7} className="text-muted">Nenhuma ordem encontrada.</td>
-                </tr>
-              )}
-
-              {data.recentOrders.map(order => (
-                <tr key={order.id}>
-                  <td>
-                    <a href={`/ordens-servico/${order.id}`} className="dashboard-order-link">
-                      {order.title || 'Sem titulo'}
-                    </a>
-                  </td>
-                  <td>{order.customerName}</td>
-                  <td>{order.responsibleName}</td>
-                  <td>
-                    <span className={`badge ${statusBadgeClass(order.status)}`}>
-                      {STATUS_LABEL[order.status] || order.status}
-                    </span>
-                  </td>
-                  <td>
-                    <span className={`badge ${priorityBadgeClass(order.priority)}`}>
-                      {PRIORITY_LABEL[order.priority] || order.priority}
-                    </span>
-                  </td>
-                  <td>{formatCurrency(order.total)}</td>
-                  <td>{formatDateTime(order.updatedAt)}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+                {data.recentOrders.map(order => (
+                  <TableRow key={order.id}>
+                    <TableCell>
+                      <a href={`/ordens-servico/${order.id}`} className="dashboard-order-link">
+                        {order.title || 'Sem titulo'}
+                      </a>
+                    </TableCell>
+                    <TableCell>{order.customerName}</TableCell>
+                    <TableCell>{order.responsibleName}</TableCell>
+                    <TableCell><span className={pillClassName(statusBadgeClass(order.status))}>{STATUS_LABEL[order.status] || order.status}</span></TableCell>
+                    <TableCell><span className={pillClassName(priorityBadgeClass(order.priority))}>{PRIORITY_LABEL[order.priority] || order.priority}</span></TableCell>
+                    <TableCell>{formatCurrency(order.total)}</TableCell>
+                    <TableCell>{formatDateTime(order.updatedAt)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

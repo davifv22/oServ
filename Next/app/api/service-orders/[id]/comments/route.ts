@@ -1,8 +1,5 @@
 ﻿import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+import { prisma } from '@/lib/prisma'
 function getAuth(req: Request) {
   return {
     companyId: req.headers.get('x-company-id'),
@@ -159,3 +156,4 @@ export async function POST(req: Request, { params }: { params: { id: string } })
 
   return NextResponse.json(comment)
 }
+

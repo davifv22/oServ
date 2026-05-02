@@ -1,11 +1,8 @@
-import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
-
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
 export async function GET(req: Request, { params }: { params: { id: string } }) {
   const companyId = req.headers.get('x-company-id')
-  if (!companyId) return NextResponse.json({ error: 'Empresa não identificada' }, { status: 401 })
+  if (!companyId) return NextResponse.json({ error: 'Empresa nÃ£o identificada' }, { status: 401 })
 
   const order = await prisma.serviceOrder.findFirst({
     where: { id: params.id, companyId },
@@ -26,7 +23,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     }
   })
 
-  if (!order) return NextResponse.json({ error: 'OS não encontrada' }, { status: 404 })
+  if (!order) return NextResponse.json({ error: 'OS nÃ£o encontrada' }, { status: 404 })
 
   return NextResponse.json(order)
 }
+

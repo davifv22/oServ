@@ -1,9 +1,7 @@
-import { NextResponse } from 'next/server'
-import { Prisma, PrismaClient, Role } from '@prisma/client'
+﻿import { NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+import { Prisma, Role } from '@prisma/client'
 import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
-
 class HttpError extends Error {
   status: number
 
@@ -272,3 +270,5 @@ export async function DELETE(req: Request) {
 
   return NextResponse.json({ success: true })
 }
+
+

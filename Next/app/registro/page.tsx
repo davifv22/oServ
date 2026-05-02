@@ -3,7 +3,11 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Checkbox } from '@/components/ui/checkbox'
 import { sanitizeSubdomain } from '@/lib/tenant'
+import { fetchAddressByZipCode, isValidDocument, isValidPhone, isValidZipCode, maskCpfCnpj, maskPhone, maskZipCode, normalizeDocument, normalizePhone, normalizeZipCode } from '@/lib/br'
 import Toast from '@/components/Toast'
 
 type PlanId = 'STARTER' | 'PRO' | 'ENTERPRISE'
@@ -21,6 +25,7 @@ export default function Registro() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [loading, setLoading] = useState(false)
   const [checkingSubdomain, setCheckingSubdomain] = useState(false)
+  const [checkingZipCode, setCheckingZipCode] = useState(false)
   const [subdomainFeedback, setSubdomainFeedback] = useState('')
 
   const [owner, setOwner] = useState({
@@ -95,6 +100,42 @@ export default function Registro() {
     }
   }
 
+  const resolveZipCode = async () => {
+    const zipCode = normalizeZipCode(company.zipCode)
+
+    if (!zipCode) return
+
+    if (!isValidZipCode(zipCode)) {
+      setToast({ message: 'CEP invalido. Informe os 8 digitos.', type: 'error' })
+      return
+    }
+
+    setCheckingZipCode(true)
+
+    try {
+      const address = await fetchAddressByZipCode(zipCode)
+
+      if (!address) {
+        setToast({ message: 'CEP nao encontrado.', type: 'error' })
+        return
+      }
+
+      setCompany(prev => ({
+        ...prev,
+        zipCode: maskZipCode(zipCode),
+        address: address.address || prev.address,
+        city: address.city || prev.city,
+        state: address.state || prev.state
+      }))
+
+      setToast({ message: 'Endereco preenchido pelo CEP.', type: 'success' })
+    } catch {
+      setToast({ message: 'Nao foi possivel consultar o CEP agora.', type: 'error' })
+    } finally {
+      setCheckingZipCode(false)
+    }
+  }
+
   const validateStepOne = () => {
     if (!owner.name || !owner.email || !owner.password || !owner.confirmPassword) {
       setError('Preencha todos os campos do dono da conta.')
@@ -121,6 +162,24 @@ export default function Registro() {
     if (!company.name || !company.subdomain) {
       setError('Nome da empresa e subdominio sao obrigatorios.')
       setToast({ message: 'Nome da empresa e subdominio sao obrigatorios.', type: 'error' })
+      return false
+    }
+
+    if (company.document && !isValidDocument(company.document)) {
+      setError('Documento invalido. Informe um CPF ou CNPJ valido.')
+      setToast({ message: 'Documento invalido. Informe um CPF ou CNPJ valido.', type: 'error' })
+      return false
+    }
+
+    if (company.phone && !isValidPhone(company.phone)) {
+      setError('Telefone invalido. Informe DDD e numero corretos.')
+      setToast({ message: 'Telefone invalido. Informe DDD e numero corretos.', type: 'error' })
+      return false
+    }
+
+    if (company.zipCode && !isValidZipCode(company.zipCode)) {
+      setError('CEP invalido. Informe os 8 digitos.')
+      setToast({ message: 'CEP invalido. Informe os 8 digitos.', type: 'error' })
       return false
     }
 
@@ -170,13 +229,13 @@ export default function Registro() {
           ownerPassword: owner.password,
           companyName: company.name,
           tradeName: company.tradeName,
-          document: company.document,
+          document: normalizeDocument(company.document),
           companyEmail: company.email || owner.email,
-          companyPhone: company.phone,
+          companyPhone: normalizePhone(company.phone),
           address: company.address,
           city: company.city,
           state: company.state,
-          zipCode: company.zipCode,
+          zipCode: normalizeZipCode(company.zipCode),
           subdomain: company.subdomain,
           plan,
           rememberMe
@@ -201,152 +260,147 @@ export default function Registro() {
   }
 
   return (
-    <div className="auth-page d-flex justify-content-center align-items-center min-vh-100 py-4">
-      <div className="auth-card card p-4 shadow-sm" style={{ width: 620, maxWidth: '95vw' }}>
-        <div className="text-center mb-3">
-          <img src="/logo.png" alt="oServ - Gestão ordem de serviços" style={{ maxWidth: 190, height: 'auto' }} />
-          <small className="text-muted d-block mt-2">oServ - Gestão ordem de serviços</small>
-        </div>
+    <div className="auth-page min-h-screen flex items-center justify-center px-4 py-8">
+      <Card className="auth-card w-full max-w-3xl border-app-border">
+        <CardHeader className="space-y-3 text-center">
+          <div className="mx-auto flex flex-col items-center gap-2">
+            <img src="/logo.png" alt="oServ - Gestao ordem de servicos" className="h-auto w-[190px]" />
+            <small className="text-muted-foreground">oServ - Gestao ordem de servicos</small>
+          </div>
 
-        <h4 className="mb-1">Criar empresa</h4>
-        <p className="text-muted small mb-3">Etapa {step} de 3</p>
+          <div>
+            <CardTitle className="text-2xl">Criar empresa</CardTitle>
+            <p className="text-sm text-muted-foreground mt-1">Etapa {step} de 3</p>
+          </div>
 
-        <div className="progress mb-4" role="progressbar" aria-valuenow={step} aria-valuemin={1} aria-valuemax={3}>
-          <div className="progress-bar" style={{ width: `${(step / 3) * 100}%` }} />
-        </div>
+          <div className="h-2 w-full rounded-full bg-app-surface-alt border border-app-border overflow-hidden">
+            <div className="h-full bg-app-accent transition-all duration-300" style={{ width: `${(step / 3) * 100}%` }} />
+          </div>
+        </CardHeader>
 
-        {step === 1 && (
-          <>
-            <h6 className="mb-3">1. Dados do dono da conta</h6>
-            <input className="form-control mb-2" placeholder="Nome do dono" value={owner.name} onChange={e => setOwner({ ...owner, name: e.target.value })} required />
-            <input className="form-control mb-2" type="email" placeholder="Email do dono" value={owner.email} onChange={e => setOwner({ ...owner, email: e.target.value })} required />
-            <input className="form-control mb-2" type="password" placeholder="Senha" value={owner.password} onChange={e => setOwner({ ...owner, password: e.target.value })} required />
-            <input className="form-control" type="password" placeholder="Confirmar senha" value={owner.confirmPassword} onChange={e => setOwner({ ...owner, confirmPassword: e.target.value })} required />
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <h6 className="mb-3">2. Informacoes da empresa</h6>
-            <div className="row g-2">
-              <div className="col-md-6">
-                <input className="form-control" placeholder="Razao social" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="Nome fantasia" value={company.tradeName} onChange={e => setCompany({ ...company, tradeName: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="CNPJ/CPF" value={company.document} onChange={e => setCompany({ ...company, document: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" type="email" placeholder="Email da empresa" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="Telefone" value={company.phone} onChange={e => setCompany({ ...company, phone: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="CEP" value={company.zipCode} onChange={e => setCompany({ ...company, zipCode: e.target.value })} />
-              </div>
-              <div className="col-12">
-                <input className="form-control" placeholder="Endereco" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="Cidade" value={company.city} onChange={e => setCompany({ ...company, city: e.target.value })} />
-              </div>
-              <div className="col-md-6">
-                <input className="form-control" placeholder="Estado" value={company.state} onChange={e => setCompany({ ...company, state: e.target.value })} />
-              </div>
+        <CardContent className="space-y-4">
+          {step === 1 && (
+            <div className="space-y-3">
+              <h6 className="font-semibold">1. Dados do dono da conta</h6>
+              <Input placeholder="Nome do dono" value={owner.name} onChange={e => setOwner({ ...owner, name: e.target.value })} required />
+              <Input type="email" placeholder="Email do dono" value={owner.email} onChange={e => setOwner({ ...owner, email: e.target.value })} required />
+              <Input type="password" placeholder="Senha" value={owner.password} onChange={e => setOwner({ ...owner, password: e.target.value })} required />
+              <Input type="password" placeholder="Confirmar senha" value={owner.confirmPassword} onChange={e => setOwner({ ...owner, confirmPassword: e.target.value })} required />
             </div>
+          )}
 
-            <div className="mt-3">
-              <label className="form-label mb-1">Subdominio</label>
-              <div className="input-group">
-                <input
-                  className="form-control"
-                  placeholder="minhaempresa"
-                  value={company.subdomain}
-                  onChange={e => onSubdomainChange(e.target.value)}
-                  onBlur={() => {
-                    if (company.subdomain) {
-                      void checkSubdomainAvailability()
-                    }
-                  }}
-                  required
+          {step === 2 && (
+            <div className="space-y-3">
+              <h6 className="font-semibold">2. Informacoes da empresa</h6>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Input placeholder="Razao social" value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} />
+                <Input placeholder="Nome fantasia" value={company.tradeName} onChange={e => setCompany({ ...company, tradeName: e.target.value })} />
+                <Input placeholder="CNPJ/CPF" value={company.document} onChange={e => setCompany({ ...company, document: maskCpfCnpj(e.target.value) })} />
+                <Input type="email" placeholder="Email da empresa" value={company.email} onChange={e => setCompany({ ...company, email: e.target.value })} />
+                <Input placeholder="Telefone" value={company.phone} onChange={e => setCompany({ ...company, phone: maskPhone(e.target.value) })} />
+                <Input
+                  placeholder="CEP"
+                  value={company.zipCode}
+                  onChange={e => setCompany({ ...company, zipCode: maskZipCode(e.target.value) })}
+                  onBlur={() => { void resolveZipCode() }}
+                  disabled={checkingZipCode}
                 />
-                <Button type="button" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void checkSubdomainAvailability()} disabled={checkingSubdomain}>
-                  {checkingSubdomain ? 'Validando...' : 'Verificar'}
-                </Button>
+                <Input className="md:col-span-2" placeholder="Endereco" value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} />
+                <Input placeholder="Cidade" value={company.city} onChange={e => setCompany({ ...company, city: e.target.value })} />
+                <Input placeholder="Estado" value={company.state} onChange={e => setCompany({ ...company, state: e.target.value })} />
               </div>
-              <small className="text-muted d-block mt-1">Exemplo: {company.subdomain || 'minhaempresa'}.localhost:3000</small>
-              {subdomainFeedback && (
-                <small className={`d-block mt-1 ${subdomainFeedback.includes('disponivel') ? 'text-success' : 'text-danger'}`}>
-                  {subdomainFeedback}
-                </small>
-              )}
-            </div>
-          </>
-        )}
 
-        {step === 3 && (
-          <>
-            <h6 className="mb-3">3. Escolha o plano</h6>
-            <div className="row g-2">
-              {plans.map(item => (
-                <div className="col-md-4" key={item.id}>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Subdominio</label>
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="minhaempresa"
+                    value={company.subdomain}
+                    onChange={e => onSubdomainChange(e.target.value)}
+                    onBlur={() => {
+                      if (company.subdomain) {
+                        void checkSubdomainAvailability()
+                      }
+                    }}
+                    required
+                  />
+                  <Button type="button" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void checkSubdomainAvailability()} disabled={checkingSubdomain}>
+                    {checkingSubdomain ? 'Validando...' : 'Verificar'}
+                  </Button>
+                </div>
+                <small className="text-muted-foreground block">Exemplo: {company.subdomain || 'minhaempresa'}.localhost:3000</small>
+                {subdomainFeedback && (
+                  <small className={`block ${subdomainFeedback.includes('disponivel') ? 'text-emerald-400' : 'text-red-400'}`}>
+                    {subdomainFeedback}
+                  </small>
+                )}
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
+            <div className="space-y-3">
+              <h6 className="font-semibold">3. Escolha o plano</h6>
+
+              <div className="grid gap-2 md:grid-cols-3">
+                {plans.map(item => (
                   <button
                     type="button"
-                    className={`card w-100 p-3 text-start border ${plan === item.id ? 'border-primary' : 'border-light'}`}
+                    key={item.id}
+                    className={`rounded-xl border p-3 text-left transition-colors ${plan === item.id ? 'border-app-accent bg-app-surface-alt' : 'border-app-border bg-app-surface hover:border-app-accent/50'}`}
                     onClick={() => setPlan(item.id)}
                   >
-                    <strong>{item.name}</strong>
-                    <div className="small text-muted mb-2">{item.price}</div>
-                    <ul className="small mb-0" style={{ paddingLeft: 18 }}>
+                    <strong className="block">{item.name}</strong>
+                    <div className="text-sm text-muted-foreground mb-2">{item.price}</div>
+                    <ul className="space-y-1 pl-4 text-sm text-muted-foreground list-disc">
                       {item.features.map(feature => <li key={feature}>{feature}</li>)}
                     </ul>
                   </button>
-                </div>
-              ))}
+                ))}
+              </div>
+
+              <Card className="border-app-border bg-app-surface-alt shadow-none">
+                <CardContent className="p-3 text-sm">
+                  <strong>Plano selecionado:</strong> {selectedPlan?.name}
+                </CardContent>
+              </Card>
+
+              <label className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Checkbox checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
+                Manter conectado por 30 dias
+              </label>
             </div>
+          )}
 
-            <div className="alert alert-light border mt-3 mb-0">
-              <strong>Plano selecionado:</strong> {selectedPlan?.name}
+          {error && <small className="block text-sm text-red-400">{error}</small>}
+
+          <div className="flex items-center justify-between gap-3 pt-2">
+            <Button variant="link" className="h-auto p-0 text-app-text hover:text-app-accent" asChild>
+              <a href="/login">Ja tenho conta</a>
+            </Button>
+
+            <div className="flex gap-2">
+              {step > 1 && (
+                <Button type="button" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={goBack} disabled={loading || checkingSubdomain || checkingZipCode}>
+                  Voltar
+                </Button>
+              )}
+
+              {step < 3 && (
+                <Button type="button" className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" onClick={() => void goNext()} disabled={loading || checkingSubdomain || checkingZipCode}>
+                  Continuar
+                </Button>
+              )}
+
+              {step === 3 && (
+                <Button type="button" className="bg-emerald-600 hover:bg-emerald-700 text-white" onClick={submitRegister} disabled={loading}>
+                  {loading ? 'Criando empresa...' : 'Finalizar cadastro'}
+                </Button>
+              )}
             </div>
-
-            <label className="form-check mt-3 d-flex align-items-center gap-2">
-              <input type="checkbox" className="form-check-input" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} />
-              <span className="form-check-label small">Manter conectado por 30 dias</span>
-            </label>
-          </>
-        )}
-
-        {error && <small className="text-danger d-block mt-3">{error}</small>}
-
-        <div className="flex justify-between mt-4 gap-2">
-          <Button variant="link" className="p-0 h-auto text-app-text hover:text-app-accent" asChild>
-            <a href="/login">Já tenho conta</a>
-          </Button>
-
-          <div className="flex gap-2">
-            {step > 1 && (
-              <Button type="button" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={goBack} disabled={loading || checkingSubdomain}>
-                Voltar
-              </Button>
-            )}
-
-            {step < 3 && (
-              <Button type="button" className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent" onClick={() => void goNext()} disabled={loading || checkingSubdomain}>
-                Continuar
-              </Button>
-            )}
-
-            {step === 3 && (
-              <Button type="button" className="bg-green-600 hover:bg-green-700 text-white" onClick={submitRegister} disabled={loading}>
-                {loading ? 'Criando empresa...' : 'Finalizar cadastro'}
-              </Button>
-            )}
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

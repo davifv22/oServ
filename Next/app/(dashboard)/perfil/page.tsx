@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
 import Loader from '@/components/Loader'
 import Toast from '@/components/Toast'
 
@@ -16,7 +18,7 @@ function getInitials(name?: string) {
 }
 
 export default function Perfil() {
-  const [toast, setToast] = useState<any>(null)
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null)
   const [loading, setLoading] = useState(false)
   const [uploadingAvatar, setUploadingAvatar] = useState(false)
   const [profile, setProfile] = useState({ name: '', email: '', avatarUrl: '' })
@@ -138,93 +140,114 @@ export default function Perfil() {
   }
 
   return (
-    <div>
-      <div className="mb-4">
-        <h2>Perfil</h2>
-        <p className="text-muted mb-0">Gerencie seus dados pessoais e seguranca da conta.</p>
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-2xl font-bold">Perfil</h2>
+        <p className="text-muted-foreground">Gerencie seus dados pessoais e seguranca da conta.</p>
       </div>
 
       {loading ? <Loader label="Carregando perfil..." /> : (
-        <div className="row g-3">
-          <div className="col-lg-8">
-            <form onSubmit={saveProfile} className="card p-4 mb-3">
-              <h5>Dados pessoais</h5>
-              <p className="text-muted small">Essas informacoes sao usadas dentro do sistema e nos registros de acoes.</p>
+        <div className="grid gap-4 lg:grid-cols-12">
+          <div className="space-y-4 lg:col-span-8">
+            <Card>
+              <CardHeader>
+                <CardTitle>Dados pessoais</CardTitle>
+                <p className="text-sm text-muted-foreground">Essas informacoes sao usadas dentro do sistema e nos registros de acoes.</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={saveProfile} className="space-y-4">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Nome</label>
+                      <Input value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Email</label>
+                      <Input value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} />
+                    </div>
+                  </div>
 
-              <div className="row g-3 mt-1">
-                <div className="col-md-6">
-                  <label className="form-label">Nome</label>
-                  <input className="form-control" value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} />
-                </div>
-                <div className="col-md-6">
-                  <label className="form-label">Email</label>
-                  <input className="form-control" value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} />
-                </div>
-              </div>
+                  <div className="flex justify-end">
+                    <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">Salvar perfil</Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
 
-              <div className="text-end mt-4">
-                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">Salvar perfil</Button>
-              </div>
-            </form>
+            <Card>
+              <CardHeader>
+                <CardTitle>Alterar senha</CardTitle>
+                <p className="text-sm text-muted-foreground">Use uma senha forte para manter sua conta segura.</p>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={changePassword} className="space-y-3">
+                  <Input type="password" placeholder="Senha atual" value={password.current} onChange={e => setPassword({ ...password, current: e.target.value })} />
+                  <Input type="password" placeholder="Nova senha" value={password.next} onChange={e => setPassword({ ...password, next: e.target.value })} />
+                  <Input type="password" placeholder="Confirmar nova senha" value={password.confirm} onChange={e => setPassword({ ...password, confirm: e.target.value })} />
 
-            <form onSubmit={changePassword} className="card p-4">
-              <h5>Alterar senha</h5>
-              <p className="text-muted small">Use uma senha forte para manter sua conta segura.</p>
-
-              <input className="form-control mb-2" type="password" placeholder="Senha atual" value={password.current} onChange={e => setPassword({ ...password, current: e.target.value })} />
-              <input className="form-control mb-2" type="password" placeholder="Nova senha" value={password.next} onChange={e => setPassword({ ...password, next: e.target.value })} />
-              <input className="form-control mb-3" type="password" placeholder="Confirmar nova senha" value={password.confirm} onChange={e => setPassword({ ...password, confirm: e.target.value })} />
-
-              <div className="text-end">
-                <Button type="submit" className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent">Alterar senha</Button>
-              </div>
-            </form>
+                  <div className="flex justify-end">
+                    <Button type="submit" className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent">Alterar senha</Button>
+                  </div>
+                </form>
+              </CardContent>
+            </Card>
           </div>
 
-          <div className="col-lg-4">
-            <div className="card p-4 mb-3">
-              <h5>Foto do usuario</h5>
-              <p className="text-muted small">A foto aparece no cabecalho para identificar a sessao ativa.</p>
+          <div className="space-y-4 lg:col-span-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Foto do usuario</CardTitle>
+                <p className="text-sm text-muted-foreground">A foto aparece no cabecalho para identificar a sessao ativa.</p>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="profile-avatar-wrap">
+                  {profile.avatarUrl ? (
+                    <img className="profile-avatar-preview" src={profile.avatarUrl} alt="Foto do usuario" />
+                  ) : (
+                    <span className="profile-avatar-fallback">{getInitials(profile.name)}</span>
+                  )}
+                </div>
 
-              <div className="profile-avatar-wrap mb-3">
-                {profile.avatarUrl ? (
-                  <img className="profile-avatar-preview" src={profile.avatarUrl} alt="Foto do usuario" />
-                ) : (
-                  <span className="profile-avatar-fallback">{getInitials(profile.name)}</span>
-                )}
-              </div>
+                <div className="flex gap-2 flex-wrap">
+                  <label className="inline-flex items-center px-3 py-2 text-sm font-medium text-app-text bg-transparent border border-app-border rounded-md cursor-pointer hover:bg-app-surface-alt transition-colors">
+                    {uploadingAvatar ? 'Enviando...' : 'Trocar foto'}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploadingAvatar}
+                      onChange={event => {
+                        const file = event.target.files?.[0]
+                        if (file) void uploadAvatar(file)
+                        event.currentTarget.value = ''
+                      }}
+                    />
+                  </label>
 
-              <div className="flex gap-2 flex-wrap">
-                <label className="inline-flex items-center px-3 py-2 text-sm font-medium text-app-text bg-transparent border border-app-border rounded-md cursor-pointer hover:bg-app-surface-alt transition-colors">
-                  {uploadingAvatar ? 'Enviando...' : 'Trocar foto'}
-                  <input
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    disabled={uploadingAvatar}
-                    onChange={event => {
-                      const file = event.target.files?.[0]
-                      if (file) void uploadAvatar(file)
-                      event.currentTarget.value = ''
-                    }}
-                  />
-                </label>
+                  <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void removeAvatar()} disabled={uploadingAvatar || !profile.avatarUrl}>
+                    Remover
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
 
-                <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void removeAvatar()} disabled={uploadingAvatar || !profile.avatarUrl}>
-                  Remover
-                </Button>
-              </div>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Seguranca da sessao</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Sua sessao e protegida por cookie seguro e expiracao automatica.</p>
+              </CardContent>
+            </Card>
 
-            <div className="card p-4 mb-3">
-              <h5>Seguranca da sessao</h5>
-              <p className="text-muted small mb-0">Sua sessao e protegida por cookie seguro e expiracao automatica.</p>
-            </div>
-
-            <div className="card p-4">
-              <h5>Permissao</h5>
-              <p className="text-muted small mb-0">Seu nivel de acesso sera exibido aqui conforme o perfil do usuario.</p>
-            </div>
+            <Card>
+              <CardHeader>
+                <CardTitle>Permissao</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground">Seu nivel de acesso sera exibido aqui conforme o perfil do usuario.</p>
+              </CardContent>
+            </Card>
           </div>
         </div>
       )}

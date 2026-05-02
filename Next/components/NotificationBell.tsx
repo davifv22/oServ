@@ -1,6 +1,8 @@
-﻿"use client"
+"use client"
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import Toast from '@/components/Toast'
 
 type NotificationItem = {
@@ -223,9 +225,9 @@ export default function NotificationBell() {
           <p className="notification-item-body">{item.body}</p>
 
           {isUnread && (
-            <button className="btn btn-sm btn-link p-0 notification-action" onClick={() => void markOne(item.id)}>
+            <Button variant="link" size="sm" className="notification-action h-auto px-0 text-app-accent" onClick={() => void markOne(item.id)}>
               Marcar como lida
-            </button>
+            </Button>
           )}
         </div>
       </article>
@@ -233,34 +235,36 @@ export default function NotificationBell() {
   }
 
   return (
-    <div className="position-relative" ref={wrapperRef}>
-      <button
-        className="btn btn-outline-secondary position-relative"
+    <div className="relative" ref={wrapperRef}>
+      <Button
+        variant="outline"
+        size="sm"
+        className="relative bg-transparent border-app-border hover:bg-app-surface-alt text-app-text"
         onClick={() => setOpen(prev => !prev)}
         aria-label="Notificacoes"
       >
         <i className="fa-solid fa-bell" />
         {unreadCount > 0 && (
-          <span className="badge bg-danger position-absolute top-0 start-100 translate-middle">
+          <span className="absolute -right-2 -top-2 inline-flex min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-semibold text-white">
             {unreadCount > 99 ? '99+' : unreadCount}
           </span>
         )}
-      </button>
+      </Button>
 
       {open && (
-        <div className="card notification-dropdown-panel shadow">
+        <Card className="notification-dropdown-panel p-0 shadow-xl">
           <div className="notification-dropdown-header">
             <div>
-              <strong>Notificacoes</strong>
-              <small className="text-muted d-block">{unreadCount} nao lidas de {items.length}</small>
+              <strong className="block">Notificacoes</strong>
+              <small className="text-muted-foreground">{unreadCount} nao lidas de {items.length}</small>
             </div>
-            <button className="btn btn-sm btn-outline-secondary" onClick={() => void markAll()} disabled={unreadCount === 0}>
+            <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void markAll()} disabled={unreadCount === 0}>
               Marcar todas
-            </button>
+            </Button>
           </div>
 
           <div className="notification-dropdown-body">
-            {items.length === 0 && <small className="text-muted p-3 d-block">Sem notificacoes</small>}
+            {items.length === 0 && <small className="text-muted-foreground p-3 block">Sem notificacoes</small>}
 
             {dropdownUnread.length > 0 && (
               <section className="notification-section">
@@ -278,33 +282,35 @@ export default function NotificationBell() {
           </div>
 
           <div className="notification-dropdown-footer">
-            <button
-              className="btn btn-sm btn-outline-secondary"
+            <Button
+              variant="outline"
+              size="sm"
+              className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text"
               onClick={() => {
                 setModalOpen(true)
                 setOpen(false)
               }}
             >
               Ver todas
-            </button>
-            <button className="btn btn-sm btn-outline-secondary" onClick={() => void load()} disabled={loading}>
+            </Button>
+            <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void load()} disabled={loading}>
               {loading ? 'Atualizando...' : 'Atualizar'}
-            </button>
+            </Button>
           </div>
-        </div>
+        </Card>
       )}
 
       {modalOpen && (
         <div className="modal-backdrop-custom" onClick={() => setModalOpen(false)}>
-          <div className="modal-card modal-card-lg notification-modal-card" onClick={event => event.stopPropagation()}>
+          <Card className="modal-card modal-card-lg notification-modal-card" onClick={event => event.stopPropagation()}>
             <div className="notification-modal-header">
               <div>
                 <h5 className="mb-1">Central de notificacoes</h5>
-                <small className="text-muted">Acompanhe mencoes e atualizacoes importantes da operacao.</small>
+                <small className="text-muted-foreground">Acompanhe mencoes e atualizacoes importantes da operacao.</small>
               </div>
-              <button className="btn btn-sm btn-outline-secondary" onClick={() => setModalOpen(false)}>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => setModalOpen(false)}>
                 Fechar
-              </button>
+              </Button>
             </div>
 
             <div className="notification-metrics">
@@ -323,28 +329,28 @@ export default function NotificationBell() {
             </div>
 
             <div className="notification-modal-toolbar">
-              <div className="btn-group" role="group" aria-label="Filtrar notificacoes">
-                <button className={`btn btn-sm ${filter === 'all' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setFilter('all')}>
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Filtrar notificacoes">
+                <Button variant={filter === 'all' ? 'default' : 'outline'} size="sm" className={filter === 'all' ? 'bg-app-accent text-white hover:bg-app-accent/85' : 'bg-transparent border-app-border hover:bg-app-surface-alt text-app-text'} onClick={() => setFilter('all')}>
                   Todas
-                </button>
-                <button className={`btn btn-sm ${filter === 'unread' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setFilter('unread')}>
+                </Button>
+                <Button variant={filter === 'unread' ? 'default' : 'outline'} size="sm" className={filter === 'unread' ? 'bg-app-accent text-white hover:bg-app-accent/85' : 'bg-transparent border-app-border hover:bg-app-surface-alt text-app-text'} onClick={() => setFilter('unread')}>
                   Nao lidas
-                </button>
-                <button className={`btn btn-sm ${filter === 'read' ? 'btn-primary' : 'btn-outline-secondary'}`} onClick={() => setFilter('read')}>
+                </Button>
+                <Button variant={filter === 'read' ? 'default' : 'outline'} size="sm" className={filter === 'read' ? 'bg-app-accent text-white hover:bg-app-accent/85' : 'bg-transparent border-app-border hover:bg-app-surface-alt text-app-text'} onClick={() => setFilter('read')}>
                   Lidas
-                </button>
+                </Button>
               </div>
 
-              <button className="btn btn-sm btn-outline-secondary" onClick={() => void markAll()} disabled={unreadCount === 0}>
+              <Button variant="outline" size="sm" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void markAll()} disabled={unreadCount === 0}>
                 Marcar todas como lidas
-              </button>
+              </Button>
             </div>
 
             <div className="notification-modal-list">
-              {modalItems.length === 0 && <small className="text-muted d-block p-2">Nenhuma notificacao nesse filtro.</small>}
+              {modalItems.length === 0 && <small className="text-muted-foreground block p-2">Nenhuma notificacao nesse filtro.</small>}
               {modalItems.map(item => renderNotification(item, false))}
             </div>
-          </div>
+          </Card>
         </div>
       )}
 
