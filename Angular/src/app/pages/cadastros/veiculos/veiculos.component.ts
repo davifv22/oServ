@@ -14,6 +14,7 @@ import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog'
 import { MatCardModule } from '@angular/material/card';
 import { EquipesComponent } from '../equipes/equipes.component'
+import { PrintService } from '../../../services/print.service'
 
 @Component({
   selector: 'app-veiculos',
@@ -30,7 +31,7 @@ export class VeiculosComponent implements OnInit {
   search:string = ''
   displayedColumns: string[] = ['idVeiculo', 'modelo', 'marca', 'placa', 'kmRodados', 'idEquipe', 'situacao', 'detalhes'];
 
-  constructor(private veiculosService: VeiculosService, public modal: MatDialog) {}
+  constructor(private veiculosService: VeiculosService, public modal: MatDialog, private printService: PrintService) {}
 
   ngOnInit(): void {
     this.title = 'VEÍCULOS'
@@ -52,6 +53,18 @@ export class VeiculosComponent implements OnInit {
   applyFilter(event: Event) {
     const filterValue = (event.target as HTMLInputElement).value;
     this.Veiculos.filter = filterValue.trim().toLowerCase();
+  }
+
+  imprimirListagem(): void {
+    this.printService.printList<Veiculos>('LISTAGEM DE VEÍCULOS', [
+      { label: '#', field: 'idVeiculo', width: 45 },
+      { label: 'Modelo', field: 'modelo', width: '*' },
+      { label: 'Marca', field: 'marca', width: '*' },
+      { label: 'Placa', field: 'placa', width: 70 },
+      { label: 'KM Rodados', field: 'kmRodados', width: 80 },
+      { label: 'ID Equipe', field: 'idEquipe', width: 70 },
+      { label: 'Situação', field: 'situacao', width: 70 }
+    ], this.Veiculos.filteredData ?? this.Veiculos.data ?? []);
   }
 
   openDialog(veiculo: Veiculos): void {
