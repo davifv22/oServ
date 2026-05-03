@@ -26,7 +26,12 @@ model Company {
   customers     Customer[]
   employees     Employee[]
   services      Service[]
+  materials     Material[]
+  vehicles      Vehicle[]
+  orderTypes    ServiceOrderType[]
   serviceOrders ServiceOrder[]
+  invoices      ServiceOrderInvoice[]
+  boletos       ServiceOrderBoleto[]
 }
 
 model User {
@@ -77,7 +82,72 @@ model Service {
   company    Company  @relation(fields: [companyId], references: [id])
   name       String
   price      Float
+  orderItems ServiceOrderItem[]
+  orderTypeItems ServiceOrderTypeItem[]
   createdAt  DateTime @default(now())
+}
+
+model Material {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  name       String
+  unit       String   @default("UN")
+  unitPrice  Float    @default(0)
+  orderItems ServiceOrderItem[]
+  orderTypeItems ServiceOrderTypeItem[]
+  createdAt  DateTime @default(now())
+}
+
+model ServiceOrderType {
+  id              String               @id @default(uuid())
+  companyId       String
+  company         Company              @relation(fields: [companyId], references: [id])
+  name            String
+  description     String?              @db.Text
+  defaultPriority Priority             @default(MEDIUM)
+  items           ServiceOrderTypeItem[]
+  serviceOrders   ServiceOrder[]
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  @@unique([companyId, name])
+}
+
+model ServiceOrderTypeItem {
+  id          String           @id @default(uuid())
+  orderTypeId String
+  orderType   ServiceOrderType @relation(fields: [orderTypeId], references: [id])
+  itemType    OrderItemType
+  serviceId   String?
+  service     Service?         @relation(fields: [serviceId], references: [id])
+  materialId  String?
+  material    Material?        @relation(fields: [materialId], references: [id])
+  description String?
+  quantity    Float            @default(1)
+  unitPrice   Float            @default(0)
+  total       Float            @default(0)
+  sortOrder   Int              @default(0)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
+
+model Vehicle {
+  id         String   @id @default(uuid())
+  companyId  String
+  company    Company  @relation(fields: [companyId], references: [id])
+  plate      String
+  brand      String?
+  model      String?
+  modelYear  Int?
+  color      String?
+  mileage    Int?
+  notes      String?  @db.Text
+  orders     ServiceOrder[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([companyId, plate])
 }
 
 model ServiceOrder {
@@ -86,6 +156,10 @@ model ServiceOrder {
   company               Company                @relation(fields: [companyId], references: [id])
   customerId            String?
   customer              Customer?              @relation(fields: [customerId], references: [id])
+  vehicleId             String?
+  vehicle               Vehicle?               @relation(fields: [vehicleId], references: [id])
+  orderTypeId           String?
+  orderType             ServiceOrderType?      @relation(fields: [orderTypeId], references: [id])
   responsibleEmployeeId String?
   responsibleEmployee   Employee?              @relation(fields: [responsibleEmployeeId], references: [id])
   title                 String
@@ -93,10 +167,68 @@ model ServiceOrder {
   status                ServiceOrderStatus     @default(OPEN)
   priority              Priority               @default(MEDIUM)
   total                 Float                  @default(0)
+  travelCost            Float                  @default(0)
+  items                 ServiceOrderItem[]
+  invoices              ServiceOrderInvoice[]
   comments              ServiceOrderComment[]
   auditLogs             ServiceOrderAuditLog[]
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
+}
+
+model ServiceOrderItem {
+  id             String            @id @default(uuid())
+  serviceOrderId String
+  serviceOrder   ServiceOrder      @relation(fields: [serviceOrderId], references: [id])
+  itemType       OrderItemType
+  serviceId      String?
+  service        Service?          @relation(fields: [serviceId], references: [id])
+  materialId     String?
+  material       Material?         @relation(fields: [materialId], references: [id])
+  description    String?
+  quantity       Float             @default(1)
+  unitPrice      Float             @default(0)
+  total          Float             @default(0)
+  sortOrder      Int               @default(0)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+}
+
+model ServiceOrderInvoice {
+  id             String             @id @default(uuid())
+  companyId      String
+  company        Company            @relation(fields: [companyId], references: [id])
+  serviceOrderId String
+  serviceOrder   ServiceOrder       @relation(fields: [serviceOrderId], references: [id])
+  code           String?
+  issueDate      DateTime           @default(now())
+  dueDate        DateTime?
+  status         InvoiceStatus      @default(DRAFT)
+  subtotal       Float              @default(0)
+  discount       Float              @default(0)
+  interest       Float              @default(0)
+  total          Float              @default(0)
+  notes          String?            @db.Text
+  paidAt         DateTime?
+  boleto         ServiceOrderBoleto?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+model ServiceOrderBoleto {
+  id             String             @id @default(uuid())
+  companyId      String
+  company        Company            @relation(fields: [companyId], references: [id])
+  invoiceId      String             @unique
+  invoice        ServiceOrderInvoice @relation(fields: [invoiceId], references: [id])
+  status         BoletoStatus       @default(PENDING)
+  bankName       String?
+  barcode        String?
+  digitableLine  String?
+  dueDate        DateTime?
+  paidAt         DateTime?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }
 
 model ServiceOrderComment {
@@ -185,4 +317,24 @@ enum Priority {
   MEDIUM
   HIGH
   URGENT
+}
+
+enum OrderItemType {
+  SERVICE
+  MATERIAL
+}
+
+enum InvoiceStatus {
+  DRAFT
+  ISSUED
+  PAID
+  CANCELED
+  OVERDUE
+}
+
+enum BoletoStatus {
+  PENDING
+  PAID
+  CANCELED
+  EXPIRED
 }

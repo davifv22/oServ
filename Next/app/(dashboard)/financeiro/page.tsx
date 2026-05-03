@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Select } from '@/components/ui/select'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
 import {
   Area,
@@ -39,11 +41,28 @@ type FinancePayload = {
     pipelineRevenue: number
     canceledRevenue: number
     averageTicket: number
+    invoicesTotal: number
+    invoicesPaidCount: number
+    invoicesOpenCount: number
+    invoicesOverdueCount: number
+    invoicesCanceledCount: number
+    invoicesAmountTotal: number
+    invoicesAmountPaid: number
+    invoicesAmountOpen: number
+    boletosTotal: number
+    boletosPending: number
+    boletosPaid: number
+    boletosExpired: number
+    boletosCanceled: number
+    boletosAmountPending: number
+    boletosAmountPaid: number
   }
   charts: {
     monthly: Array<{ key: string, month: string, opened: number, finished: number, revenue: number }>
     byStatus: Array<{ status: string, label: string, orders: number, revenue: number }>
     pipelineByPriority: Array<{ priority: string, label: string, orders: number, revenue: number }>
+    invoiceByStatus: Array<{ status: string, label: string, total: number, amount: number }>
+    boletoByStatus: Array<{ status: string, label: string, total: number, amount: number }>
   }
   topCustomers: Array<{
     customerId: string
@@ -70,6 +89,40 @@ type FinancePayload = {
   }>
 }
 
+type InvoiceRow = {
+  id: string
+  companyId: string
+  serviceOrderId: string
+  code: string | null
+  issueDate: string
+  dueDate: string | null
+  status: 'DRAFT' | 'ISSUED' | 'PAID' | 'OVERDUE' | 'CANCELED'
+  subtotal: number
+  discount: number
+  interest: number
+  total: number
+  notes: string | null
+  paidAt: string | null
+  createdAt: string
+  updatedAt: string
+  boleto: {
+    id: string
+    status: 'PENDING' | 'PAID' | 'EXPIRED' | 'CANCELED'
+    bankName: string | null
+    barcode: string | null
+    digitableLine: string | null
+    dueDate: string | null
+    paidAt: string | null
+  } | null
+  serviceOrder: {
+    id: string
+    title: string
+    status: string
+    customer: { name: string } | null
+    responsibleEmployee: { name: string } | null
+  } | null
+}
+
 const PLAN_LABEL: Record<string, string> = {
   STARTER: 'Starter',
   PRO: 'Pro',
@@ -82,6 +135,21 @@ const STATUS_LABEL: Record<string, string> = {
   WAITING_CUSTOMER: 'Aguardando cliente',
   FINISHED: 'Finalizada',
   CANCELED: 'Cancelada'
+}
+
+const INVOICE_STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Rascunho',
+  ISSUED: 'Emitida',
+  PAID: 'Paga',
+  OVERDUE: 'Vencida',
+  CANCELED: 'Cancelada'
+}
+
+const BOLETO_STATUS_LABEL: Record<string, string> = {
+  PENDING: 'Pendente',
+  PAID: 'Pago',
+  EXPIRED: 'Expirado',
+  CANCELED: 'Cancelado'
 }
 
 function formatCurrency(value: number) {
@@ -101,6 +169,13 @@ function formatDateTime(value: string) {
   return date.toLocaleString('pt-BR')
 }
 
+function formatDateInput(value?: string | null) {
+  if (!value) return ''
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toISOString().slice(0, 10)
+}
+
 function statusBadgeClass(status: string) {
   if (status === 'OPEN') return 'border-sky-400/30 bg-sky-500/20 text-sky-100'
   if (status === 'IN_PROGRESS') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
@@ -110,16 +185,62 @@ function statusBadgeClass(status: string) {
   return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
 }
 
+function invoiceStatusBadgeClass(status: string) {
+  if (status === 'DRAFT') return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+  if (status === 'ISSUED') return 'border-cyan-400/30 bg-cyan-500/20 text-cyan-100'
+  if (status === 'PAID') return 'border-emerald-400/30 bg-emerald-500/20 text-emerald-100'
+  if (status === 'OVERDUE') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (status === 'CANCELED') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+}
+
+function boletoStatusBadgeClass(status: string) {
+  if (status === 'PENDING') return 'border-amber-400/30 bg-amber-500/20 text-amber-100'
+  if (status === 'PAID') return 'border-emerald-400/30 bg-emerald-500/20 text-emerald-100'
+  if (status === 'EXPIRED') return 'border-red-400/30 bg-red-500/20 text-red-100'
+  if (status === 'CANCELED') return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+  return 'border-slate-400/30 bg-slate-500/20 text-slate-100'
+}
+
 function pillClassName(tone: string) {
   return `inline-flex rounded-full border px-2 py-0.5 text-xs font-semibold ${tone}`
 }
 
 export default function FinanceiroPage() {
   const [data, setData] = useState<FinancePayload | null>(null)
+  const [invoiceRows, setInvoiceRows] = useState<InvoiceRow[]>([])
   const [loading, setLoading] = useState(true)
+  const [invoiceLoading, setInvoiceLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
+  const [invoiceSyncing, setInvoiceSyncing] = useState(false)
+  const [invoiceFilters, setInvoiceFilters] = useState({
+    status: '',
+    boletoStatus: '',
+    q: ''
+  })
+  const [editingInvoice, setEditingInvoice] = useState<InvoiceRow | null>(null)
+  const [editInvoiceForm, setEditInvoiceForm] = useState({
+    code: '',
+    dueDate: '',
+    status: 'DRAFT',
+    notes: '',
+    subtotal: '0',
+    discount: '0',
+    interest: '0',
+    total: '0',
+    boletoEnabled: false,
+    boletoStatus: 'PENDING',
+    boletoDueDate: '',
+    bankName: '',
+    barcode: '',
+    digitableLine: ''
+  })
+  const [invoiceSaving, setInvoiceSaving] = useState(false)
+  const [invoiceDeletingId, setInvoiceDeletingId] = useState<string | null>(null)
   const [toast, setToast] = useState<{ message: string, type: 'success' | 'error' | 'info' } | null>(null)
   const loadErrorShownRef = useRef(false)
+  const invoicesErrorShownRef = useRef(false)
+  const filtersInitializedRef = useRef(false)
 
   async function load(silent = false) {
     if (silent) {
@@ -151,6 +272,146 @@ export default function FinanceiroPage() {
     }
   }
 
+  async function loadInvoices(silent = false) {
+    if (silent) {
+      setInvoiceSyncing(true)
+    } else {
+      setInvoiceLoading(true)
+    }
+
+    try {
+      const params = new URLSearchParams()
+      if (invoiceFilters.status) params.set('status', invoiceFilters.status)
+      if (invoiceFilters.boletoStatus) params.set('boletoStatus', invoiceFilters.boletoStatus)
+      if (invoiceFilters.q.trim()) params.set('q', invoiceFilters.q.trim())
+
+      const response = await fetch(`/api/invoices?${params.toString()}`, { cache: 'no-store' })
+      if (!response.ok) {
+        throw new Error('Erro ao carregar faturas')
+      }
+
+      const payload = await response.json() as InvoiceRow[]
+      setInvoiceRows(payload)
+      invoicesErrorShownRef.current = false
+    } catch {
+      if (!invoicesErrorShownRef.current) {
+        setToast({ message: 'Nao foi possivel carregar faturas e boletos.', type: 'error' })
+        invoicesErrorShownRef.current = true
+      }
+    } finally {
+      if (silent) {
+        setInvoiceSyncing(false)
+      } else {
+        setInvoiceLoading(false)
+      }
+    }
+  }
+
+  async function refreshAll() {
+    await load(true)
+  }
+
+  function openEditInvoice(invoice: InvoiceRow) {
+    setEditingInvoice(invoice)
+    setEditInvoiceForm({
+      code: invoice.code || '',
+      dueDate: formatDateInput(invoice.dueDate),
+      status: invoice.status,
+      notes: invoice.notes || '',
+      subtotal: String(Number(invoice.subtotal || 0)),
+      discount: String(Number(invoice.discount || 0)),
+      interest: String(Number(invoice.interest || 0)),
+      total: String(Number(invoice.total || 0)),
+      boletoEnabled: Boolean(invoice.boleto),
+      boletoStatus: invoice.boleto?.status || 'PENDING',
+      boletoDueDate: formatDateInput(invoice.boleto?.dueDate || invoice.dueDate),
+      bankName: invoice.boleto?.bankName || '',
+      barcode: invoice.boleto?.barcode || '',
+      digitableLine: invoice.boleto?.digitableLine || ''
+    })
+  }
+
+  async function saveInvoiceEdit() {
+    if (!editingInvoice) return
+    if (invoiceSaving) return
+
+    setInvoiceSaving(true)
+
+    try {
+      const subtotal = Number(editInvoiceForm.subtotal || 0)
+      const discount = Number(editInvoiceForm.discount || 0)
+      const interest = Number(editInvoiceForm.interest || 0)
+      const total = Number(editInvoiceForm.total || 0)
+
+      const response = await fetch('/api/invoices', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          invoiceId: editingInvoice.id,
+          code: editInvoiceForm.code || null,
+          dueDate: editInvoiceForm.dueDate || null,
+          status: editInvoiceForm.status,
+          notes: editInvoiceForm.notes || null,
+          subtotal: Number.isFinite(subtotal) ? subtotal : 0,
+          discount: Number.isFinite(discount) ? discount : 0,
+          interest: Number.isFinite(interest) ? interest : 0,
+          total: Number.isFinite(total) ? total : 0,
+          boleto: editInvoiceForm.boletoEnabled
+            ? {
+                status: editInvoiceForm.boletoStatus,
+                dueDate: editInvoiceForm.boletoDueDate || editInvoiceForm.dueDate || null,
+                bankName: editInvoiceForm.bankName || null,
+                barcode: editInvoiceForm.barcode || null,
+                digitableLine: editInvoiceForm.digitableLine || null
+              }
+            : undefined
+        })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao salvar fatura')
+      }
+
+      const updated = await response.json() as InvoiceRow
+      setInvoiceRows(prev => prev.map(item => (item.id === updated.id ? updated : item)))
+      setEditingInvoice(null)
+      setToast({ message: 'Fatura atualizada com sucesso.', type: 'success' })
+      await load(true)
+    } catch {
+      setToast({ message: 'Erro ao atualizar fatura.', type: 'error' })
+    } finally {
+      setInvoiceSaving(false)
+    }
+  }
+
+  async function deleteInvoice(invoice: InvoiceRow) {
+    if (invoiceDeletingId) return
+    const confirmed = window.confirm(`Excluir fatura ${invoice.code || invoice.id}? Esta acao nao pode ser desfeita.`)
+    if (!confirmed) return
+
+    setInvoiceDeletingId(invoice.id)
+
+    try {
+      const response = await fetch('/api/invoices', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ invoiceId: invoice.id })
+      })
+
+      if (!response.ok) {
+        throw new Error('Erro ao excluir')
+      }
+
+      setInvoiceRows(prev => prev.filter(item => item.id !== invoice.id))
+      setToast({ message: 'Fatura excluida com sucesso.', type: 'success' })
+      await load(true)
+    } catch {
+      setToast({ message: 'Erro ao excluir fatura.', type: 'error' })
+    } finally {
+      setInvoiceDeletingId(null)
+    }
+  }
+
   useEffect(() => {
     void load(false)
     const interval = setInterval(() => {
@@ -159,6 +420,13 @@ export default function FinanceiroPage() {
 
     return () => clearInterval(interval)
   }, [])
+
+  useEffect(() => {
+    if (!filtersInitializedRef.current) {
+      filtersInitializedRef.current = true
+      return
+    }
+  }, [invoiceFilters.status, invoiceFilters.boletoStatus, invoiceFilters.q])
 
   const monthlyRevenueChart = useMemo(() => {
     if (!data) return []
@@ -183,6 +451,24 @@ export default function FinanceiroPage() {
     return data.charts.pipelineByPriority.map(item => ({
       name: item.label,
       revenue: Number(item.revenue.toFixed(2))
+    }))
+  }, [data])
+
+  const invoiceStatusChart = useMemo(() => {
+    if (!data) return []
+    return data.charts.invoiceByStatus.map(item => ({
+      name: item.label,
+      total: item.total,
+      amount: Number(item.amount.toFixed(2))
+    }))
+  }, [data])
+
+  const boletoStatusChart = useMemo(() => {
+    if (!data) return []
+    return data.charts.boletoByStatus.map(item => ({
+      name: item.label,
+      total: item.total,
+      amount: Number(item.amount.toFixed(2))
     }))
   }, [data])
 
@@ -222,7 +508,7 @@ export default function FinanceiroPage() {
               <small className="text-muted-foreground">Atualizado em {formatDateTime(data.generatedAt)}</small>
             </div>
 
-            <Button variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void load(true)} disabled={syncing}>
+            <Button variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => void refreshAll()} disabled={syncing}>
               <i className={`fa-solid ${syncing ? 'fa-rotate fa-spin' : 'fa-rotate-right'} mr-2`} />
               {syncing ? 'Sincronizando...' : 'Atualizar'}
             </Button>
@@ -237,6 +523,9 @@ export default function FinanceiroPage() {
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Ticket medio</span><strong>{formatCurrency(data.summary.averageTicket)}</strong><small>{data.summary.finishedOrders} ordens concluidas</small></CardContent></Card>
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Taxa de conclusao</span><strong>{formatPercent(data.summary.conversionRate)}</strong><small>Sobre {data.summary.totalOrders} ordens totais</small></CardContent></Card>
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Receita cancelada</span><strong>{formatCurrency(data.summary.canceledRevenue)}</strong><small>{data.summary.canceledOrders} ordens canceladas</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturas</span><strong>{data.summary.invoicesTotal}</strong><small>Receita emitida: {formatCurrency(data.summary.invoicesAmountTotal)}</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Em aberto</span><strong>{formatCurrency(data.summary.invoicesAmountOpen)}</strong><small>{data.summary.invoicesOpenCount} faturas ativas</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Boletos pendentes</span><strong>{data.summary.boletosPending}</strong><small>{formatCurrency(data.summary.boletosAmountPending)}</small></CardContent></Card>
       </section>
 
       <section className="grid gap-3 xl:grid-cols-12">
@@ -333,6 +622,47 @@ export default function FinanceiroPage() {
       </section>
 
       <section className="grid gap-3 xl:grid-cols-12">
+        <Card className="dashboard-list-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
+            <div className="dashboard-card-head">
+              <h5 className="mb-1 text-lg font-semibold">Faturas por status</h5>
+              <small className="text-muted-foreground">Resumo de cobranca e recebimento</small>
+            </div>
+            <div className="space-y-2 mt-2">
+              {invoiceStatusChart.map(item => (
+                <div className="dashboard-top-item" key={item.name}>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <small className="block text-muted-foreground">{item.total} faturas</small>
+                  </div>
+                  <span>{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="dashboard-list-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
+            <div className="dashboard-card-head">
+              <h5 className="mb-1 text-lg font-semibold">Boletos por status</h5>
+              <small className="text-muted-foreground">Controle de boletos da operacao</small>
+            </div>
+            <div className="space-y-2 mt-2">
+              {boletoStatusChart.map(item => (
+                <div className="dashboard-top-item" key={item.name}>
+                  <div>
+                    <strong>{item.name}</strong>
+                    <small className="block text-muted-foreground">{item.total} boletos</small>
+                  </div>
+                  <span>{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-3 xl:grid-cols-12">
         <Card className="dashboard-table-card xl:col-span-7">
           <CardContent className="p-4 md:p-5 h-full">
             <div className="dashboard-card-head">
@@ -404,6 +734,23 @@ export default function FinanceiroPage() {
           </CardContent>
         </Card>
       </section>
+
+      <Card className="dashboard-table-card">
+        <CardContent className="p-4 md:p-5">
+          <div className="flex flex-wrap justify-between items-center gap-3">
+            <div>
+              <h5 className="mb-1 text-lg font-semibold">Gestao de Faturas e Boletos</h5>
+              <small className="text-muted-foreground">A gestao detalhada foi movida para a pagina dedicada.</small>
+            </div>
+            <Button asChild className="bg-app-accent hover:bg-app-accent/80 text-white border-app-accent">
+              <a href="/faturas-boletos">
+                <i className="fa-solid fa-file-invoice-dollar mr-2" />
+                Abrir pagina de Faturas e Boletos
+              </a>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>

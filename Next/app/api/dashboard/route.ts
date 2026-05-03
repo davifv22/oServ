@@ -1,9 +1,11 @@
-﻿import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
-import { Priority, ServiceOrderStatus } from '@prisma/client'
+import { BoletoStatus, InvoiceStatus, Priority, ServiceOrderStatus } from '@prisma/client'
 
 const STATUS_ORDER: ServiceOrderStatus[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'FINISHED', 'CANCELED']
 const PRIORITY_ORDER: Priority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
+const INVOICE_STATUS_ORDER: InvoiceStatus[] = ['DRAFT', 'ISSUED', 'PAID', 'OVERDUE', 'CANCELED']
+const BOLETO_STATUS_ORDER: BoletoStatus[] = ['PENDING', 'PAID', 'EXPIRED', 'CANCELED']
 const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 function getCompanyId(req: Request) {
@@ -56,7 +58,8 @@ export async function GET(req: Request) {
     monthlyOrders,
     topCustomersAgg,
     customerNames,
-    recentOrders
+    recentOrders,
+    invoiceSnapshot
   ] = await Promise.all([
     prisma.company.findUnique({
       where: { id: companyId },
@@ -146,6 +149,18 @@ export async function GET(req: Request) {
           }
         }
       }
+    }),
+    prisma.serviceOrderInvoice.findMany({
+      where: { companyId },
+      select: {
+        status: true,
+        total: true,
+        boleto: {
+          select: {
+            status: true
+          }
+        }
+      }
     })
   ])
 
@@ -194,6 +209,48 @@ export async function GET(req: Request) {
     canceled: statusCountMap.get('CANCELED') || 0
   }
 
+  const invoiceStatusCountMap = new Map<InvoiceStatus, number>()
+  const invoiceStatusAmountMap = new Map<InvoiceStatus, number>()
+  const boletoStatusCountMap = new Map<BoletoStatus, number>()
+
+  let invoiceAmountTotal = 0
+  let invoiceAmountPaid = 0
+  let invoiceAmountOpen = 0
+  let boletoCount = 0
+  let boletoAmountPending = 0
+  let boletoAmountPaid = 0
+
+  for (const invoice of invoiceSnapshot) {
+    const status = invoice.status
+    const total = Number(invoice.total || 0)
+
+    invoiceAmountTotal += total
+    invoiceStatusCountMap.set(status, (invoiceStatusCountMap.get(status) || 0) + 1)
+    invoiceStatusAmountMap.set(status, (invoiceStatusAmountMap.get(status) || 0) + total)
+
+    if (status === 'PAID') {
+      invoiceAmountPaid += total
+    }
+
+    if (status === 'DRAFT' || status === 'ISSUED' || status === 'OVERDUE') {
+      invoiceAmountOpen += total
+    }
+
+    if (invoice.boleto?.status) {
+      boletoCount += 1
+      const boletoStatus = invoice.boleto.status
+      boletoStatusCountMap.set(boletoStatus, (boletoStatusCountMap.get(boletoStatus) || 0) + 1)
+
+      if (boletoStatus === 'PENDING') {
+        boletoAmountPending += total
+      }
+
+      if (boletoStatus === 'PAID') {
+        boletoAmountPaid += total
+      }
+    }
+  }
+
   const payload = {
     generatedAt: new Date().toISOString(),
     company: company
@@ -210,12 +267,23 @@ export async function GET(req: Request) {
       employeesWithAccess: employeesWithAccessCount,
       services: servicesCount,
       orders: ordersCount,
+      invoices: invoiceSnapshot.length,
+      boletos: boletoCount,
       ...statusSummary
     },
     finance: {
       finishedRevenueTotal: Number(finishedTotals._sum.total || 0),
       finishedRevenueThisMonth: Number(finishedThisMonthTotals._sum.total || 0),
-      averageTicket: Number(finishedTotals._avg.total || 0)
+      averageTicket: Number(finishedTotals._avg.total || 0),
+      invoiceAmountTotal,
+      invoiceAmountPaid,
+      invoiceAmountOpen,
+      boletoAmountPending,
+      boletoAmountPaid,
+      boletosPending: boletoStatusCountMap.get('PENDING') || 0,
+      boletosPaid: boletoStatusCountMap.get('PAID') || 0,
+      boletosExpired: boletoStatusCountMap.get('EXPIRED') || 0,
+      boletosCanceled: boletoStatusCountMap.get('CANCELED') || 0
     },
     charts: {
       status: STATUS_ORDER.map(status => ({
@@ -226,7 +294,16 @@ export async function GET(req: Request) {
         priority,
         total: priorityCountMap.get(priority) || 0
       })),
-      monthly: monthBuckets
+      monthly: monthBuckets,
+      invoiceStatus: INVOICE_STATUS_ORDER.map(status => ({
+        status,
+        total: invoiceStatusCountMap.get(status) || 0,
+        amount: Number((invoiceStatusAmountMap.get(status) || 0).toFixed(2))
+      })),
+      boletoStatus: BOLETO_STATUS_ORDER.map(status => ({
+        status,
+        total: boletoStatusCountMap.get(status) || 0
+      }))
     },
     topCustomers,
     recentOrders: recentOrders.map(order => ({
@@ -244,5 +321,3 @@ export async function GET(req: Request) {
 
   return NextResponse.json(payload)
 }
-
-

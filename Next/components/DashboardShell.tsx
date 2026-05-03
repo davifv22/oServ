@@ -10,8 +10,12 @@ const menuItems = [
   { href: '/clientes', label: 'Clientes', icon: 'fa-solid fa-users' },
   { href: '/funcionarios', label: 'Funcionarios', icon: 'fa-solid fa-user-tie' },
   { href: '/servicos', label: 'Servicos', icon: 'fa-solid fa-screwdriver-wrench' },
+  { href: '/tipos-os', label: 'Tipos de OS', icon: 'fa-solid fa-layer-group' },
+  { href: '/materiais', label: 'Materiais', icon: 'fa-solid fa-boxes-stacked' },
+  { href: '/veiculos', label: 'Veiculos', icon: 'fa-solid fa-car-side' },
   { href: '/ordens-servico', label: 'Ordens de Servico', icon: 'fa-solid fa-clipboard-list' },
   { href: '/financeiro', label: 'Financeiro', icon: 'fa-solid fa-coins' },
+  { href: '/faturas-boletos', label: 'Faturas e Boletos', icon: 'fa-solid fa-file-invoice-dollar' },
   { href: '/configuracoes', label: 'Configuracoes', icon: 'fa-solid fa-gear' },
   { href: '/perfil', label: 'Perfil', icon: 'fa-solid fa-user' },
   { href: '/empresa', label: 'Perfil da Empresa', icon: 'fa-solid fa-building' }

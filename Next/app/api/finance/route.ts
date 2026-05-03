@@ -1,9 +1,12 @@
-﻿import { CompanyPlan, Priority, ServiceOrderStatus } from '@prisma/client'
+import { BoletoStatus, CompanyPlan, InvoiceStatus, Priority, ServiceOrderStatus } from '@prisma/client'
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+
 const STATUS_ORDER: ServiceOrderStatus[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER', 'FINISHED', 'CANCELED']
 const PRIORITY_ORDER: Priority[] = ['LOW', 'MEDIUM', 'HIGH', 'URGENT']
 const ACTIVE_STATUSES: ServiceOrderStatus[] = ['OPEN', 'IN_PROGRESS', 'WAITING_CUSTOMER']
+const INVOICE_STATUS_ORDER: InvoiceStatus[] = ['DRAFT', 'ISSUED', 'PAID', 'OVERDUE', 'CANCELED']
+const BOLETO_STATUS_ORDER: BoletoStatus[] = ['PENDING', 'PAID', 'EXPIRED', 'CANCELED']
 const MONTH_LABELS = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez']
 
 function getCompanyId(req: Request) {
@@ -34,6 +37,23 @@ function priorityLabel(priority: Priority) {
   if (priority === 'HIGH') return 'Alta'
   if (priority === 'URGENT') return 'Urgente'
   return priority
+}
+
+function invoiceStatusLabel(status: InvoiceStatus) {
+  if (status === 'DRAFT') return 'Rascunho'
+  if (status === 'ISSUED') return 'Emitida'
+  if (status === 'PAID') return 'Paga'
+  if (status === 'OVERDUE') return 'Vencida'
+  if (status === 'CANCELED') return 'Cancelada'
+  return status
+}
+
+function boletoStatusLabel(status: BoletoStatus) {
+  if (status === 'PENDING') return 'Pendente'
+  if (status === 'PAID') return 'Pago'
+  if (status === 'EXPIRED') return 'Expirado'
+  if (status === 'CANCELED') return 'Cancelado'
+  return status
 }
 
 export async function GET(req: Request) {
@@ -71,7 +91,8 @@ export async function GET(req: Request) {
     topCustomersAgg,
     customerNames,
     recentTransactions,
-    pipelineOrders
+    pipelineOrders,
+    invoiceSnapshot
   ] = await Promise.all([
     prisma.company.findUnique({
       where: { id: companyId },
@@ -183,6 +204,18 @@ export async function GET(req: Request) {
         customer: { select: { name: true } },
         responsibleEmployee: { select: { name: true } }
       }
+    }),
+    prisma.serviceOrderInvoice.findMany({
+      where: { companyId },
+      select: {
+        status: true,
+        total: true,
+        boleto: {
+          select: {
+            status: true
+          }
+        }
+      }
     })
   ])
 
@@ -236,6 +269,39 @@ export async function GET(req: Request) {
 
   const conversionRate = totalOrders > 0 ? (finishedOrders / totalOrders) * 100 : 0
 
+  const invoiceStatusCountMap = new Map<InvoiceStatus, number>()
+  const invoiceStatusAmountMap = new Map<InvoiceStatus, number>()
+  const boletoStatusCountMap = new Map<BoletoStatus, number>()
+  const boletoStatusAmountMap = new Map<BoletoStatus, number>()
+
+  let invoicesAmountTotal = 0
+  let invoicesAmountPaid = 0
+  let invoicesAmountOpen = 0
+
+  for (const invoice of invoiceSnapshot) {
+    const invoiceStatus = invoice.status
+    const total = Number(invoice.total || 0)
+
+    invoicesAmountTotal += total
+
+    invoiceStatusCountMap.set(invoiceStatus, (invoiceStatusCountMap.get(invoiceStatus) || 0) + 1)
+    invoiceStatusAmountMap.set(invoiceStatus, (invoiceStatusAmountMap.get(invoiceStatus) || 0) + total)
+
+    if (invoiceStatus === 'PAID') {
+      invoicesAmountPaid += total
+    }
+
+    if (invoiceStatus === 'DRAFT' || invoiceStatus === 'ISSUED' || invoiceStatus === 'OVERDUE') {
+      invoicesAmountOpen += total
+    }
+
+    if (invoice.boleto?.status) {
+      const boletoStatus = invoice.boleto.status
+      boletoStatusCountMap.set(boletoStatus, (boletoStatusCountMap.get(boletoStatus) || 0) + 1)
+      boletoStatusAmountMap.set(boletoStatus, (boletoStatusAmountMap.get(boletoStatus) || 0) + total)
+    }
+  }
+
   return NextResponse.json({
     generatedAt: new Date().toISOString(),
     company: company
@@ -258,7 +324,22 @@ export async function GET(req: Request) {
       monthGrowthPercent,
       pipelineRevenue,
       canceledRevenue,
-      averageTicket
+      averageTicket,
+      invoicesTotal: invoiceSnapshot.length,
+      invoicesPaidCount: invoiceStatusCountMap.get('PAID') || 0,
+      invoicesOpenCount: (invoiceStatusCountMap.get('DRAFT') || 0) + (invoiceStatusCountMap.get('ISSUED') || 0) + (invoiceStatusCountMap.get('OVERDUE') || 0),
+      invoicesOverdueCount: invoiceStatusCountMap.get('OVERDUE') || 0,
+      invoicesCanceledCount: invoiceStatusCountMap.get('CANCELED') || 0,
+      invoicesAmountTotal,
+      invoicesAmountPaid,
+      invoicesAmountOpen,
+      boletosTotal: BOLETO_STATUS_ORDER.reduce((sum, status) => sum + (boletoStatusCountMap.get(status) || 0), 0),
+      boletosPending: boletoStatusCountMap.get('PENDING') || 0,
+      boletosPaid: boletoStatusCountMap.get('PAID') || 0,
+      boletosExpired: boletoStatusCountMap.get('EXPIRED') || 0,
+      boletosCanceled: boletoStatusCountMap.get('CANCELED') || 0,
+      boletosAmountPending: Number((boletoStatusAmountMap.get('PENDING') || 0).toFixed(2)),
+      boletosAmountPaid: Number((boletoStatusAmountMap.get('PAID') || 0).toFixed(2))
     },
     charts: {
       monthly: monthBuckets,
@@ -273,6 +354,18 @@ export async function GET(req: Request) {
         label: priorityLabel(priority),
         orders: priorityCountMap.get(priority) || 0,
         revenue: priorityRevenueMap.get(priority) || 0
+      })),
+      invoiceByStatus: INVOICE_STATUS_ORDER.map(status => ({
+        status,
+        label: invoiceStatusLabel(status),
+        total: invoiceStatusCountMap.get(status) || 0,
+        amount: Number((invoiceStatusAmountMap.get(status) || 0).toFixed(2))
+      })),
+      boletoByStatus: BOLETO_STATUS_ORDER.map(status => ({
+        status,
+        label: boletoStatusLabel(status),
+        total: boletoStatusCountMap.get(status) || 0,
+        amount: Number((boletoStatusAmountMap.get(status) || 0).toFixed(2))
       }))
     },
     topCustomers,
@@ -295,6 +388,3 @@ export async function GET(req: Request) {
     }))
   })
 }
-
-
-
