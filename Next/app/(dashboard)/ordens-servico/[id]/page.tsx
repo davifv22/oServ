@@ -139,6 +139,7 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
   const [comments, setComments] = useState<any[]>([])
   const [customers, setCustomers] = useState<any[]>([])
   const [employees, setEmployees] = useState<any[]>([])
+  const [vehicles, setVehicles] = useState<any[]>([])
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState<any>(null)
@@ -156,11 +157,12 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
     title: '',
     description: '',
     customerId: '',
+    vehicleId: '',
     responsibleEmployeeId: '',
     status: 'OPEN',
     priority: 'MEDIUM',
-    total: 0,
-    totalInput: '0,00'
+    travelCost: 0,
+    travelCostInput: '0,00'
   })
 
   async function load() {
@@ -227,17 +229,19 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
 
   async function loadSupportData() {
     try {
-      const [customersRes, employeesRes] = await Promise.all([
+      const [customersRes, employeesRes, vehiclesRes] = await Promise.all([
         fetch('/api/customers', { cache: 'no-store' }),
-        fetch('/api/employees', { cache: 'no-store' })
+        fetch('/api/employees', { cache: 'no-store' }),
+        fetch('/api/vehicles', { cache: 'no-store' })
       ])
 
-      if (!customersRes.ok || !employeesRes.ok) {
+      if (!customersRes.ok || !employeesRes.ok || !vehiclesRes.ok) {
         setToast({ message: 'Erro ao carregar clientes e funcionarios da OS', type: 'error' })
       }
 
       if (customersRes.ok) setCustomers(await customersRes.json())
       if (employeesRes.ok) setEmployees(await employeesRes.json())
+      if (vehiclesRes.ok) setVehicles(await vehiclesRes.json())
     } catch {
       setToast({ message: 'Erro de conexao ao carregar dados auxiliares da OS', type: 'error' })
     }
@@ -283,11 +287,12 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
       title: order.title || '',
       description: order.description || '',
       customerId: order.customerId || '',
+      vehicleId: order.vehicleId || '',
       responsibleEmployeeId: order.responsibleEmployeeId || '',
       status: order.status || 'OPEN',
       priority: order.priority || 'MEDIUM',
-      total: Number(order.total || 0),
-      totalInput: numberToCurrencyInput(order.total || 0)
+      travelCost: Number(order.travelCost || 0),
+      travelCostInput: numberToCurrencyInput(order.travelCost || 0)
     })
 
     setEditModalOpen(true)
@@ -302,9 +307,9 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
       return
     }
 
-    const parsedTotal = parseCurrencyInput(editForm.totalInput)
-    if (parsedTotal < 0) {
-      setToast({ message: 'Informe um valor total valido', type: 'error' })
+    const parsedTravelCost = parseCurrencyInput(editForm.travelCostInput)
+    if (parsedTravelCost < 0) {
+      setToast({ message: 'Informe um custo de deslocamento valido', type: 'error' })
       return
     }
 
@@ -319,10 +324,11 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
           title: String(editForm.title || '').trim(),
           description: String(editForm.description || '').trim() || null,
           customerId: editForm.customerId || null,
+          vehicleId: editForm.vehicleId || null,
           responsibleEmployeeId: editForm.responsibleEmployeeId || null,
           status: editForm.status,
           priority: editForm.priority,
-          total: parsedTotal
+          travelCost: parsedTravelCost
         })
       })
 
@@ -375,7 +381,7 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
             <div className="min-w-0">
               <h5 className="mb-1 text-xl font-semibold break-words">{order?.title || 'OS sem titulo'}</h5>
               <small className="text-muted-foreground block">ID: {params.id}</small>
-              <small className="text-muted-foreground block">Comentarios: {comments.length} | Eventos: {timeline.length}</small>
+              <small className="text-muted-foreground block">Comentarios: {comments.length} | Eventos: {timeline.length} | Faturas: {(order?.invoices || []).length}</small>
             </div>
 
             <div className="flex flex-wrap gap-2 items-center">
@@ -421,10 +427,69 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
             </div>
 
             <div className="md:col-span-4 space-y-1">
+              <label className="text-sm text-muted-foreground">Veiculo</label>
+              <strong className="block">{order?.vehicle?.plate || 'Sem veiculo'}</strong>
+              <small className="text-muted-foreground block">Modelo: {order?.vehicle?.model || '-'}</small>
+              <small className="text-muted-foreground block">Marca: {order?.vehicle?.brand || '-'}</small>
+            </div>
+
+            <div className="md:col-span-4 space-y-1">
               <label className="text-sm text-muted-foreground">Financeiro e datas</label>
               <strong className="block">{formatCurrencyBRL(order?.total || 0)}</strong>
+              <small className="text-muted-foreground block">Subtotal itens: {formatCurrencyBRL(Math.max(Number(order?.total || 0) - Number(order?.travelCost || 0), 0))}</small>
+              <small className="text-muted-foreground block">Deslocamento: {formatCurrencyBRL(order?.travelCost || 0)}</small>
               <small className="text-muted-foreground block">Criada em: {formatDateTime(order?.createdAt)}</small>
               <small className="text-muted-foreground block">Atualizada em: {formatDateTime(order?.updatedAt)}</small>
+            </div>
+
+            <div className="md:col-span-8 space-y-2">
+              <label className="text-sm text-muted-foreground">Itens da OS</label>
+              <div className="rounded-xl border border-app-border bg-app-surface overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-app-border">
+                      <th className="text-left px-3 py-2">Tipo</th>
+                      <th className="text-left px-3 py-2">Descricao</th>
+                      <th className="text-left px-3 py-2">Qtd</th>
+                      <th className="text-left px-3 py-2">Unit.</th>
+                      <th className="text-left px-3 py-2">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(order?.items || []).length === 0 && (
+                      <tr>
+                        <td colSpan={5} className="px-3 py-2 text-muted-foreground">Sem itens detalhados.</td>
+                      </tr>
+                    )}
+                    {(order?.items || []).map((item: any) => (
+                      <tr key={item.id} className="border-b border-app-border/50">
+                        <td className="px-3 py-2">{item.itemType === 'MATERIAL' ? 'Material' : 'Servico'}</td>
+                        <td className="px-3 py-2">{item.description || item.service?.name || item.material?.name || '-'}</td>
+                        <td className="px-3 py-2">{Number(item.quantity || 0).toLocaleString('pt-BR')}</td>
+                        <td className="px-3 py-2">{formatCurrencyBRL(item.unitPrice || 0)}</td>
+                        <td className="px-3 py-2">{formatCurrencyBRL(item.total || 0)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="md:col-span-4 space-y-2">
+              <label className="text-sm text-muted-foreground">Faturas e boletos</label>
+              {(order?.invoices || []).length === 0 && <small className="text-muted-foreground">Nenhuma fatura emitida.</small>}
+              <div className="space-y-2">
+                {(order?.invoices || []).map((invoice: any) => (
+                  <Card key={invoice.id} className="border-app-border bg-app-surface">
+                    <CardContent className="p-2">
+                      <strong className="block text-sm">{invoice.code || invoice.id}</strong>
+                      <small className="text-muted-foreground block">Status: {invoice.status}</small>
+                      <small className="text-muted-foreground block">Total: {formatCurrencyBRL(invoice.total || 0)}</small>
+                      <small className="text-muted-foreground block">Boleto: {invoice.boleto?.status || 'Nao'}</small>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </div>
           </div>
         </CardContent>
@@ -591,6 +656,14 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
                 </div>
 
                 <div className="md:col-span-6 space-y-2">
+                  <label className="text-sm font-medium">Veiculo</label>
+                  <Select value={editForm.vehicleId || ''} onChange={e => setEditForm({ ...editForm, vehicleId: e.target.value })}>
+                    <option value="">Sem veiculo</option>
+                    {vehicles.map(vehicle => <option key={vehicle.id} value={vehicle.id}>{vehicle.plate} {vehicle.model ? `- ${vehicle.model}` : ''}</option>)}
+                  </Select>
+                </div>
+
+                <div className="md:col-span-6 space-y-2">
                   <label className="text-sm font-medium">Responsavel</label>
                   <Select value={editForm.responsibleEmployeeId || ''} onChange={e => setEditForm({ ...editForm, responsibleEmployeeId: e.target.value })}>
                     <option value="">Sem responsavel</option>
@@ -613,14 +686,34 @@ export default function ServiceOrderDetail({ params }: { params: { id: string } 
                 </div>
 
                 <div className="md:col-span-4 space-y-2">
-                  <label className="text-sm font-medium">Valor total</label>
+                  <label className="text-sm font-medium">Subtotal (itens)</label>
+                  <Input value={formatCurrencyBRL(Math.max(Number(order?.total || 0) - Number(order?.travelCost || 0), 0))} readOnly />
+                </div>
+
+                <div className="md:col-span-4 space-y-2">
+                  <label className="text-sm font-medium">Custo deslocamento</label>
                   <Input
                     inputMode="numeric"
-                    value={editForm.totalInput || '0,00'}
+                    value={editForm.travelCostInput || '0,00'}
                     onChange={e => {
                       const masked = formatCurrencyInput(e.target.value)
-                      setEditForm({ ...editForm, totalInput: masked, total: parseCurrencyInput(masked) })
+                      setEditForm({ ...editForm, travelCostInput: masked, travelCost: parseCurrencyInput(masked) })
                     }}
+                  />
+                </div>
+
+                <div className="md:col-span-4 space-y-2">
+                  <label className="text-sm font-medium">Total final</label>
+                  <Input
+                    value={formatCurrencyBRL(
+                      Number(
+                        (
+                          Math.max(Number(order?.total || 0) - Number(order?.travelCost || 0), 0)
+                          + Number(editForm.travelCost || 0)
+                        ).toFixed(2)
+                      )
+                    )}
+                    readOnly
                   />
                 </div>
 

@@ -32,6 +32,8 @@ type DashboardPayload = {
     employeesWithAccess: number
     services: number
     orders: number
+    invoices: number
+    boletos: number
     open: number
     inProgress: number
     waitingCustomer: number
@@ -42,11 +44,22 @@ type DashboardPayload = {
     finishedRevenueTotal: number
     finishedRevenueThisMonth: number
     averageTicket: number
+    invoiceAmountTotal: number
+    invoiceAmountPaid: number
+    invoiceAmountOpen: number
+    boletoAmountPending: number
+    boletoAmountPaid: number
+    boletosPending: number
+    boletosPaid: number
+    boletosExpired: number
+    boletosCanceled: number
   }
   charts: {
     status: Array<{ status: string, total: number }>
     priority: Array<{ priority: string, total: number }>
     monthly: Array<{ key: string, month: string, opened: number, finished: number, revenue: number }>
+    invoiceStatus: Array<{ status: string, total: number, amount: number }>
+    boletoStatus: Array<{ status: string, total: number }>
   }
   topCustomers: Array<{
     customerId: string
@@ -80,6 +93,21 @@ const PRIORITY_LABEL: Record<string, string> = {
   MEDIUM: 'Media',
   HIGH: 'Alta',
   URGENT: 'Urgente'
+}
+
+const INVOICE_STATUS_LABEL: Record<string, string> = {
+  DRAFT: 'Rascunho',
+  ISSUED: 'Emitida',
+  PAID: 'Paga',
+  OVERDUE: 'Vencida',
+  CANCELED: 'Cancelada'
+}
+
+const BOLETO_STATUS_LABEL: Record<string, string> = {
+  PENDING: 'Pendente',
+  PAID: 'Pago',
+  EXPIRED: 'Expirado',
+  CANCELED: 'Cancelado'
 }
 
 const PLAN_LABEL: Record<string, string> = {
@@ -184,6 +212,25 @@ export default function DashboardPage() {
     }))
   }, [data])
 
+  const invoiceStatusData = useMemo(() => {
+    if (!data) return []
+    return data.charts.invoiceStatus.map(item => ({
+      status: item.status,
+      label: INVOICE_STATUS_LABEL[item.status] || item.status,
+      total: item.total,
+      amount: item.amount
+    }))
+  }, [data])
+
+  const boletoStatusData = useMemo(() => {
+    if (!data) return []
+    return data.charts.boletoStatus.map(item => ({
+      status: item.status,
+      label: BOLETO_STATUS_LABEL[item.status] || item.status,
+      total: item.total
+    }))
+  }, [data])
+
   if (loading && !data) {
     return <Loader label="Carregando dashboard premium..." />
   }
@@ -233,6 +280,9 @@ export default function DashboardPage() {
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Servicos</span><strong>{data.counts.services}</strong><small>Catalogo cadastrado</small></CardContent></Card>
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturamento total</span><strong>{formatCurrency(data.finance.finishedRevenueTotal)}</strong><small>OS finalizadas</small></CardContent></Card>
         <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturamento do mes</span><strong>{formatCurrency(data.finance.finishedRevenueThisMonth)}</strong><small>Ticket medio: {formatCurrency(data.finance.averageTicket)}</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturas emitidas</span><strong>{data.counts.invoices}</strong><small>Total: {formatCurrency(data.finance.invoiceAmountTotal)}</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Faturas em aberto</span><strong>{formatCurrency(data.finance.invoiceAmountOpen)}</strong><small>Pagas: {formatCurrency(data.finance.invoiceAmountPaid)}</small></CardContent></Card>
+        <Card className="dashboard-kpi-card"><CardContent className="p-3"><span>Boletos</span><strong>{data.counts.boletos}</strong><small>{data.finance.boletosPending} pendentes | {data.finance.boletosPaid} pagos</small></CardContent></Card>
       </section>
 
       <section className="grid gap-3 xl:grid-cols-12">
@@ -283,6 +333,52 @@ export default function DashboardPage() {
                   <Bar dataKey="total" fill="#22b8cf" radius={[8, 8, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+
+      <section className="grid gap-3 xl:grid-cols-12">
+        <Card className="dashboard-list-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
+            <div className="dashboard-card-head">
+              <h5 className="mb-1 text-lg font-semibold">Faturas por status</h5>
+              <small className="text-muted-foreground">Controle de emissao e recebimento</small>
+            </div>
+            <div className="space-y-2 mt-2">
+              {invoiceStatusData.map(item => (
+                <div key={item.status} className="dashboard-top-item">
+                  <div>
+                    <strong>{item.label}</strong>
+                    <small className="block text-muted-foreground">{item.total} faturas</small>
+                  </div>
+                  <span>{formatCurrency(item.amount)}</span>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="dashboard-list-card xl:col-span-6">
+          <CardContent className="p-4 md:p-5 h-full">
+            <div className="dashboard-card-head">
+              <h5 className="mb-1 text-lg font-semibold">Boletos por status</h5>
+              <small className="text-muted-foreground">Acompanhamento de cobrancas via boleto</small>
+            </div>
+            <div className="space-y-2 mt-2">
+              {boletoStatusData.map(item => (
+                <div key={item.status} className="dashboard-top-item">
+                  <div>
+                    <strong>{item.label}</strong>
+                    <small className="block text-muted-foreground">{item.total} boletos</small>
+                  </div>
+                  <span>
+                    {item.status === 'PENDING' && formatCurrency(data.finance.boletoAmountPending)}
+                    {item.status === 'PAID' && formatCurrency(data.finance.boletoAmountPaid)}
+                    {item.status !== 'PENDING' && item.status !== 'PAID' && `${item.total} itens`}
+                  </span>
+                </div>
+              ))}
             </div>
           </CardContent>
         </Card>

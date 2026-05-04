@@ -59,6 +59,33 @@ function priorityLabel(priority?: string) {
   return map[priority || ''] || normalizeText(priority)
 }
 
+function invoiceStatusLabel(status?: string) {
+  const map: Record<string, string> = {
+    DRAFT: 'Rascunho',
+    ISSUED: 'Emitida',
+    PAID: 'Paga',
+    OVERDUE: 'Vencida',
+    CANCELED: 'Cancelada'
+  }
+
+  return map[status || ''] || normalizeText(status)
+}
+
+function boletoStatusLabel(status?: string) {
+  const map: Record<string, string> = {
+    PENDING: 'Pendente',
+    PAID: 'Pago',
+    EXPIRED: 'Expirado',
+    CANCELED: 'Cancelado'
+  }
+
+  return map[status || ''] || normalizeText(status)
+}
+
+function itemTypeLabel(value?: string) {
+  return value === 'MATERIAL' ? 'Material' : 'Servico'
+}
+
 function localizeStatusTokens(text: string) {
   return text.replace(/\b(OPEN|IN_PROGRESS|WAITING_CUSTOMER|FINISHED|CANCELED)\b/g, code => statusLabel(code))
 }
@@ -278,6 +305,32 @@ function buildFooterBlock(currentPage: number, pageCount: number, branding: PdfB
   }
 }
 
+function formatBoletoCode(value: string | null | undefined) {
+  const digits = String(value || '').replace(/\D/g, '')
+  return digits.length === 0 ? '-' : digits.match(/.{1,5}/g)?.join(' ') ?? digits
+}
+
+function buildBoletoBarcodeGraphic(value: string | null | undefined) {
+  const digits = String(value || '').replace(/\D/g, '')
+  if (!digits) return []
+
+  const width = 520
+  const height = 44
+  const segmentWidth = Math.max(2, Math.floor(width / digits.length))
+
+  return digits.split('').map((digit, index) => {
+    const even = Number(digit) % 2 === 0
+    return {
+      type: 'rect' as const,
+      x: index * segmentWidth,
+      y: 0,
+      w: segmentWidth,
+      h: height,
+      color: even ? PDF_COLORS.text : '#ffffff'
+    }
+  })
+}
+
 function defaultStyles() {
   return {
     companyTitle: {
@@ -348,6 +401,18 @@ function defaultStyles() {
       fontSize: 10,
       color: PDF_COLORS.text,
       lineHeight: 1.3
+    },
+    barcodeText: {
+      fontSize: 10,
+      color: PDF_COLORS.text,
+      bold: true,
+      alignment: 'center'
+    },
+    importantNote: {
+      fontSize: 9,
+      color: PDF_COLORS.text,
+      italics: true,
+      margin: [0, 4, 0, 0]
     }
   }
 }
@@ -433,6 +498,276 @@ export async function exportListPdf(title: string, headers: string[], keys: stri
   pdfMake.createPdf(docDefinition).download(fileName)
 }
 
+async function buildInvoiceDocument(invoice: any, branding: PdfBranding) {
+  const invoiceRows = Array.isArray(invoice?.serviceOrder?.invoices) ? invoice.serviceOrder.invoices : []
+  const boleto = invoice?.boleto
+
+  const documentTitle = 'Fatura'
+  const documentSubtitle = invoice?.code ? `Fatura ${normalizeText(invoice.code)}` : `Fatura ${normalizeText(invoice.id)}`
+
+  const invoiceSummaryRows = [
+    { label: 'Fatura', value: normalizeText(invoice.code || invoice.id) },
+    { label: 'Status', value: invoiceStatusLabel(invoice?.status) },
+    { label: 'Emissao', value: formatDateTime(invoice?.issueDate) },
+    { label: 'Vencimento', value: formatDateTime(invoice?.dueDate) },
+    { label: 'Subtotal', value: formatCurrency(invoice?.subtotal) },
+    { label: 'Desconto', value: formatCurrency(invoice?.discount) },
+    { label: 'Juros', value: formatCurrency(invoice?.interest) },
+    { label: 'Total', value: formatCurrency(invoice?.total) }
+  ]
+
+  const orderSummaryRows = [
+    { label: 'OS', value: normalizeText(invoice?.serviceOrder?.title || invoice?.serviceOrder?.id) },
+    { label: 'Cliente', value: normalizeText(invoice?.serviceOrder?.customer?.name) },
+    { label: 'Responsavel', value: normalizeText(invoice?.serviceOrder?.responsibleEmployee?.name) },
+    { label: 'Status da OS', value: statusLabel(invoice?.serviceOrder?.status) }
+  ]
+
+  const boletoRows = boleto ? [
+    { label: 'Status do boleto', value: boletoStatusLabel(boleto?.status) },
+    { label: 'Banco', value: normalizeText(boleto?.bankName) },
+    { label: 'Vencimento do boleto', value: formatDateTime(boleto?.dueDate) },
+    { label: 'Codigo de barras', value: normalizeText(boleto?.barcode) },
+    { label: 'Linha digitavel', value: normalizeText(boleto?.digitableLine) }
+  ] : []
+
+  const demonstrativeRows = [
+    { label: 'Valor bruto', value: formatCurrency(invoice?.subtotal) },
+    { label: 'Descontos aplicados', value: formatCurrency(invoice?.discount) },
+    { label: 'Juros e acrescimos', value: formatCurrency(invoice?.interest) },
+    { label: 'Total a pagar', value: formatCurrency(invoice?.total) }
+  ]
+
+  const content: any[] = [
+    buildHeaderBlock(documentTitle, documentSubtitle, branding),
+    {
+      margin: [0, 14, 0, 12],
+      columns: [
+        {
+          width: '*',
+          stack: [
+            { text: 'Resumo da fatura', style: 'sectionTitle' },
+            {
+              table: {
+                widths: ['auto', '*'],
+                body: invoiceSummaryRows.map(item => [
+                  { text: item.label, style: 'label' },
+                  { text: item.value, style: 'value' }
+                ])
+              },
+              layout: 'noBorders'
+            }
+          ],
+          fillColor: PDF_COLORS.surface,
+          margin: [0, 0, 8, 0]
+        },
+        {
+          width: '*',
+          stack: [
+            { text: 'Resumo da OS', style: 'sectionTitle' },
+            {
+              table: {
+                widths: ['auto', '*'],
+                body: orderSummaryRows.map(item => [
+                  { text: item.label, style: 'label' },
+                  { text: item.value, style: 'value' }
+                ])
+              },
+              layout: 'noBorders'
+            }
+          ],
+          fillColor: PDF_COLORS.surface,
+          margin: [8, 0, 0, 0]
+        }
+      ]
+    },
+    { text: 'Demonstrativos de cobranca', style: 'sectionTitle' },
+    {
+      table: {
+        widths: ['auto', '*'],
+        body: demonstrativeRows.map(item => [
+          { text: item.label, style: 'label' },
+          { text: item.value, style: 'value' }
+        ])
+      },
+      layout: 'noBorders',
+      margin: [0, 0, 0, 14]
+    },
+    { text: 'Observacoes', style: 'sectionTitle' },
+    { text: normalizeText(invoice?.notes), style: 'paragraph', margin: [0, 0, 0, 14] }
+  ]
+
+  if (boletoRows.length > 0) {
+    content.push({ text: 'Dados do boleto', style: 'sectionTitle' })
+    content.push({
+      table: {
+        widths: ['auto', '*'],
+        body: boletoRows.map(item => [
+          { text: item.label, style: 'label' },
+          { text: item.value, style: 'value' }
+        ])
+      },
+      layout: 'noBorders',
+      margin: [0, 0, 0, 14]
+    })
+  }
+
+  if (invoiceRows.length > 0) {
+    content.push({ text: 'Outras faturas da OS', style: 'sectionTitle' })
+    content.push({
+      table: {
+        headerRows: 1,
+        widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+        body: [
+          [
+            { text: 'Fatura', style: 'tableHeader' },
+            { text: 'Status', style: 'tableHeader' },
+            { text: 'Vencimento', style: 'tableHeader' },
+            { text: 'Total', style: 'tableHeader' },
+            { text: 'Boleto', style: 'tableHeader' }
+          ],
+          ...invoiceRows.map((item: any) => [
+            { text: normalizeText(item?.code || item?.id), style: 'tableBody' },
+            { text: invoiceStatusLabel(item?.status), style: 'tableBody' },
+            { text: formatDateTime(item?.dueDate || item?.createdAt), style: 'tableBody' },
+            { text: formatCurrency(item?.total), style: 'tableBody' },
+            { text: item?.boleto ? boletoStatusLabel(item.boleto.status) : 'Sem boleto', style: 'tableBody' }
+          ])
+        ]
+      },
+      layout: baseLayout(),
+      margin: [0, 0, 0, 14]
+    })
+  }
+
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [36, 34, 36, 40],
+    content,
+    footer(currentPage: number, pageCount: number) {
+      return buildFooterBlock(currentPage, pageCount, branding, documentTitle)
+    },
+    styles: defaultStyles(),
+    defaultStyle: { color: PDF_COLORS.text }
+  }
+
+  return docDefinition
+}
+
+async function buildBoletoDocument(invoice: any, branding: PdfBranding) {
+  const boleto = invoice?.boleto
+  const documentTitle = 'Boleto Bancário'
+  const documentSubtitle = invoice?.code ? `Boleto da fatura ${normalizeText(invoice.code)}` : `Boleto da fatura ${normalizeText(invoice.id)}`
+
+  const boletoRows = [
+    { label: 'Status', value: boletoStatusLabel(boleto?.status) },
+    { label: 'Banco', value: normalizeText(boleto?.bankName) },
+    { label: 'Vencimento', value: formatDateTime(boleto?.dueDate) },
+    { label: 'Codigo de barras', value: normalizeText(boleto?.barcode) },
+    { label: 'Linha digitavel', value: normalizeText(boleto?.digitableLine) },
+    { label: 'Valor da fatura', value: formatCurrency(invoice?.total) }
+  ]
+
+  const orderRows = [
+    { label: 'OS', value: normalizeText(invoice?.serviceOrder?.title || invoice?.serviceOrder?.id) },
+    { label: 'Cliente', value: normalizeText(invoice?.serviceOrder?.customer?.name) },
+    { label: 'Responsavel', value: normalizeText(invoice?.serviceOrder?.responsibleEmployee?.name) }
+  ]
+
+  const content = [
+    buildHeaderBlock(documentTitle, documentSubtitle, branding),
+    {
+      margin: [0, 14, 0, 12],
+      columns: [
+        {
+          width: '*',
+          stack: [
+            { text: 'Resumo do boleto', style: 'sectionTitle' },
+            {
+              table: {
+                widths: ['auto', '*'],
+                body: boletoRows.map(item => [
+                  { text: item.label, style: 'label' },
+                  { text: item.value, style: 'value' }
+                ])
+              },
+              layout: 'noBorders'
+            }
+          ],
+          fillColor: PDF_COLORS.surface,
+          margin: [0, 0, 8, 0]
+        },
+        {
+          width: '*',
+          stack: [
+            { text: 'Resumo da OS', style: 'sectionTitle' },
+            {
+              table: {
+                widths: ['auto', '*'],
+                body: orderRows.map(item => [
+                  { text: item.label, style: 'label' },
+                  { text: item.value, style: 'value' }
+                ])
+              },
+              layout: 'noBorders'
+            }
+          ],
+          fillColor: PDF_COLORS.surface,
+          margin: [8, 0, 0, 0]
+        }
+      ]
+    },
+    { text: 'Informacoes adicionais', style: 'sectionTitle' },
+    { text: normalizeText(invoice?.notes), style: 'paragraph', margin: [0, 0, 0, 14] }
+  ]
+
+  if (boleto?.barcode || boleto?.digitableLine) {
+    const formattedBarcode = formatBoletoCode(boleto?.barcode)
+    content.push({ text: 'Linha digitavel', style: 'sectionTitle' })
+    content.push({ text: formatBoletoCode(boleto?.digitableLine), style: 'barcodeText', margin: [0, 0, 0, 8] })
+
+    content.push({ text: 'Codigo de barras', style: 'sectionTitle' })
+    const barcodeGraphic: any = {
+      canvas: buildBoletoBarcodeGraphic(boleto?.barcode),
+      margin: [0, 0, 0, 8]
+    }
+    content.push(barcodeGraphic)
+    content.push({ text: formattedBarcode, style: 'barcodeText', margin: [0, 0, 0, 14] })
+
+    content.push({ text: 'Instrucoes FEBRABAN', style: 'sectionTitle' })
+    content.push({
+      text: 'Pague este boleto em qualquer banco, casa loterica ou internet banking ate a data de vencimento. Depois do vencimento, a cobertura esta sujeita a juros e multa conforme acordado.',
+      style: 'importantNote',
+      margin: [0, 0, 0, 14]
+    })
+  }
+
+  const docDefinition = {
+    pageSize: 'A4',
+    pageMargins: [36, 34, 36, 40],
+    content,
+    footer(currentPage: number, pageCount: number) {
+      return buildFooterBlock(currentPage, pageCount, branding, documentTitle)
+    },
+    styles: defaultStyles(),
+    defaultStyle: { color: PDF_COLORS.text }
+  }
+
+  return docDefinition
+}
+
+export async function exportInvoicePdf(invoice: any, fileName: string) {
+  const [pdfMake, branding] = await Promise.all([getPdfMake(), loadPdfBranding()])
+  const docDefinition = await buildInvoiceDocument(invoice, branding)
+  pdfMake.createPdf(docDefinition).download(fileName)
+}
+
+export async function exportBoletoPdf(invoice: any, fileName: string) {
+  const [pdfMake, branding] = await Promise.all([getPdfMake(), loadPdfBranding()])
+  const docDefinition = await buildBoletoDocument(invoice, branding)
+  pdfMake.createPdf(docDefinition).download(fileName)
+}
+
 type ExportServiceOrderPdfOptions = {
   includeComments?: boolean
   includeTimeline?: boolean
@@ -449,12 +784,17 @@ export async function exportServiceOrderPdf(
   const includeComments = options.includeComments !== false
   const includeTimeline = options.includeTimeline !== false
   const timeline = Array.isArray(options.timeline) ? options.timeline : []
+  const orderTravelCost = Number(order?.travelCost || 0)
+  const orderGrandTotal = Number(order?.total || 0)
+  const orderItemsSubtotal = Math.max(Number((orderGrandTotal - orderTravelCost).toFixed(2)), 0)
 
   const summaryRows = [
     { label: 'OS', value: normalizeText(order?.id) },
     { label: 'Titulo', value: normalizeText(order?.title) },
     { label: 'Status', value: statusLabel(order?.status) },
     { label: 'Prioridade', value: priorityLabel(order?.priority) },
+    { label: 'Subtotal itens', value: formatCurrency(orderItemsSubtotal) },
+    { label: 'Deslocamento', value: formatCurrency(orderTravelCost) },
     { label: 'Valor total', value: formatCurrency(order?.total) },
     { label: 'Criada em', value: formatDateTime(order?.createdAt) },
     { label: 'Atualizada em', value: formatDateTime(order?.updatedAt) }
@@ -470,6 +810,54 @@ export async function exportServiceOrderPdf(
     { label: 'Responsavel', value: normalizeText(order?.responsibleEmployee?.name) },
     { label: 'Email', value: normalizeText(order?.responsibleEmployee?.email) },
     { label: 'Telefone', value: normalizeText(order?.responsibleEmployee?.phone) }
+  ]
+
+  const vehicleRows = [
+    { label: 'Placa', value: normalizeText(order?.vehicle?.plate) },
+    { label: 'Marca', value: normalizeText(order?.vehicle?.brand) },
+    { label: 'Modelo', value: normalizeText(order?.vehicle?.model) },
+    { label: 'Cor', value: normalizeText(order?.vehicle?.color) },
+    { label: 'Ano', value: normalizeText(order?.vehicle?.modelYear) },
+    { label: 'KM', value: normalizeText(order?.vehicle?.mileage) }
+  ]
+
+  const itemRows = Array.isArray(order?.items) ? order.items : []
+  const invoiceRows = Array.isArray(order?.invoices) ? order.invoices : []
+  const itemsAmountTotal = itemRows.reduce((sum: number, item: any) => sum + Number(item?.total || 0), 0)
+  const invoicesAmountTotal = invoiceRows.reduce((sum: number, invoice: any) => sum + Number(invoice?.total || 0), 0)
+
+  const itemsTableBody = [
+    [
+      { text: 'Tipo', style: 'tableHeader' },
+      { text: 'Descricao', style: 'tableHeader' },
+      { text: 'Qtd', style: 'tableHeader' },
+      { text: 'Unitario', style: 'tableHeader' },
+      { text: 'Total', style: 'tableHeader' }
+    ],
+    ...itemRows.map((item: any) => [
+      { text: itemTypeLabel(item?.itemType), style: 'tableBody' },
+      { text: normalizeText(item?.description || item?.service?.name || item?.material?.name), style: 'tableBody' },
+      { text: normalizeText(item?.quantity), style: 'tableBody' },
+      { text: formatCurrency(item?.unitPrice), style: 'tableBody' },
+      { text: formatCurrency(item?.total), style: 'tableBody' }
+    ])
+  ]
+
+  const invoicesTableBody = [
+    [
+      { text: 'Fatura', style: 'tableHeader' },
+      { text: 'Status', style: 'tableHeader' },
+      { text: 'Boleto', style: 'tableHeader' },
+      { text: 'Vencimento', style: 'tableHeader' },
+      { text: 'Total', style: 'tableHeader' }
+    ],
+    ...invoiceRows.map((invoice: any) => [
+      { text: normalizeText(invoice?.code || invoice?.id), style: 'tableBody' },
+      { text: invoiceStatusLabel(invoice?.status), style: 'tableBody' },
+      { text: invoice?.boleto ? boletoStatusLabel(invoice?.boleto?.status) : 'Sem boleto', style: 'tableBody' },
+      { text: formatDateTime(invoice?.dueDate || invoice?.createdAt), style: 'tableBody' },
+      { text: formatCurrency(invoice?.total), style: 'tableBody' }
+    ])
   ]
 
   const commentsTableBody = [
@@ -592,6 +980,17 @@ export async function exportServiceOrderPdf(
                   ])
                 },
                 layout: 'noBorders'
+              },
+              { text: 'Veiculo', style: 'sectionTitle', margin: [0, 12, 0, 8] },
+              {
+                table: {
+                  widths: ['auto', '*'],
+                  body: vehicleRows.map(item => [
+                    { text: item.label, style: 'label' },
+                    { text: item.value, style: 'value' }
+                  ])
+                },
+                layout: 'noBorders'
               }
             ],
             fillColor: PDF_COLORS.surface,
@@ -603,6 +1002,50 @@ export async function exportServiceOrderPdf(
       {
         text: normalizeText(order?.description || 'Sem descricao informada.'),
         style: 'paragraph',
+        margin: [0, 0, 0, 14]
+      },
+      { text: 'Itens da OS', style: 'sectionTitle' },
+      itemRows.length === 0
+        ? { text: 'Nenhum item detalhado na OS.', style: 'label', margin: [0, 0, 0, 12] }
+        : {
+            table: {
+              headerRows: 1,
+              widths: ['auto', '*', 'auto', 'auto', 'auto'],
+              body: itemsTableBody
+            },
+            layout: baseLayout(),
+            margin: [0, 0, 0, 6]
+          },
+      {
+        text: `Total dos itens: ${formatCurrency(itemsAmountTotal)}`,
+        style: 'value',
+        margin: [0, 0, 0, 3]
+      },
+      {
+        text: `Custo de deslocamento: ${formatCurrency(orderTravelCost)}`,
+        style: 'value',
+        margin: [0, 0, 0, 3]
+      },
+      {
+        text: `Total final da OS: ${formatCurrency(orderGrandTotal)}`,
+        style: 'value',
+        margin: [0, 0, 0, 14]
+      },
+      { text: 'Faturas e boletos', style: 'sectionTitle' },
+      invoiceRows.length === 0
+        ? { text: 'Nenhuma fatura registrada para esta OS.', style: 'label', margin: [0, 0, 0, 12] }
+        : {
+            table: {
+              headerRows: 1,
+              widths: ['*', 'auto', 'auto', 'auto', 'auto'],
+              body: invoicesTableBody
+            },
+            layout: baseLayout(),
+            margin: [0, 0, 0, 6]
+          },
+      {
+        text: `Total das faturas: ${formatCurrency(invoicesAmountTotal)}`,
+        style: 'value',
         margin: [0, 0, 0, 14]
       },
       ...extraSections

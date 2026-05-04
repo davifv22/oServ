@@ -41,13 +41,39 @@ type ServiceOrder = {
   status: string
   priority?: string
   total?: number
+  travelCost?: number
   createdAt?: string
   updatedAt?: string
   customerId?: string | null
+  vehicleId?: string | null
+  orderTypeId?: string | null
   responsibleEmployeeId?: string | null
   customer?: { name?: string; email?: string; phone?: string }
+  vehicle?: { plate?: string; model?: string; brand?: string; modelYear?: number | null }
   responsibleEmployee?: { name?: string; email?: string; phone?: string }
+  items?: Array<{
+    id: string
+    itemType: 'SERVICE' | 'MATERIAL'
+    description?: string | null
+    quantity?: number
+    unitPrice?: number
+    total?: number
+    service?: { id: string; name: string } | null
+    material?: { id: string; name: string; unit?: string } | null
+  }>
   comments?: { id: string }[]
+}
+
+type DraftOrderItem = {
+  id: string
+  itemType: 'SERVICE' | 'MATERIAL'
+  serviceId: string
+  materialId: string
+  description: string
+  quantity: number
+  unitPrice: number
+  unitPriceInput: string
+  total: number
 }
 
 type ColumnProps = {
@@ -74,6 +100,28 @@ function getCurrentMonthDateRange() {
     start: toLocalDateInputValue(firstDay),
     end: toLocalDateInputValue(now)
   }
+}
+
+function createDraftOrderItem(itemType: 'SERVICE' | 'MATERIAL' = 'SERVICE'): DraftOrderItem {
+  return {
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    itemType,
+    serviceId: '',
+    materialId: '',
+    description: '',
+    quantity: 1,
+    unitPrice: 0,
+    unitPriceInput: '0,00',
+    total: 0
+  }
+}
+
+function calcDraftItemTotal(item: DraftOrderItem) {
+  return Number((Number(item.quantity || 0) * Number(item.unitPrice || 0)).toFixed(2))
+}
+
+function calcDraftItemsTotal(items: DraftOrderItem[]) {
+  return Number(items.reduce((sum, item) => sum + Number(item.total || 0), 0).toFixed(2))
 }
 
 function priorityPill(priority?: string) {
@@ -150,6 +198,9 @@ function OrderCardContent({ order, onOpenOrder }: { order: ServiceOrder; onOpenO
       </div>
       <small className="block text-muted-foreground mt-1 truncate">Cliente: {order.customer?.name || 'Sem cliente'}</small>
       <small className="block text-muted-foreground truncate">Responsavel: {order.responsibleEmployee?.name || 'Sem responsavel'}</small>
+      <small className="block text-muted-foreground truncate">
+        Veiculo: {order.vehicle?.plate || 'Sem veiculo'} {order.vehicle?.model ? `- ${order.vehicle.model}` : ''}
+      </small>
       {order.description && <small className="block mt-1 text-muted-foreground truncate">Descricao: {order.description}</small>}
       <div className="flex justify-between items-center mt-2 gap-2">
         <span className="font-semibold">{formatCurrencyBRL(order.total || 0)}</span>
@@ -157,6 +208,8 @@ function OrderCardContent({ order, onOpenOrder }: { order: ServiceOrder; onOpenO
           Comentarios: {order.comments?.length || 0}
         </span>
       </div>
+      <small className="block mt-1 text-muted-foreground truncate">Deslocamento: {formatCurrencyBRL(order.travelCost || 0)}</small>
+      <small className="block mt-1 text-muted-foreground truncate">Itens: {order.items?.length || 0}</small>
       <Button
         variant="outline"
         size="sm"
@@ -215,6 +268,9 @@ export default function ServiceOrdersPage() {
   const [customers, setCustomers] = useState<any[]>([])
   const [employees, setEmployees] = useState<any[]>([])
   const [services, setServices] = useState<any[]>([])
+  const [materials, setMaterials] = useState<any[]>([])
+  const [vehicles, setVehicles] = useState<any[]>([])
+  const [orderTypes, setOrderTypes] = useState<any[]>([])
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [updatingStatus, setUpdatingStatus] = useState(false)
@@ -235,14 +291,34 @@ export default function ServiceOrdersPage() {
   const [kanbanModalOpen, setKanbanModalOpen] = useState(false)
   const [detailsModalOpen, setDetailsModalOpen] = useState(false)
   const [detailsLoading, setDetailsLoading] = useState(false)
-  const [detailsTab, setDetailsTab] = useState<'resumo' | 'comentarios' | 'timeline'>('resumo')
+  const [detailsTab, setDetailsTab] = useState<'resumo' | 'comentarios' | 'timeline' | 'faturas'>('resumo')
   const [detailsOrder, setDetailsOrder] = useState<any>(null)
   const [detailsComments, setDetailsComments] = useState<any[]>([])
   const [detailsTimeline, setDetailsTimeline] = useState<any[]>([])
   const [detailsCommentMessage, setDetailsCommentMessage] = useState('')
   const [detailsCommentSending, setDetailsCommentSending] = useState(false)
+  const [detailsInvoiceSaving, setDetailsInvoiceSaving] = useState(false)
+  const [detailsInvoiceForm, setDetailsInvoiceForm] = useState({
+    dueDate: '',
+    discountInput: '0,00',
+    interestInput: '0,00',
+    notes: '',
+    createBoleto: true,
+    bankName: '',
+    barcode: '',
+    digitableLine: ''
+  })
 
-  const [form, setForm] = useState<any>({ priority: 'MEDIUM', total: 0, totalInput: '0,00' })
+  const [form, setForm] = useState<any>({
+    orderTypeId: '',
+    priority: 'MEDIUM',
+    status: 'OPEN',
+    total: 0,
+    totalInput: '0,00',
+    travelCost: 0,
+    travelCostInput: '0,00',
+    items: [createDraftOrderItem('SERVICE')]
+  })
   const [activeOrderId, setActiveOrderId] = useState<string | null>(null)
   const loadingRef = useRef(false)
   const interactionLockRef = useRef(false)
@@ -267,14 +343,23 @@ export default function ServiceOrdersPage() {
     setSyncing(true)
 
     try {
-      const [ordersRes, employeesRes, customersRes, servicesRes] = await Promise.all([
+      const [ordersRes, employeesRes, customersRes, servicesRes, materialsRes, vehiclesRes, orderTypesRes] = await Promise.all([
         fetch('/api/service-orders', { cache: 'no-store' }),
         fetch('/api/employees', { cache: 'no-store' }),
         fetch('/api/customers', { cache: 'no-store' }),
-        fetch('/api/services', { cache: 'no-store' })
+        fetch('/api/services', { cache: 'no-store' }),
+        fetch('/api/materials', { cache: 'no-store' }),
+        fetch('/api/vehicles', { cache: 'no-store' }),
+        fetch('/api/order-types', { cache: 'no-store' })
       ])
 
-      const allOk = ordersRes.ok && employeesRes.ok && customersRes.ok && servicesRes.ok
+      const allOk = ordersRes.ok
+        && employeesRes.ok
+        && customersRes.ok
+        && servicesRes.ok
+        && materialsRes.ok
+        && vehiclesRes.ok
+        && orderTypesRes.ok
       if (!allOk) {
         if (!loadErrorShownRef.current) {
           setToast({ message: 'Erro ao carregar dados das ordens de servico', type: 'error' })
@@ -288,6 +373,9 @@ export default function ServiceOrdersPage() {
       if (employeesRes.ok) setEmployees(await employeesRes.json())
       if (customersRes.ok) setCustomers(await customersRes.json())
       if (servicesRes.ok) setServices(await servicesRes.json())
+      if (materialsRes.ok) setMaterials(await materialsRes.json())
+      if (vehiclesRes.ok) setVehicles(await vehiclesRes.json())
+      if (orderTypesRes.ok) setOrderTypes(await orderTypesRes.json())
 
       setLastSync(new Date())
     } catch {
@@ -336,7 +424,7 @@ export default function ServiceOrdersPage() {
     const rangeEnd = start !== null && end !== null ? Math.max(start, end) : end
 
     return orders.filter(order => {
-      const text = `${order.title || ''} ${order.customer?.name || ''}`.toLowerCase()
+      const text = `${order.title || ''} ${order.customer?.name || ''} ${order.vehicle?.plate || ''} ${order.vehicle?.model || ''}`.toLowerCase()
       const matchesText = text.includes(search.toLowerCase())
       const matchesPriority = priority === 'ALL' || order.priority === priority
       const matchesResponsible = responsible === 'ALL' || order.responsibleEmployeeId === responsible
@@ -464,18 +552,95 @@ export default function ServiceOrdersPage() {
   }
 
   function openNewOrderModal() {
-    setForm({ priority: 'MEDIUM', total: 0, totalInput: '0,00' })
+    setForm({
+      orderTypeId: '',
+      priority: 'MEDIUM',
+      status: 'OPEN',
+      total: 0,
+      totalInput: '0,00',
+      travelCost: 0,
+      travelCostInput: '0,00',
+      items: [createDraftOrderItem('SERVICE')]
+    })
     setCreateModalOpen(true)
   }
 
-  function handleSelectService(serviceId: string) {
-    const service = services.find(item => item.id === serviceId)
+  function syncFormTotals(items: DraftOrderItem[]) {
+    const total = calcDraftItemsTotal(items)
     setForm((prev: any) => ({
       ...prev,
-      serviceId,
-      title: prev.title || service?.name || '',
-      total: Number(service?.price || 0),
-      totalInput: numberToCurrencyInput(service?.price || 0)
+      items,
+      total,
+      totalInput: numberToCurrencyInput(total)
+    }))
+  }
+
+  function addDraftItem(itemType: 'SERVICE' | 'MATERIAL') {
+    const items = [...(form.items || []), createDraftOrderItem(itemType)]
+    syncFormTotals(items)
+  }
+
+  function removeDraftItem(itemId: string) {
+    const items = (form.items || []).filter((item: DraftOrderItem) => item.id !== itemId)
+    syncFormTotals(items.length > 0 ? items : [createDraftOrderItem('SERVICE')])
+  }
+
+  function updateDraftItem(itemId: string, updater: (item: DraftOrderItem) => DraftOrderItem) {
+    const items = (form.items || []).map((item: DraftOrderItem) => {
+      if (item.id !== itemId) return item
+      const next = updater(item)
+      const total = calcDraftItemTotal(next)
+      return { ...next, total }
+    })
+
+    syncFormTotals(items)
+  }
+
+  function applyOrderTypeToForm(orderTypeId: string) {
+    if (!orderTypeId) {
+      setForm((prev: any) => ({
+        ...prev,
+        orderTypeId: '',
+        items: [createDraftOrderItem('SERVICE')],
+        total: 0,
+        totalInput: '0,00'
+      }))
+      return
+    }
+
+    const orderType = orderTypes.find(item => item.id === orderTypeId)
+    if (!orderType) return
+
+    const mappedItems: DraftOrderItem[] = (orderType.items || []).map((item: any) => {
+      const quantity = Number(item.quantity || 1) || 1
+      const unitPrice = Number(item.unitPrice || 0) || 0
+      const total = Number((quantity * unitPrice).toFixed(2))
+
+      return {
+        id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        itemType: item.itemType === 'MATERIAL' ? 'MATERIAL' : 'SERVICE',
+        serviceId: item.serviceId || '',
+        materialId: item.materialId || '',
+        description: item.description || item.service?.name || item.material?.name || '',
+        quantity,
+        unitPrice,
+        unitPriceInput: numberToCurrencyInput(unitPrice),
+        total
+      }
+    })
+
+    const hasItems = mappedItems.length > 0
+    const safeItems = hasItems ? mappedItems : [createDraftOrderItem('SERVICE')]
+    const total = calcDraftItemsTotal(safeItems)
+
+    setForm((prev: any) => ({
+      ...prev,
+      orderTypeId,
+      title: prev.title || orderType.name || '',
+      priority: orderType.defaultPriority || prev.priority || 'MEDIUM',
+      items: safeItems,
+      total,
+      totalInput: numberToCurrencyInput(total)
     }))
   }
 
@@ -486,14 +651,32 @@ export default function ServiceOrdersPage() {
       return
     }
 
-    const parsedTotal = parseCurrencyInput(form.totalInput)
-    if (parsedTotal < 0) {
-      setToast({ message: 'Informe um valor valido para a OS', type: 'error' })
+    const formItems: DraftOrderItem[] = Array.isArray(form.items) ? form.items : []
+    const itemsPayload = formItems
+      .map(item => ({
+        itemType: item.itemType,
+        serviceId: item.itemType === 'SERVICE' ? (item.serviceId || null) : null,
+        materialId: item.itemType === 'MATERIAL' ? (item.materialId || null) : null,
+        description: item.description || null,
+        quantity: Number(item.quantity || 0),
+        unitPrice: Number(item.unitPrice || 0)
+      }))
+      .filter(item => item.quantity > 0 && (item.description || item.serviceId || item.materialId))
+
+    if (itemsPayload.length === 0) {
+      setToast({ message: 'Adicione pelo menos um servico ou material na OS', type: 'error' })
       return
     }
 
+    const parsedItemsTotal = calcDraftItemsTotal(formItems)
+    const parsedTravelCost = parseCurrencyInput(form.travelCostInput)
+    const parsedTotal = Number((parsedItemsTotal + parsedTravelCost).toFixed(2))
+
     const payload = {
       ...form,
+      vehicleId: form.vehicleId || null,
+      items: itemsPayload,
+      travelCost: parsedTravelCost,
       total: parsedTotal
     }
 
@@ -508,7 +691,16 @@ export default function ServiceOrdersPage() {
     if (response.ok) {
       setToast({ message: 'OS criada com sucesso', type: 'success' })
       setCreateModalOpen(false)
-      setForm({ priority: 'MEDIUM', total: 0, totalInput: '0,00' })
+      setForm({
+        orderTypeId: '',
+        priority: 'MEDIUM',
+        status: 'OPEN',
+        total: 0,
+        totalInput: '0,00',
+        travelCost: 0,
+        travelCostInput: '0,00',
+        items: [createDraftOrderItem('SERVICE')]
+      })
       await load(false, true)
     } else {
       setToast({ message: 'Erro ao criar OS', type: 'error' })
@@ -574,6 +766,18 @@ export default function ServiceOrdersPage() {
     setDetailsLoading(true)
     setDetailsTab('resumo')
     setDetailsCommentMessage('')
+    const dueDate = new Date()
+    dueDate.setDate(dueDate.getDate() + 7)
+    setDetailsInvoiceForm({
+      dueDate: toLocalDateInputValue(dueDate),
+      discountInput: '0,00',
+      interestInput: '0,00',
+      notes: '',
+      createBoleto: true,
+      bankName: '',
+      barcode: '',
+      digitableLine: ''
+    })
 
     try {
       const [orderRes, timelineRes, commentsRes] = await Promise.all([
@@ -636,6 +840,53 @@ export default function ServiceOrdersPage() {
       setToast({ message: 'Erro de conexao ao enviar comentario', type: 'error' })
     } finally {
       setDetailsCommentSending(false)
+    }
+  }
+
+  async function createDetailsInvoice(e: React.FormEvent) {
+    e.preventDefault()
+    if (!detailsOrder?.id) return
+
+    setDetailsInvoiceSaving(true)
+
+    try {
+      const response = await fetch(`/api/service-orders/${detailsOrder.id}/invoices`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dueDate: detailsInvoiceForm.dueDate || null,
+          discount: parseCurrencyInput(detailsInvoiceForm.discountInput),
+          interest: parseCurrencyInput(detailsInvoiceForm.interestInput),
+          notes: detailsInvoiceForm.notes || null,
+          createBoleto: detailsInvoiceForm.createBoleto,
+          boleto: detailsInvoiceForm.createBoleto
+            ? {
+                bankName: detailsInvoiceForm.bankName || null,
+                barcode: detailsInvoiceForm.barcode || null,
+                digitableLine: detailsInvoiceForm.digitableLine || null,
+                dueDate: detailsInvoiceForm.dueDate || null
+              }
+            : null
+        })
+      })
+
+      if (!response.ok) {
+        setToast({ message: 'Erro ao criar fatura da OS', type: 'error' })
+        return
+      }
+
+      const createdInvoice = await response.json()
+      setDetailsOrder((prev: any) => ({
+        ...(prev || {}),
+        invoices: [createdInvoice, ...((prev?.invoices || []) as any[])]
+      }))
+
+      setToast({ message: 'Fatura criada com sucesso', type: 'success' })
+      setDetailsTab('faturas')
+    } catch {
+      setToast({ message: 'Erro de conexao ao criar fatura da OS', type: 'error' })
+    } finally {
+      setDetailsInvoiceSaving(false)
     }
   }
 
@@ -749,6 +1000,7 @@ export default function ServiceOrdersPage() {
                     Cliente <span>{tableSortIndicator('customer')}</span>
                   </button>
                 </TableHead>
+                <TableHead>Veiculo</TableHead>
                 <TableHead>
                   <button type="button" className="table-sort-button" onClick={() => toggleTableSort('responsible')}>
                     Responsavel <span>{tableSortIndicator('responsible')}</span>
@@ -780,7 +1032,7 @@ export default function ServiceOrdersPage() {
             <TableBody>
               {listedOrders.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center text-muted-foreground">Nenhuma OS encontrada para os filtros atuais.</TableCell>
+                  <TableCell colSpan={9} className="text-center text-muted-foreground">Nenhuma OS encontrada para os filtros atuais.</TableCell>
                 </TableRow>
               )}
 
@@ -793,6 +1045,10 @@ export default function ServiceOrdersPage() {
                     </div>
                   </TableCell>
                   <TableCell>{order.customer?.name || 'Sem cliente'}</TableCell>
+                  <TableCell>
+                    {order.vehicle?.plate || 'Sem veiculo'}
+                    {order.vehicle?.model ? <small className="block text-muted-foreground">{order.vehicle.model}</small> : null}
+                  </TableCell>
                   <TableCell>{order.responsibleEmployee?.name || 'Sem responsavel'}</TableCell>
                   <TableCell>{statusLabel(order.status)}</TableCell>
                   <TableCell>{priorityLabel(order.priority)}</TableCell>
@@ -952,10 +1208,25 @@ export default function ServiceOrdersPage() {
                   </Select>
                 </div>
                 <div className="md:col-span-6 space-y-2">
-                  <label className="text-sm font-medium">Servico</label>
-                  <Select value={form.serviceId || ''} onChange={e => handleSelectService(e.target.value)}>
+                  <label className="text-sm font-medium">Tipo de OS (opcional)</label>
+                  <Select value={form.orderTypeId || ''} onChange={e => applyOrderTypeToForm(e.target.value)}>
                     <option value="">Selecione</option>
-                    {services.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                    {orderTypes.map(orderType => (
+                      <option key={orderType.id} value={orderType.id}>
+                        {orderType.name}
+                      </option>
+                    ))}
+                  </Select>
+                </div>
+                <div className="md:col-span-6 space-y-2">
+                  <label className="text-sm font-medium">Veiculo</label>
+                  <Select value={form.vehicleId || ''} onChange={e => setForm({ ...form, vehicleId: e.target.value })}>
+                    <option value="">Sem veiculo</option>
+                    {vehicles.map(vehicle => (
+                      <option key={vehicle.id} value={vehicle.id}>
+                        {vehicle.plate} {vehicle.model ? `- ${vehicle.model}` : ''}
+                      </option>
+                    ))}
                   </Select>
                 </div>
                 <div className="md:col-span-6 space-y-2">
@@ -975,13 +1246,17 @@ export default function ServiceOrdersPage() {
                   </Select>
                 </div>
                 <div className="md:col-span-4 space-y-2">
-                  <label className="text-sm font-medium">Valor</label>
+                  <label className="text-sm font-medium">Subtotal (itens)</label>
+                  <Input value={form.totalInput || '0,00'} readOnly />
+                </div>
+                <div className="md:col-span-4 space-y-2">
+                  <label className="text-sm font-medium">Custo deslocamento</label>
                   <Input
                     inputMode="numeric"
-                    value={form.totalInput || '0,00'}
+                    value={form.travelCostInput || '0,00'}
                     onChange={e => {
                       const masked = formatCurrencyInput(e.target.value)
-                      setForm({ ...form, totalInput: masked, total: parseCurrencyInput(masked) })
+                      setForm({ ...form, travelCostInput: masked, travelCost: parseCurrencyInput(masked) })
                     }}
                   />
                 </div>
@@ -990,6 +1265,148 @@ export default function ServiceOrdersPage() {
                   <Select value={form.status || 'OPEN'} onChange={e => setForm({ ...form, status: e.target.value })}>
                     {columns.map(col => <option key={col.key} value={col.key}>{col.title}</option>)}
                   </Select>
+                </div>
+                <div className="md:col-span-12 space-y-1">
+                  <div className="rounded-xl border border-app-border bg-app-surface p-3 flex justify-between items-center">
+                    <small className="text-muted-foreground">Total final da OS</small>
+                    <strong>{formatCurrencyBRL(Number(form.total || 0) + Number(form.travelCost || 0))}</strong>
+                  </div>
+                </div>
+                <div className="md:col-span-12 space-y-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <label className="text-sm font-medium">Itens da OS (servicos e materiais)</label>
+                    <div className="flex gap-2">
+                      <Button type="button" size="sm" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => addDraftItem('SERVICE')}>
+                        + Servico
+                      </Button>
+                      <Button type="button" size="sm" variant="outline" className="bg-transparent border-app-border hover:bg-app-surface-alt text-app-text" onClick={() => addDraftItem('MATERIAL')}>
+                        + Material
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="space-y-2">
+                    {(form.items || []).map((item: DraftOrderItem, index: number) => (
+                      <div key={item.id} className="rounded-xl border border-app-border bg-app-surface p-3">
+                        <div className="grid gap-2 md:grid-cols-12">
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Tipo</label>
+                            <Select
+                              value={item.itemType}
+                              onChange={e => updateDraftItem(item.id, current => ({
+                                ...current,
+                                itemType: e.target.value === 'MATERIAL' ? 'MATERIAL' : 'SERVICE',
+                                serviceId: '',
+                                materialId: '',
+                                description: '',
+                                unitPrice: 0,
+                                unitPriceInput: '0,00'
+                              }))}
+                            >
+                              <option value="SERVICE">Servico</option>
+                              <option value="MATERIAL">Material</option>
+                            </Select>
+                          </div>
+
+                          <div className="md:col-span-4 space-y-1">
+                            <label className="text-xs text-muted-foreground block">{item.itemType === 'MATERIAL' ? 'Material' : 'Servico'}</label>
+                            {item.itemType === 'MATERIAL' ? (
+                              <Select
+                                value={item.materialId || ''}
+                                onChange={e => {
+                                  const material = materials.find(entry => entry.id === e.target.value)
+                                  updateDraftItem(item.id, current => ({
+                                    ...current,
+                                    materialId: e.target.value,
+                                    serviceId: '',
+                                    description: current.description || material?.name || '',
+                                    unitPrice: Number(material?.unitPrice || 0),
+                                    unitPriceInput: numberToCurrencyInput(material?.unitPrice || 0)
+                                  }))
+                                }}
+                              >
+                                <option value="">Selecione</option>
+                                {materials.map(material => <option key={material.id} value={material.id}>{material.name}</option>)}
+                              </Select>
+                            ) : (
+                              <Select
+                                value={item.serviceId || ''}
+                                onChange={e => {
+                                  const service = services.find(entry => entry.id === e.target.value)
+                                  updateDraftItem(item.id, current => ({
+                                    ...current,
+                                    serviceId: e.target.value,
+                                    materialId: '',
+                                    description: current.description || service?.name || '',
+                                    unitPrice: Number(service?.price || 0),
+                                    unitPriceInput: numberToCurrencyInput(service?.price || 0)
+                                  }))
+                                }}
+                              >
+                                <option value="">Selecione</option>
+                                {services.map(service => <option key={service.id} value={service.id}>{service.name}</option>)}
+                              </Select>
+                            )}
+                          </div>
+
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Qtd</label>
+                            <Input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={item.quantity}
+                              onChange={e => {
+                                const quantity = Math.max(Number(e.target.value || 0), 0)
+                                updateDraftItem(item.id, current => ({ ...current, quantity }))
+                              }}
+                            />
+                          </div>
+
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Valor unit.</label>
+                            <Input
+                              inputMode="numeric"
+                              value={item.unitPriceInput}
+                              onChange={e => {
+                                const masked = formatCurrencyInput(e.target.value)
+                                updateDraftItem(item.id, current => ({
+                                  ...current,
+                                  unitPriceInput: masked,
+                                  unitPrice: parseCurrencyInput(masked)
+                                }))
+                              }}
+                            />
+                          </div>
+
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Total</label>
+                            <Input value={formatCurrencyBRL(item.total || 0)} readOnly />
+                          </div>
+
+                          <div className="md:col-span-12 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Descricao</label>
+                            <div className="flex gap-2">
+                              <Input
+                                value={item.description || ''}
+                                onChange={e => updateDraftItem(item.id, current => ({ ...current, description: e.target.value }))}
+                                placeholder={`Item ${index + 1}`}
+                              />
+                              <Button
+                                type="button"
+                                size="sm"
+                                variant="destructive"
+                                className="bg-red-600 hover:bg-red-700 text-white"
+                                onClick={() => removeDraftItem(item.id)}
+                              >
+                                Remover
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
                 <div className="md:col-span-12 space-y-2">
                   <label className="text-sm font-medium">Descricao</label>
@@ -1027,7 +1444,7 @@ export default function ServiceOrdersPage() {
                   <div className="min-w-0">
                     <h6 className="text-xl font-semibold break-words">{detailsOrder.title || 'OS sem titulo'}</h6>
                     <small className="text-muted-foreground block">ID: {detailsOrder.id}</small>
-                    <small className="text-muted-foreground block">Comentarios: {detailsComments.length} | Eventos: {detailsTimeline.length}</small>
+                    <small className="text-muted-foreground block">Comentarios: {detailsComments.length} | Eventos: {detailsTimeline.length} | Faturas: {(detailsOrder.invoices || []).length}</small>
                   </div>
                   <div className="flex gap-2 flex-wrap">
                     <span className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-semibold ${priorityPill(detailsOrder.priority)}`}>{priorityLabel(detailsOrder.priority)}</span>
@@ -1060,10 +1477,52 @@ export default function ServiceOrdersPage() {
                   </div>
 
                   <div className="md:col-span-4 space-y-1">
+                    <label className="text-sm text-muted-foreground">Veiculo</label>
+                    <strong className="block">{detailsOrder.vehicle?.plate || 'Sem veiculo'}</strong>
+                    <small className="text-muted-foreground block">Modelo: {detailsOrder.vehicle?.model || '-'}</small>
+                    <small className="text-muted-foreground block">Marca: {detailsOrder.vehicle?.brand || '-'}</small>
+                  </div>
+
+                  <div className="md:col-span-4 space-y-1">
                     <label className="text-sm text-muted-foreground">Financeiro e datas</label>
                     <strong className="block">{formatCurrencyBRL(detailsOrder.total || 0)}</strong>
+                    <small className="text-muted-foreground block">Subtotal itens: {formatCurrencyBRL(Math.max(Number(detailsOrder.total || 0) - Number(detailsOrder.travelCost || 0), 0))}</small>
+                    <small className="text-muted-foreground block">Deslocamento: {formatCurrencyBRL(detailsOrder.travelCost || 0)}</small>
                     <small className="text-muted-foreground block">Criada em: {formatDateTime(detailsOrder.createdAt)}</small>
                     <small className="text-muted-foreground block">Atualizada em: {formatDateTime(detailsOrder.updatedAt)}</small>
+                  </div>
+
+                  <div className="md:col-span-8 space-y-2">
+                    <label className="text-sm text-muted-foreground">Itens da OS</label>
+                    <div className="rounded-xl border border-app-border bg-app-surface overflow-hidden">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Descricao</TableHead>
+                            <TableHead>Qtd</TableHead>
+                            <TableHead>Unit.</TableHead>
+                            <TableHead>Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {(detailsOrder.items || []).length === 0 && (
+                            <TableRow>
+                              <TableCell colSpan={5} className="text-center text-muted-foreground">Sem itens detalhados.</TableCell>
+                            </TableRow>
+                          )}
+                          {(detailsOrder.items || []).map((item: any) => (
+                            <TableRow key={item.id}>
+                              <TableCell>{item.itemType === 'MATERIAL' ? 'Material' : 'Servico'}</TableCell>
+                              <TableCell>{item.description || item.service?.name || item.material?.name || '-'}</TableCell>
+                              <TableCell>{Number(item.quantity || 0).toLocaleString('pt-BR')}</TableCell>
+                              <TableCell>{formatCurrencyBRL(item.unitPrice || 0)}</TableCell>
+                              <TableCell>{formatCurrencyBRL(item.total || 0)}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
                   </div>
                 </div>
 
@@ -1092,10 +1551,18 @@ export default function ServiceOrdersPage() {
                   >
                     Timeline ({detailsTimeline.length})
                   </Button>
+                  <Button
+                    size="sm"
+                    variant={detailsTab === 'faturas' ? 'default' : 'outline'}
+                    className={detailsTab === 'faturas' ? 'bg-app-accent hover:bg-app-accent/80 text-white border-app-accent' : 'bg-transparent border-app-border hover:bg-app-surface-alt text-app-text'}
+                    onClick={() => setDetailsTab('faturas')}
+                  >
+                    Faturas ({(detailsOrder?.invoices || []).length})
+                  </Button>
                 </div>
 
                 {detailsTab === 'resumo' && (
-                  <div className="grid gap-3 md:grid-cols-3">
+                  <div className="grid gap-3 md:grid-cols-7">
                     <Card className="bg-app-surface border-app-border">
                       <CardContent className="p-3">
                         <small className="text-muted-foreground block">Status atual</small>
@@ -1110,8 +1577,32 @@ export default function ServiceOrdersPage() {
                     </Card>
                     <Card className="bg-app-surface border-app-border">
                       <CardContent className="p-3">
+                        <small className="text-muted-foreground block">Total OS</small>
+                        <strong>{formatCurrencyBRL(detailsOrder.total || 0)}</strong>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-app-surface border-app-border">
+                      <CardContent className="p-3">
+                        <small className="text-muted-foreground block">Deslocamento</small>
+                        <strong>{formatCurrencyBRL(detailsOrder.travelCost || 0)}</strong>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-app-surface border-app-border">
+                      <CardContent className="p-3">
                         <small className="text-muted-foreground block">Comentarios</small>
                         <strong>{detailsComments.length}</strong>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-app-surface border-app-border">
+                      <CardContent className="p-3">
+                        <small className="text-muted-foreground block">Itens</small>
+                        <strong>{(detailsOrder.items || []).length}</strong>
+                      </CardContent>
+                    </Card>
+                    <Card className="bg-app-surface border-app-border">
+                      <CardContent className="p-3">
+                        <small className="text-muted-foreground block">Faturas</small>
+                        <strong>{(detailsOrder.invoices || []).length}</strong>
                       </CardContent>
                     </Card>
                   </div>
@@ -1177,6 +1668,101 @@ export default function ServiceOrdersPage() {
                           <small className="text-muted-foreground block mt-1">{item.type === 'audit' ? timelineActionLabel(item.action) : 'Comentario'}</small>
                           <p className="mt-1 mb-0">{item.type === 'comment' ? item.message : localizeStatusTokens(item.message)}</p>
                         </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {detailsTab === 'faturas' && (
+                  <div className="space-y-3">
+                    <Card className="bg-app-surface border-app-border">
+                      <CardContent className="p-3">
+                        <form onSubmit={createDetailsInvoice} className="grid gap-3 md:grid-cols-12">
+                          <div className="md:col-span-3 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Vencimento</label>
+                            <Input type="date" value={detailsInvoiceForm.dueDate} onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, dueDate: e.target.value }))} />
+                          </div>
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Desconto</label>
+                            <Input
+                              inputMode="numeric"
+                              value={detailsInvoiceForm.discountInput}
+                              onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, discountInput: formatCurrencyInput(e.target.value) }))}
+                            />
+                          </div>
+                          <div className="md:col-span-2 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Juros</label>
+                            <Input
+                              inputMode="numeric"
+                              value={detailsInvoiceForm.interestInput}
+                              onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, interestInput: formatCurrencyInput(e.target.value) }))}
+                            />
+                          </div>
+                          <div className="md:col-span-5 space-y-1">
+                            <label className="text-xs text-muted-foreground block">Observacoes</label>
+                            <Input value={detailsInvoiceForm.notes} onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, notes: e.target.value }))} />
+                          </div>
+                          <div className="md:col-span-12">
+                            <label className="inline-flex items-center gap-2 text-sm">
+                              <input
+                                type="checkbox"
+                                checked={detailsInvoiceForm.createBoleto}
+                                onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, createBoleto: e.target.checked }))}
+                              />
+                              Gerar boleto junto da fatura
+                            </label>
+                          </div>
+                          {detailsInvoiceForm.createBoleto && (
+                            <>
+                              <div className="md:col-span-4 space-y-1">
+                                <label className="text-xs text-muted-foreground block">Banco</label>
+                                <Input value={detailsInvoiceForm.bankName} onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, bankName: e.target.value }))} />
+                              </div>
+                              <div className="md:col-span-4 space-y-1">
+                                <label className="text-xs text-muted-foreground block">Codigo de barras</label>
+                                <Input value={detailsInvoiceForm.barcode} onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, barcode: e.target.value }))} />
+                              </div>
+                              <div className="md:col-span-4 space-y-1">
+                                <label className="text-xs text-muted-foreground block">Linha digitavel</label>
+                                <Input value={detailsInvoiceForm.digitableLine} onChange={e => setDetailsInvoiceForm(prev => ({ ...prev, digitableLine: e.target.value }))} />
+                              </div>
+                            </>
+                          )}
+                          <div className="md:col-span-12 flex justify-end">
+                            <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white" disabled={detailsInvoiceSaving}>
+                              {detailsInvoiceSaving ? 'Gerando...' : 'Gerar fatura'}
+                            </Button>
+                          </div>
+                        </form>
+                      </CardContent>
+                    </Card>
+
+                    <div className="space-y-2">
+                      {(detailsOrder.invoices || []).length === 0 && <small className="text-muted-foreground">Nenhuma fatura registrada para esta OS.</small>}
+
+                      {(detailsOrder.invoices || []).map((invoice: any) => (
+                        <Card key={invoice.id} className="bg-app-surface border-app-border">
+                          <CardContent className="p-3 space-y-1">
+                            <div className="flex flex-wrap items-start justify-between gap-2">
+                              <div>
+                                <strong className="block">{invoice.code || invoice.id}</strong>
+                                <small className="text-muted-foreground block">Status: {invoice.status}</small>
+                                <small className="text-muted-foreground block">Vencimento: {formatDateTime(invoice.dueDate)}</small>
+                              </div>
+                              <strong>{formatCurrencyBRL(invoice.total || 0)}</strong>
+                            </div>
+                            {invoice.boleto ? (
+                              <div className="rounded-lg border border-app-border bg-app-surface-alt p-2">
+                                <small className="text-muted-foreground block">Boleto: {invoice.boleto.status}</small>
+                                <small className="text-muted-foreground block">Banco: {invoice.boleto.bankName || '-'}</small>
+                                <small className="text-muted-foreground block">Codigo: {invoice.boleto.barcode || '-'}</small>
+                                <small className="text-muted-foreground block">Linha: {invoice.boleto.digitableLine || '-'}</small>
+                              </div>
+                            ) : (
+                              <small className="text-muted-foreground">Sem boleto vinculado.</small>
+                            )}
+                          </CardContent>
+                        </Card>
                       ))}
                     </div>
                   </div>
